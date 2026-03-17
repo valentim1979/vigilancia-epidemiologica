@@ -1,65 +1,65 @@
 ---
-title: "Boletim Epidemiológico — SRAG"
+title: "Boletim Epidemiológico"
 subtitle: "15ª Regional de Saúde — Maringá/PR"
 date: last-modified
 date-format: "DD/MM/YYYY"
 ---
 
-Dados de Síndrome Respiratória Aguda Grave (SRAG) produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde.  
+Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde.  
 Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.
 
 ---
 
-## Série temporal
+## Sistemas de vigilância de doenças respiratórias
 
-![Curva epidêmica comparativa — anos 2023, 2024, 2025 e 2026](graficos/06_curva_epidemica_comparativa.png)
-
-![Notificações de SRAG por semana epidemiológica](graficos/07_notificacoes_semana_epi.png)
-
-![Casos confirmados de SRAG por semana epidemiológica](graficos/08_confirmados_semana_epi.png)
+A vigilância de doenças respiratórias no Brasil opera por dois sistemas complementares. Clique em cada aba para acessar os dados.
 
 ---
 
-## Distribuição geográfica
+::: {.grid}
 
-![Taxa de incidência de SRAG por município — 15ª RS Maringá](graficos/09_incidencia_por_municipio.png)
+::: {.g-col-6}
+### 🏥 Vigilância Universal — SRAG
 
-![Notificações de SRAG por Regional de Saúde — Paraná](graficos/10_notificacoes_regionais_pr.png)
+**O que monitora:** todos os casos de Síndrome Respiratória Aguda Grave que resultam em hospitalização.
 
----
+**Onde:** em todos os hospitais e unidades de saúde da rede.
 
-## Perfil dos casos
+**Perfil dos casos:** pacientes hospitalizados, com quadro grave, incluindo internações em UTI e óbitos.
 
-![Distribuição por sexo](graficos/11_distribuicao_sexo.png)
+**Fonte:** SIVEP-Gripe (módulo SRAG hospitalar)
 
-![Classificação final dos casos](graficos/12_classificacao_final.png)
+[→ Acessar dados de SRAG](srag.qmd){.btn .btn-primary}
+:::
 
-![Faixa etária: notificados vs confirmados](graficos/16_faixa_etaria_notif_confirmados.png)
+::: {.g-col-6}
+### 🩺 Vigilância Sentinela — Síndrome Gripal
 
-![Pirâmide etária — notificados](graficos/17_piramide_etaria_notificados.png)
+**O que monitora:** casos de Síndrome Gripal (febre + tosse ou dor de garganta) em unidades sentinela selecionadas.
 
-![Pirâmide etária — óbitos](graficos/18_piramide_etaria_obitos.png)
+**Onde:** em unidades de saúde sentinela cadastradas — representa a circulação viral na comunidade.
 
-![Evolução (desfecho) dos casos](graficos/19_evolucao_desfecho.png)
+**Perfil dos casos:** pacientes ambulatoriais, casos leves a moderados, sem necessidade de hospitalização.
 
-![Casos por raça/cor](graficos/20_raca_cor.png)
+**Fonte:** SIVEP-Gripe (módulo SG sentinela)
 
-![Casos por escolaridade (maiores de 18 anos)](graficos/21_escolaridade.png)
+[→ Acessar dados de SG](sindrome_gripal.qmd){.btn .btn-success}
+:::
 
----
-
-## Circulação viral
-
-![Vírus identificados por RT-PCR — total](graficos/13_circulacao_viral_total.png)
-
-![Tendência semanal de vírus respiratórios](graficos/14_tendencia_viral_semanal.png)
-
-![Tipos e linhagens de Influenza](graficos/15_tipos_linhagens_influenza.png)
+:::
 
 ---
 
-## Notas
+## Como os dois sistemas se complementam
 
-- Fonte: SIVEP-Gripe
-- Dados sujeitos a revisão conforme encerramento de casos
-- 15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR
+| | SRAG (Universal) | SG (Sentinela) |
+|---|---|---|
+| **Abrangência** | Todos os serviços | Unidades selecionadas |
+| **Casos** | Hospitalizados | Ambulatoriais |
+| **Gravidade** | Alta | Leve a moderada |
+| **Objetivo principal** | Monitorar morbimortalidade | Monitorar circulação viral |
+| **Coleta laboratorial** | Parcial | Sistemática (amostra) |
+
+---
+
+*15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR*

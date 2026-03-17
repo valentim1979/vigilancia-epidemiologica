@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>SRAG — Síndrome Respiratória Aguda Grave – 15ª Regional de Saúde — Vigilância Epidemiológica</title>
+<title>Vigilância Universal — SRAG – 15ª Regional de Saúde — Vigilância Epidemiológica</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -96,8 +96,12 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Início</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./agravos.html" aria-current="page"> 
-<span class="menu-text">Agravos</span></a>
+    <a class="nav-link active" href="./srag.html" aria-current="page"> 
+<span class="menu-text">Vigilância Universal (SRAG)</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./sindrome_gripal.html"> 
+<span class="menu-text">Vigilância Sentinela (SG)</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./sobre.html"> 
@@ -120,7 +124,8 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">SRAG — Síndrome Respiratória Aguda Grave</h1>
+<h1 class="title">Vigilância Universal — SRAG</h1>
+<p class="subtitle lead">Síndrome Respiratória Aguda Grave — 15ª RS Maringá</p>
 </div>
 
 
@@ -143,18 +148,139 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Dados de notificações de SRAG na área de abrangência da 15ª Regional de Saúde de Maringá.<br>
-Ano de referência: 2025. Fonte: SIVEP-Gripe.</p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Nota
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Ano de referência:</strong> 2025 | <strong>Dados extraídos em:</strong> 16/03/2026 | <strong>Fonte:</strong> SIVEP-Gripe</p>
+</div>
+</div>
+<p>Dados de Síndrome Respiratória Aguda Grave (SRAG) — casos hospitalizados notificados na área de abrangência da 15ª Regional de Saúde.</p>
+<blockquote class="blockquote">
+<p><strong>Vigilância Universal:</strong> abrange todos os hospitais e serviços de saúde da regional. Monitora casos graves com necessidade de hospitalização, internações em UTI e óbitos.</p>
+</blockquote>
 <hr>
-<p>Todos os gráficos estão disponíveis na <a href="./index.html">página inicial</a>, organizados por tema:</p>
-<ul>
-<li><strong>Série temporal</strong> — curva epidêmica, notificações e confirmados por semana epidemiológica</li>
-<li><strong>Distribuição geográfica</strong> — incidência por município e comparação entre regionais do Paraná</li>
-<li><strong>Perfil dos casos</strong> — sexo, faixa etária, pirâmide etária, desfecho, raça/cor e escolaridade</li>
-<li><strong>Circulação viral</strong> — vírus identificados por RT-PCR, tendência semanal e linhagens de Influenza</li>
-</ul>
+<section id="série-temporal" class="level2">
+<h2 class="anchored" data-anchor-id="série-temporal">Série temporal</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/06_curva_epidemica_comparativa.png" class="img-fluid figure-img"></p>
+<figcaption>Curva epidêmica comparativa — anos 2023, 2024, 2025 e 2026</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/07_notificacoes_semana_epi.png" class="img-fluid figure-img"></p>
+<figcaption>Notificações de SRAG por semana epidemiológica</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/08_confirmados_semana_epi.png" class="img-fluid figure-img"></p>
+<figcaption>Casos confirmados de SRAG por semana epidemiológica</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="distribuição-geográfica" class="level2">
+<h2 class="anchored" data-anchor-id="distribuição-geográfica">Distribuição geográfica</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/09_incidencia_por_municipio.png" class="img-fluid figure-img"></p>
+<figcaption>Taxa de incidência de SRAG por município — 15ª RS Maringá</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/10_notificacoes_regionais_pr.png" class="img-fluid figure-img"></p>
+<figcaption>Notificações de SRAG por Regional de Saúde — Paraná</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="perfil-dos-casos" class="level2">
+<h2 class="anchored" data-anchor-id="perfil-dos-casos">Perfil dos casos</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/11_distribuicao_sexo.png" class="img-fluid figure-img"></p>
+<figcaption>Distribuição por sexo</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/12_classificacao_final.png" class="img-fluid figure-img"></p>
+<figcaption>Classificação final dos casos</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/16_faixa_etaria_notif_confirmados.png" class="img-fluid figure-img"></p>
+<figcaption>Faixa etária: notificados vs confirmados</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/17_piramide_etaria_notificados.png" class="img-fluid figure-img"></p>
+<figcaption>Pirâmide etária — notificados</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/18_piramide_etaria_obitos.png" class="img-fluid figure-img"></p>
+<figcaption>Pirâmide etária — óbitos</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/19_evolucao_desfecho.png" class="img-fluid figure-img"></p>
+<figcaption>Evolução (desfecho) dos casos</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/20_raca_cor.png" class="img-fluid figure-img"></p>
+<figcaption>Casos por raça/cor</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/21_escolaridade.png" class="img-fluid figure-img"></p>
+<figcaption>Casos por escolaridade (maiores de 18 anos)</figcaption>
+</figure>
+</div>
+<hr>
+</section>
+<section id="circulação-viral" class="level2">
+<h2 class="anchored" data-anchor-id="circulação-viral">Circulação viral</h2>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/13_circulacao_viral_total.png" class="img-fluid figure-img"></p>
+<figcaption>Vírus identificados por RT-PCR — total</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/14_tendencia_viral_semanal.png" class="img-fluid figure-img"></p>
+<figcaption>Tendência semanal de vírus respiratórios</figcaption>
+</figure>
+</div>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="graficos/15_tipos_linhagens_influenza.png" class="img-fluid figure-img"></p>
+<figcaption>Tipos e linhagens de Influenza</figcaption>
+</figure>
+</div>
+<hr>
+<p><em>Dados sujeitos a revisão conforme encerramento de casos.</em></p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
