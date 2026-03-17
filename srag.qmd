@@ -6,7 +6,7 @@ date-format: "DD/MM/YYYY"
 ---
 
 ::: {.callout-note}
-**Ano de referência:** 2025 | **Dados extraídos em:** 16/03/2026 | **Fonte:** SIVEP-Gripe
+**Ano de referência:** 2026 | **Dados extraídos em:** 16/03/2026 | **Fonte:** SIVEP-Gripe
 :::
 
 Dados de Síndrome Respiratória Aguda Grave (SRAG) — casos hospitalizados notificados na área de abrangência da 15ª Regional de Saúde.
