@@ -17,11 +17,14 @@ Os gráficos publicados aqui são gerados a partir dos sistemas oficiais de info
 ## Sistemas de informação utilizados
 
 - **SIVEP-Gripe** — Síndrome Respiratória Aguda Grave (SRAG hospitalar) e Síndrome Gripal sentinela
-- **SINAN** — Sistema de Informação de Agravos de Notificação
-- **SIM** — Sistema de Informações sobre Mortalidade
-- **GAL** — Gerenciamento de Ambiente Laboratorial
+
 
 ## Contato
+SCVGE
+
+Sandra Ap. Barbosa
+
+Valentim Sala Junior
 
 15ª Regional de Saúde — Seção de Vigilância Epidemiológica  
 Maringá — PR
