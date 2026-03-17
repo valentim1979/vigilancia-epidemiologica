@@ -1,0 +1,48 @@
+---
+title: "Vigilância Sentinela — Síndrome Gripal"
+subtitle: "SG Sentinela — 15ª RS Maringá"
+date: last-modified
+date-format: "DD/MM/YYYY"
+---
+
+::: {.callout-note}
+**Ano de referência:** 2026 | **Dados extraídos em:** 16/03/2026 | **Fonte:** SIVEP-Gripe (SG sentinela)
+:::
+
+Dados de Síndrome Gripal (SG) provenientes das unidades sentinela da 15ª Regional de Saúde.
+
+> **Vigilância Sentinela:** realizada em unidades de saúde selecionadas. Monitora a circulação viral na comunidade por meio de casos ambulatoriais — pacientes com febre de início súbito acompanhada de tosse ou dor de garganta.
+
+---
+
+## Série temporal
+
+![Curva epidêmica comparativa de SG — anos 2023, 2024, 2025 e 2026](graficos/SG06_curva_epidemica_comparativa.png)
+
+![Atendimentos de síndrome gripal por semana epidemiológica — 2026](graficos/SG07_atendimentos_semana.png)
+
+---
+
+## Sintomas
+
+![Prevalência de sintomas nos casos de SG](graficos/SG08_prevalencia_sintomas.png)
+
+![Proporção semanal de sintomas por semana epidemiológica](graficos/SG09_tendencia_semanal_sintomas.png)
+
+![Proporção de sintomas por faixa etária](graficos/SG12_sintomas_por_faixa_etaria.png)
+
+---
+
+## Comorbidades
+
+![Comorbidades nos casos de síndrome gripal](graficos/SG10_comorbidades.png)
+
+---
+
+## Circulação viral
+
+![Perfil de sintomas por vírus identificado (RT-PCR)](graficos/SG11_sintomas_por_virus.png)
+
+---
+
+*Dados sujeitos a revisão conforme encerramento de casos.*

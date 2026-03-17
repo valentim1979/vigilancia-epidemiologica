@@ -12,9 +12,16 @@ A equipe de Vigilância Epidemiológica monitora e analisa os agravos de notific
 
 ## Sobre este site
 
-Os gráficos publicados aqui são gerados a partir dos sistemas oficiais de informação em saúde (SINAN, GAL, SIM, SIVEP-Gripe) e atualizados periodicamente pela equipe técnica.
+Os gráficos publicados aqui são gerados a partir dos sistemas oficiais de informação em saúde (SIVEP-Gripe, SINAN, SIM) e atualizados periodicamente pela equipe técnica.
+
+## Sistemas de informação utilizados
+
+- **SIVEP-Gripe** — Síndrome Respiratória Aguda Grave (SRAG hospitalar) e Síndrome Gripal sentinela
+- **SINAN** — Sistema de Informação de Agravos de Notificação
+- **SIM** — Sistema de Informações sobre Mortalidade
+- **GAL** — Gerenciamento de Ambiente Laboratorial
 
 ## Contato
 
 15ª Regional de Saúde — Seção de Vigilância Epidemiológica  
-Maringá — PR  
+Maringá — PR
