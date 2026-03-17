@@ -1,0 +1,86 @@
+[
+  {
+    "objectID": "sobre.html",
+    "href": "sobre.html",
+    "title": "Sobre",
+    "section": "",
+    "text": "A 15ª Regional de Saúde, sediada em Maringá/PR, é responsável pela coordenação das ações de saúde nos municípios de sua área de abrangência."
+  },
+  {
+    "objectID": "sobre.html#ª-regional-de-saúde-do-paraná",
+    "href": "sobre.html#ª-regional-de-saúde-do-paraná",
+    "title": "Sobre",
+    "section": "",
+    "text": "A 15ª Regional de Saúde, sediada em Maringá/PR, é responsável pela coordenação das ações de saúde nos municípios de sua área de abrangência."
+  },
+  {
+    "objectID": "sobre.html#vigilância-epidemiológica",
+    "href": "sobre.html#vigilância-epidemiológica",
+    "title": "Sobre",
+    "section": "Vigilância Epidemiológica",
+    "text": "Vigilância Epidemiológica\nA equipe de Vigilância Epidemiológica monitora e analisa os agravos de notificação compulsória, produzindo informações para orientar as ações de controle e prevenção de doenças."
+  },
+  {
+    "objectID": "sobre.html#sobre-este-site",
+    "href": "sobre.html#sobre-este-site",
+    "title": "Sobre",
+    "section": "Sobre este site",
+    "text": "Sobre este site\nOs gráficos publicados aqui são gerados a partir dos sistemas oficiais de informação em saúde (SINAN, GAL, SIM, SIVEP-Gripe) e atualizados periodicamente pela equipe técnica."
+  },
+  {
+    "objectID": "sobre.html#contato",
+    "href": "sobre.html#contato",
+    "title": "Sobre",
+    "section": "Contato",
+    "text": "Contato\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica\nMaringá — PR"
+  },
+  {
+    "objectID": "agravos.html",
+    "href": "agravos.html",
+    "title": "SRAG — Síndrome Respiratória Aguda Grave",
+    "section": "",
+    "text": "Dados de notificações de SRAG na área de abrangência da 15ª Regional de Saúde de Maringá.\nAno de referência: 2025. Fonte: SIVEP-Gripe.\n\nTodos os gráficos estão disponíveis na página inicial, organizados por tema:\n\nSérie temporal — curva epidêmica, notificações e confirmados por semana epidemiológica\nDistribuição geográfica — incidência por município e comparação entre regionais do Paraná\nPerfil dos casos — sexo, faixa etária, pirâmide etária, desfecho, raça/cor e escolaridade\nCirculação viral — vírus identificados por RT-PCR, tendência semanal e linhagens de Influenza"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "",
+    "text": "Dados de Síndrome Respiratória Aguda Grave (SRAG) produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde.\nFonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026."
+  },
+  {
+    "objectID": "index.html#série-temporal",
+    "href": "index.html#série-temporal",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "Série temporal",
+    "text": "Série temporal\n\n\n\nCurva epidêmica comparativa — anos 2023, 2024, 2025 e 2026\n\n\n\n\n\nNotificações de SRAG por semana epidemiológica\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica"
+  },
+  {
+    "objectID": "index.html#distribuição-geográfica",
+    "href": "index.html#distribuição-geográfica",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "Distribuição geográfica",
+    "text": "Distribuição geográfica\n\n\n\nTaxa de incidência de SRAG por município — 15ª RS Maringá\n\n\n\n\n\nNotificações de SRAG por Regional de Saúde — Paraná"
+  },
+  {
+    "objectID": "index.html#perfil-dos-casos",
+    "href": "index.html#perfil-dos-casos",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "Perfil dos casos",
+    "text": "Perfil dos casos\n\n\n\nDistribuição por sexo\n\n\n\n\n\nClassificação final dos casos\n\n\n\n\n\nFaixa etária: notificados vs confirmados\n\n\n\n\n\nPirâmide etária — notificados\n\n\n\n\n\nPirâmide etária — óbitos\n\n\n\n\n\nEvolução (desfecho) dos casos\n\n\n\n\n\nCasos por raça/cor\n\n\n\n\n\nCasos por escolaridade (maiores de 18 anos)"
+  },
+  {
+    "objectID": "index.html#circulação-viral",
+    "href": "index.html#circulação-viral",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "Circulação viral",
+    "text": "Circulação viral\n\n\n\nVírus identificados por RT-PCR — total\n\n\n\n\n\nTendência semanal de vírus respiratórios\n\n\n\n\n\nTipos e linhagens de Influenza"
+  },
+  {
+    "objectID": "index.html#notas",
+    "href": "index.html#notas",
+    "title": "Boletim Epidemiológico — SRAG",
+    "section": "Notas",
+    "text": "Notas\n\nFonte: SIVEP-Gripe\nDados sujeitos a revisão conforme encerramento de casos\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
+  }
+]
