@@ -1,0 +1,65 @@
+---
+title: "Boletim Epidemiológico — SRAG"
+subtitle: "15ª Regional de Saúde — Maringá/PR"
+date: last-modified
+date-format: "DD/MM/YYYY"
+---
+
+Dados de Síndrome Respiratória Aguda Grave (SRAG) produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde.  
+Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.
+
+---
+
+## Série temporal
+
+![Curva epidêmica comparativa — anos 2023, 2024, 2025 e 2026](graficos/06_curva_epidemica_comparativa.png)
+
+![Notificações de SRAG por semana epidemiológica](graficos/07_notificacoes_semana_epi.png)
+
+![Casos confirmados de SRAG por semana epidemiológica](graficos/08_confirmados_semana_epi.png)
+
+---
+
+## Distribuição geográfica
+
+![Taxa de incidência de SRAG por município — 15ª RS Maringá](graficos/09_incidencia_por_municipio.png)
+
+![Notificações de SRAG por Regional de Saúde — Paraná](graficos/10_notificacoes_regionais_pr.png)
+
+---
+
+## Perfil dos casos
+
+![Distribuição por sexo](graficos/11_distribuicao_sexo.png)
+
+![Classificação final dos casos](graficos/12_classificacao_final.png)
+
+![Faixa etária: notificados vs confirmados](graficos/16_faixa_etaria_notif_confirmados.png)
+
+![Pirâmide etária — notificados](graficos/17_piramide_etaria_notificados.png)
+
+![Pirâmide etária — óbitos](graficos/18_piramide_etaria_obitos.png)
+
+![Evolução (desfecho) dos casos](graficos/19_evolucao_desfecho.png)
+
+![Casos por raça/cor](graficos/20_raca_cor.png)
+
+![Casos por escolaridade (maiores de 18 anos)](graficos/21_escolaridade.png)
+
+---
+
+## Circulação viral
+
+![Vírus identificados por RT-PCR — total](graficos/13_circulacao_viral_total.png)
+
+![Tendência semanal de vírus respiratórios](graficos/14_tendencia_viral_semanal.png)
+
+![Tipos e linhagens de Influenza](graficos/15_tipos_linhagens_influenza.png)
+
+---
+
+## Notas
+
+- Fonte: SIVEP-Gripe
+- Dados sujeitos a revisão conforme encerramento de casos
+- 15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR

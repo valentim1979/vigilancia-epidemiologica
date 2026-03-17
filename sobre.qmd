@@ -1,0 +1,20 @@
+---
+title: "Sobre"
+---
+
+## 15ª Regional de Saúde do Paraná
+
+A 15ª Regional de Saúde, sediada em Maringá/PR, é responsável pela coordenação das ações de saúde nos municípios de sua área de abrangência.
+
+## Vigilância Epidemiológica
+
+A equipe de Vigilância Epidemiológica monitora e analisa os agravos de notificação compulsória, produzindo informações para orientar as ações de controle e prevenção de doenças.
+
+## Sobre este site
+
+Os gráficos publicados aqui são gerados a partir dos sistemas oficiais de informação em saúde (SINAN, GAL, SIM, SIVEP-Gripe) e atualizados periodicamente pela equipe técnica.
+
+## Contato
+
+15ª Regional de Saúde — Seção de Vigilância Epidemiológica  
+Maringá — PR  

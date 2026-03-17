@@ -1,0 +1,17 @@
+---
+title: "SRAG — Síndrome Respiratória Aguda Grave"
+date: last-modified
+date-format: "DD/MM/YYYY"
+---
+
+Dados de notificações de SRAG na área de abrangência da 15ª Regional de Saúde de Maringá.  
+Ano de referência: 2025. Fonte: SIVEP-Gripe.
+
+---
+
+Todos os gráficos estão disponíveis na [página inicial](index.qmd), organizados por tema:
+
+- **Série temporal** — curva epidêmica, notificações e confirmados por semana epidemiológica
+- **Distribuição geográfica** — incidência por município e comparação entre regionais do Paraná
+- **Perfil dos casos** — sexo, faixa etária, pirâmide etária, desfecho, raça/cor e escolaridade
+- **Circulação viral** — vírus identificados por RT-PCR, tendência semanal e linhagens de Influenza

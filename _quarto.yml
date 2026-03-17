@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "15ª Regional de Saúde — Vigilância Epidemiológica"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Início
+      - href: agravos.qmd
+        text: Agravos
+      - href: sobre.qmd
+        text: Sobre
+
+format:
+  html:
+    theme: cosmo
+    lang: pt
