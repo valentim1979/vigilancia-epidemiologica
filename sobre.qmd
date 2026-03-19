@@ -1,30 +1,38 @@
 ---
 title: "Sobre"
+toc: false
 ---
 
 ## 15ª Regional de Saúde do Paraná
 
-A 15ª Regional de Saúde, sediada em Maringá/PR, é responsável pela coordenação das ações de saúde nos municípios de sua área de abrangência.
+A 15ª Regional de Saúde, sediada em Maringá/PR, coordena ações de saúde em 30 municípios da região noroeste do Paraná, com população estimada de aproximadamente 958 mil habitantes (IBGE 2025).
 
 ## Vigilância Epidemiológica
 
-A equipe de Vigilância Epidemiológica monitora e analisa os agravos de notificação compulsória, produzindo informações para orientar as ações de controle e prevenção de doenças.
+A Seção de Vigilância Epidemiológica (SCVGE) monitora agravos de notificação compulsória e produz informações para orientar as ações de controle e prevenção de doenças na regional.
 
-## Sobre este site
+## Sobre este boletim
 
-Os gráficos publicados aqui são gerados a partir dos sistemas oficiais de informação em saúde (SIVEP-Gripe, SINAN, SIM) e atualizados periodicamente pela equipe técnica.
+Os gráficos e mapas publicados aqui são gerados a partir de um script R unificado (`SCRIPT_Unificado.R`) que processa dados dos sistemas oficiais e exporta as imagens diretamente para a pasta `graficos/` do projeto. O site é renderizado com [Quarto](https://quarto.org) e publicado via GitHub Pages.
+
+**Fluxo de atualização:**
+
+1. Extração dos dados do SIVEP-Gripe
+2. Execução do script R (`SCRIPT_Unificado.R`)
+3. `quarto render` — geração do site
+4. `git push` — publicação no GitHub Pages
 
 ## Sistemas de informação utilizados
 
 - **SIVEP-Gripe** — Síndrome Respiratória Aguda Grave (SRAG hospitalar) e Síndrome Gripal sentinela
 
+## Equipe técnica
 
-## Contato
-SCVGE
+**SCVGE — 15ª Regional de Saúde**
 
-Sandra Ap. Barbosa
-
+Sandra Ap. Barbosa  
 Valentim Sala Junior
 
-15ª Regional de Saúde — Seção de Vigilância Epidemiológica  
-Maringá — PR
+---
+
+*15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR*

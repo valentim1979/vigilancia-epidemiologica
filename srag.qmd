@@ -1,66 +1,142 @@
 ---
 title: "Vigilância Universal — SRAG"
-subtitle: "Síndrome Respiratória Aguda Grave — 15ª RS Maringá"
+subtitle: "Síndrome Respiratória Aguda Grave — 15ª RS Maringá/PR"
 date: last-modified
 date-format: "DD/MM/YYYY"
 ---
 
-::: {.callout-note}
-**Ano de referência:** 2026 | **Dados extraídos em:** 16/03/2026 | **Fonte:** SIVEP-Gripe
+::: {.callout-tip}
+**Ano de referência:** 2026 &nbsp;|&nbsp; **Fonte:** SIVEP-Gripe (módulo hospitalar) &nbsp;|&nbsp; **Escopo:** 30 municípios da 15ª Regional de Saúde
 :::
 
-Dados de Síndrome Respiratória Aguda Grave (SRAG) — casos hospitalizados notificados na área de abrangência da 15ª Regional de Saúde.
-
-> **Vigilância Universal:** abrange todos os hospitais e serviços de saúde da regional. Monitora casos graves com necessidade de hospitalização, internações em UTI e óbitos.
+Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos.
 
 ---
 
 ## Série temporal
 
-![Curva epidêmica comparativa — anos 2023, 2024, 2025 e 2026](graficos/06_curva_epidemica_comparativa.png)
+::: {.panel-tabset}
 
-![Notificações de SRAG por semana epidemiológica](graficos/07_notificacoes_semana_epi.png)
+### Curva comparativa
 
-![Casos confirmados de SRAG por semana epidemiológica](graficos/08_confirmados_semana_epi.png)
+![Curva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.](graficos/06_curva_epidemica_comparativa.png){.lightbox}
+
+### Notificações semanais
+
+![Total de notificações de SRAG por semana epidemiológica — 2026.](graficos/07_notificacoes_semana_epi.png){.lightbox}
+
+### Confirmados semanais
+
+![Casos confirmados de SRAG por semana epidemiológica — 2026.](graficos/08_confirmados_semana_epi.png){.lightbox}
+
+:::
 
 ---
 
-## Distribuição geográfica
+## Distribuição geográfica — gráficos
 
-![Taxa de incidência de SRAG por município — 15ª RS Maringá](graficos/09_incidencia_por_municipio.png)
+::: {.panel-tabset}
 
-![Notificações de SRAG por Regional de Saúde — Paraná](graficos/10_notificacoes_regionais_pr.png)
+### Incidência por município
+
+![Taxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).](graficos/09_incidencia_por_municipio.png){.lightbox}
+
+### Regionais do Paraná
+
+![Total de notificações de SRAG por Regional de Saúde — Paraná — 2026.](graficos/10_notificacoes_regionais_pr.png){.lightbox}
+
+:::
+
+---
+
+## Distribuição geográfica — mapas
+
+::: {.callout-note}
+Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.
+:::
+
+::: {.panel-tabset}
+
+### Casos por município
+
+![Mapa de casos absolutos de SRAG por município da 15ª RS — 2026.](graficos/mapa_srag_casos_2026.png){.lightbox group="mapas-municipio"}
+
+### Incidência por município
+
+![Mapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.](graficos/mapa_srag_incidencia_2026.png){.lightbox group="mapas-municipio"}
+
+### Bairros — Maringá
+
+![Distribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_maringa_2026.png){.lightbox group="mapas-bairro"}
+
+### Bairros — Sarandi
+
+![Distribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_sarandi_2026.png){.lightbox group="mapas-bairro"}
+
+:::
+
+> **Nota sobre os nomes dos arquivos de mapa:** o script gera os mapas com o ano no nome (`mapa_srag_casos_2026.png`). Se você alterar `ANO_ANALISE` no script para múltiplos anos (ex.: `c(2025, 2026)`), os arquivos terão o padrão `mapa_srag_casos_2025_2026.png` — atualize os caminhos acima nesse caso.
 
 ---
 
 ## Perfil dos casos
 
-![Distribuição por sexo](graficos/11_distribuicao_sexo.png)
+::: {.panel-tabset}
 
-![Classificação final dos casos](graficos/12_classificacao_final.png)
+### Sexo
 
-![Faixa etária: notificados vs confirmados](graficos/16_faixa_etaria_notif_confirmados.png)
+![Distribuição de notificações de SRAG por sexo — 15ª RS — 2026.](graficos/11_distribuicao_sexo.png){.lightbox}
 
-![Pirâmide etária — notificados](graficos/17_piramide_etaria_notificados.png)
+### Classificação final
 
-![Pirâmide etária — óbitos](graficos/18_piramide_etaria_obitos.png)
+![Classificação final dos casos de SRAG notificados — 15ª RS — 2026.](graficos/12_classificacao_final.png){.lightbox}
 
-![Evolução (desfecho) dos casos](graficos/19_evolucao_desfecho.png)
+### Faixa etária
 
-![Casos por raça/cor](graficos/20_raca_cor.png)
+![Comparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.](graficos/16_faixa_etaria_notif_confirmados.png){.lightbox}
 
-![Casos por escolaridade (maiores de 18 anos)](graficos/21_escolaridade.png)
+### Pirâmide — Notificados
+
+![Pirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.](graficos/17_piramide_etaria_notificados.png){.lightbox}
+
+### Pirâmide — Óbitos
+
+![Pirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.](graficos/18_piramide_etaria_obitos.png){.lightbox}
+
+### Desfecho
+
+![Distribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.](graficos/19_evolucao_desfecho.png){.lightbox}
+
+### Raça/Cor
+
+![Distribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.](graficos/20_raca_cor.png){.lightbox}
+
+### Escolaridade
+
+![Distribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026.](graficos/21_escolaridade.png){.lightbox}
+
+:::
 
 ---
 
 ## Circulação viral
 
-![Vírus identificados por RT-PCR — total](graficos/13_circulacao_viral_total.png)
+::: {.panel-tabset}
 
-![Tendência semanal de vírus respiratórios](graficos/14_tendencia_viral_semanal.png)
+### Vírus detectados — total
 
-![Tipos e linhagens de Influenza](graficos/15_tipos_linhagens_influenza.png)
+![Agentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.](graficos/13_circulacao_viral_total.png){.lightbox}
+
+### Tendência semanal
+
+![Tendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.](graficos/14_tendencia_viral_semanal.png){.lightbox}
+
+### Tipos de Influenza
+
+![Tipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.](graficos/15_tipos_linhagens_influenza.png){.lightbox}
+
+:::
 
 ---
 
-*Dados sujeitos a revisão conforme encerramento de casos.*
+*Dados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe.*
