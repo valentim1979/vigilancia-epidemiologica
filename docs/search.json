@@ -81,7 +81,7 @@
     "href": "index.html",
     "title": "Boletim Epidemiológico",
     "section": "",
-    "text": "&lt;strong&gt;Fonte:&lt;/strong&gt; SIVEP-Gripe &nbsp;|&nbsp;\n&lt;strong&gt;Ano de referência:&lt;/strong&gt; 2026 &nbsp;|&nbsp;\n&lt;strong&gt;Última atualização:&lt;/strong&gt; &lt;span id=\"data-atualizacao\"&gt;&lt;/span&gt;\n&lt;script&gt;\n  var d = new Date(document.lastModified);\n  var dia = String(d.getDate()).padStart(2, '0');\n  var mes = String(d.getMonth() + 1).padStart(2, '0');\n  var ano = d.getFullYear();\n  document.getElementById(\"data-atualizacao\").textContent = dia + \"/\" + mes + \"/\" + ano;\n&lt;/script&gt;\nDados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde."
+    "text": "Fonte: SIVEP-Gripe  | \n    Ano de referência: 2026  | \n    Última atualização:\nDados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde."
   },
   {
     "objectID": "index.html#sistemas-de-vigilância-respiratória",
