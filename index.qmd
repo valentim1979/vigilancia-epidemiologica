@@ -6,7 +6,7 @@ date-format: "DD [de] MMMM [de] YYYY"
 toc: false
 ---
 
-``````{=html}
+```{=html}
 <div class="callout callout-style-default callout-tip">
   <div class="callout-body">
     <strong>Fonte:</strong> SIVEP-Gripe &nbsp;|&nbsp;
@@ -21,7 +21,6 @@ toc: false
     </script>
   </div>
 </div>
-```
 ```
 
 Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.
