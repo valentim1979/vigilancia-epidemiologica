@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Boletim Epidemiológico – 15ª Regional de Saúde — Vigilância Epidemiológica</title>
+<title>Boletim Epidemiológico – 15ª RS — Vigilância Epidemiológica</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -33,6 +33,7 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
+<link href="./assets/favicon.ico" rel="icon">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
@@ -42,7 +43,7 @@ ul.task-list li input[type="checkbox"] {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-46f66b053e56abd73bb6e954d61a315b.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-a0f9fd0d421825b736dc1bbcbcba2219.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-2971108b7177c011da61777beff1b929.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -82,7 +83,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">15ª Regional de Saúde — Vigilância Epidemiológica</span>
+    <span class="navbar-title">15ª RS — Vigilância Epidemiológica</span>
     </a>
   </div>
             <div id="quarto-search" class="" title="Procurar"></div>
@@ -97,14 +98,17 @@ ul.task-list li input[type="checkbox"] {
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./srag.html"> 
-<span class="menu-text">Vigilância Universal (SRAG)</span></a>
+<span class="menu-text">SRAG (Universal)</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./sindrome_gripal.html"> 
-<span class="menu-text">Vigilância Sentinela (SG)</span></a>
+<span class="menu-text">Síndrome Gripal (Sentinela)</span></a>
   </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./sobre.html"> 
+    <a class="nav-link" href="./sobre.html"> <i class="bi bi-info-circle" role="img">
+</i> 
 <span class="menu-text">Sobre</span></a>
   </li>  
 </ul>
@@ -136,7 +140,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Data de Publicação</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">16/03/2026</p>
+      <p class="date">19 de março de 2026</p>
     </div>
   </div>
   
@@ -148,35 +152,66 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<p>Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde.<br>
-Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.</p>
+<div class="callout callout-style-default callout-tip">
+  <div class="callout-body">
+    <strong>Fonte:</strong> SIVEP-Gripe &nbsp;|&nbsp;
+    <strong>Ano de referência:</strong> 2026 &nbsp;|&nbsp;
+    <strong>Última atualização:</strong> <span id="data-atualizacao"></span>
+    <script>document.getElementById("data-atualizacao").textContent = document.lastModified.split(" ")[0];</script>
+  </div>
+</div>
+<p>Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.</p>
 <hr>
-<section id="sistemas-de-vigilância-de-doenças-respiratórias" class="level2">
-<h2 class="anchored" data-anchor-id="sistemas-de-vigilância-de-doenças-respiratórias">Sistemas de vigilância de doenças respiratórias</h2>
-<p>A vigilância de doenças respiratórias no Brasil opera por dois sistemas complementares. Clique em cada aba para acessar os dados.</p>
-<hr>
+<section id="sistemas-de-vigilância-respiratória" class="level2">
+<h2 class="anchored" data-anchor-id="sistemas-de-vigilância-respiratória">Sistemas de vigilância respiratória</h2>
 <div class="grid">
-<section id="vigilância-universal-srag" class="level3 g-col-6">
+<section id="vigilância-universal-srag" class="level3 g-col-12 g-col-md-6">
 <h3 class="anchored" data-anchor-id="vigilância-universal-srag">🏥 Vigilância Universal — SRAG</h3>
-<p><strong>O que monitora:</strong> todos os casos de Síndrome Respiratória Aguda Grave que resultam em hospitalização.</p>
-<p><strong>Onde:</strong> em todos os hospitais e unidades de saúde da rede.</p>
-<p><strong>Perfil dos casos:</strong> pacientes hospitalizados, com quadro grave, incluindo internações em UTI e óbitos.</p>
-<p><strong>Fonte:</strong> SIVEP-Gripe (módulo SRAG hospitalar)</p>
+<p>Monitora <strong>todos os casos hospitalizados</strong> de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Abrangência</strong></td>
+<td>Todos os hospitais da rede</td>
+</tr>
+<tr class="even">
+<td><strong>Perfil</strong></td>
+<td>Hospitalizados — casos graves, UTI, óbitos</td>
+</tr>
+<tr class="odd">
+<td><strong>Fonte</strong></td>
+<td>SIVEP-Gripe (módulo hospitalar)</td>
+</tr>
+</tbody>
+</table>
 <p><a href="./srag.html" class="btn btn-primary">→ Acessar dados de SRAG</a></p>
 </section>
-<section id="vigilância-sentinela-síndrome-gripal" class="level3 g-col-6">
+<section id="vigilância-sentinela-síndrome-gripal" class="level3 g-col-12 g-col-md-6">
 <h3 class="anchored" data-anchor-id="vigilância-sentinela-síndrome-gripal">🩺 Vigilância Sentinela — Síndrome Gripal</h3>
-<p><strong>O que monitora:</strong> casos de Síndrome Gripal (febre + tosse ou dor de garganta) em unidades sentinela selecionadas.</p>
-<p><strong>Onde:</strong> em unidades de saúde sentinela cadastradas — representa a circulação viral na comunidade.</p>
-<p><strong>Perfil dos casos:</strong> pacientes ambulatoriais, casos leves a moderados, sem necessidade de hospitalização.</p>
-<p><strong>Fonte:</strong> SIVEP-Gripe (módulo SG sentinela)</p>
+<p>Monitora a <strong>circulação viral na comunidade</strong> por meio de unidades sentinela selecionadas.</p>
+<table class="caption-top table">
+<tbody>
+<tr class="odd">
+<td><strong>Abrangência</strong></td>
+<td>Unidades sentinela cadastradas</td>
+</tr>
+<tr class="even">
+<td><strong>Perfil</strong></td>
+<td>Ambulatoriais — casos leves a moderados</td>
+</tr>
+<tr class="odd">
+<td><strong>Fonte</strong></td>
+<td>SIVEP-Gripe (módulo SG sentinela)</td>
+</tr>
+</tbody>
+</table>
 <p><a href="./sindrome_gripal.html" class="btn btn-success">→ Acessar dados de SG</a></p>
 </section>
 </div>
 <hr>
 </section>
-<section id="como-os-dois-sistemas-se-complementam" class="level2">
-<h2 class="anchored" data-anchor-id="como-os-dois-sistemas-se-complementam">Como os dois sistemas se complementam</h2>
+<section id="o-que-cada-sistema-monitora" class="level2">
+<h2 class="anchored" data-anchor-id="o-que-cada-sistema-monitora">O que cada sistema monitora</h2>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 33%">
@@ -197,7 +232,7 @@ Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.</p>
 <td>Unidades selecionadas</td>
 </tr>
 <tr class="even">
-<td><strong>Casos</strong></td>
+<td><strong>Tipo de caso</strong></td>
 <td>Hospitalizados</td>
 <td>Ambulatoriais</td>
 </tr>
@@ -207,9 +242,9 @@ Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.</p>
 <td>Leve a moderada</td>
 </tr>
 <tr class="even">
-<td><strong>Objetivo principal</strong></td>
-<td>Monitorar morbimortalidade</td>
-<td>Monitorar circulação viral</td>
+<td><strong>Objetivo</strong></td>
+<td>Morbimortalidade grave</td>
+<td>Circulação viral na comunidade</td>
 </tr>
 <tr class="odd">
 <td><strong>Coleta laboratorial</strong></td>
@@ -218,6 +253,12 @@ Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.</p>
 </tr>
 </tbody>
 </table>
+<hr>
+</section>
+<section id="área-de-abrangência-15ª-rs" class="level2">
+<h2 class="anchored" data-anchor-id="área-de-abrangência-15ª-rs">Área de abrangência — 15ª RS</h2>
+<p>A 15ª Regional de Saúde abrange <strong>30 municípios</strong> da região de Maringá, com população estimada de <strong>~958 mil habitantes</strong> (IBGE 2025).</p>
+<p>Municípios-sede da regional: <strong>Maringá</strong> (429.660 hab.), <strong>Sarandi</strong> (128.106 hab.) e <strong>Paicandu</strong> (48.695 hab.) representam juntos cerca de 63% da população regional.</p>
 <hr>
 <p><em>15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR</em></p>
 
@@ -626,6 +667,23 @@ Fonte: SIVEP-Gripe. Dados extraídos em: 16/03/2026.</p>
   });
   </script>
 </div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+ Fonte: SIVEP-Gripe
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
 
 
 
