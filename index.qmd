@@ -6,15 +6,22 @@ date-format: "DD [de] MMMM [de] YYYY"
 toc: false
 ---
 
-```{=html}
+``````{=html}
 <div class="callout callout-style-default callout-tip">
   <div class="callout-body">
     <strong>Fonte:</strong> SIVEP-Gripe &nbsp;|&nbsp;
     <strong>Ano de referência:</strong> 2026 &nbsp;|&nbsp;
     <strong>Última atualização:</strong> <span id="data-atualizacao"></span>
-    <script>document.getElementById("data-atualizacao").textContent = document.lastModified.split(" ")[0];</script>
+    <script>
+      var d = new Date(document.lastModified);
+      var dia = String(d.getDate()).padStart(2, '0');
+      var mes = String(d.getMonth() + 1).padStart(2, '0');
+      var ano = d.getFullYear();
+      document.getElementById("data-atualizacao").textContent = dia + "/" + mes + "/" + ano;
+    </script>
   </div>
 </div>
+```
 ```
 
 Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.
