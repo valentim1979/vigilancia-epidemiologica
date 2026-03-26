@@ -15,8 +15,7 @@ website:
         text: Início
       - text: "SRAG (Universal)"
         href: srag.qmd
-      - text: "Síndrome Gripal (Sentinela)"
-        href: sindrome_gripal.qmd
+     
     right:
       - href: sobre.qmd
         text: Sobre
