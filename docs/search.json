@@ -11,7 +11,7 @@
     "href": "srag.html#série-temporal",
     "title": "Vigilância Universal — SRAG",
     "section": "Série temporal",
-    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanais\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026."
+    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanaisVariação semanal\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução."
   },
   {
     "objectID": "srag.html#distribuição-geográfica-gráficos",
@@ -25,7 +25,7 @@
     "href": "srag.html#distribuição-geográfica-mapas",
     "title": "Vigilância Universal — SRAG",
     "section": "Distribuição geográfica — mapas",
-    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\nNota sobre os nomes dos arquivos de mapa: o script gera os mapas com o ano no nome (mapa_srag_casos_2026.png). Se você alterar ANO_ANALISE no script para múltiplos anos (ex.: c(2025, 2026)), os arquivos terão o padrão mapa_srag_casos_2025_2026.png — atualize os caminhos acima nesse caso."
+    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos."
   },
   {
     "objectID": "srag.html#perfil-dos-casos",
@@ -42,41 +42,6 @@
     "text": "Circulação viral\n\nVírus detectados — totalTendência semanalTipos de Influenza\n\n\n\n\n\nAgentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nTendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.\n\n\n\n\n\n\n\nTipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.\n\n\n\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
   },
   {
-    "objectID": "sindrome_gripal.html",
-    "href": "sindrome_gripal.html",
-    "title": "Vigilância Sentinela — Síndrome Gripal",
-    "section": "",
-    "text": "Dica\n\n\n\nAno de referência: 2026  |  Fonte: SIVEP-Gripe (módulo SG sentinela)  |  Escopo: unidades sentinela da 15ª RS\nDados de Síndrome Gripal (SG) das unidades sentinela da 15ª Regional de Saúde. A Vigilância Sentinela monitora casos ambulatoriais — pacientes com febre de início súbito acompanhada de tosse ou dor de garganta — e representa a circulação viral na comunidade."
-  },
-  {
-    "objectID": "sindrome_gripal.html#série-temporal",
-    "href": "sindrome_gripal.html#série-temporal",
-    "title": "Vigilância Sentinela — Síndrome Gripal",
-    "section": "Série temporal",
-    "text": "Série temporal\n\nCurva comparativaAtendimentos semanais\n\n\n\n\n\nCurva comparativa de atendimentos de síndrome gripal por semana epidemiológica — 2024–2026. A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de atendimentos de síndrome gripal por semana epidemiológica nas unidades sentinela — 2026."
-  },
-  {
-    "objectID": "sindrome_gripal.html#sintomas",
-    "href": "sindrome_gripal.html#sintomas",
-    "title": "Vigilância Sentinela — Síndrome Gripal",
-    "section": "Sintomas",
-    "text": "Sintomas\n\nPrevalência geralTendência semanalPor faixa etária\n\n\n\n\n\nFrequência de cada sintoma nos casos de síndrome gripal notificados — 15ª RS — 2026.\n\n\n\n\n\n\n\nProporção semanal de cada sintoma por semana epidemiológica — 15ª RS — 2026.\n\n\n\n\n\n\n\nProporção de sintomas por faixa etária nos casos de síndrome gripal — 15ª RS — 2026."
-  },
-  {
-    "objectID": "sindrome_gripal.html#comorbidades",
-    "href": "sindrome_gripal.html#comorbidades",
-    "title": "Vigilância Sentinela — Síndrome Gripal",
-    "section": "Comorbidades",
-    "text": "Comorbidades\n\n\n\nPrevalência de comorbidades nos casos de síndrome gripal notificados — 15ª RS — 2026."
-  },
-  {
-    "objectID": "sindrome_gripal.html#circulação-viral",
-    "href": "sindrome_gripal.html#circulação-viral",
-    "title": "Vigilância Sentinela — Síndrome Gripal",
-    "section": "Circulação viral",
-    "text": "Circulação viral\n\n\n\nPerfil de sintomas por vírus identificado em RT-PCR nos casos de síndrome gripal — 15ª RS — 2026.\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
-  },
-  {
     "objectID": "index.html",
     "href": "index.html",
     "title": "Boletim Epidemiológico",
@@ -84,18 +49,11 @@
     "text": "Fonte: SIVEP-Gripe  | \n    Ano de referência: 2026  | \n    Última atualização:\nDados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde."
   },
   {
-    "objectID": "index.html#sistemas-de-vigilância-respiratória",
-    "href": "index.html#sistemas-de-vigilância-respiratória",
+    "objectID": "index.html#vigilância-universal-srag",
+    "href": "index.html#vigilância-universal-srag",
     "title": "Boletim Epidemiológico",
-    "section": "Sistemas de vigilância respiratória",
-    "text": "Sistemas de vigilância respiratória\n\n\n🏥 Vigilância Universal — SRAG\nMonitora todos os casos hospitalizados de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.\n\n\n\nAbrangência\nTodos os hospitais da rede\n\n\nPerfil\nHospitalizados — casos graves, UTI, óbitos\n\n\nFonte\nSIVEP-Gripe (módulo hospitalar)\n\n\n\n→ Acessar dados de SRAG\n\n\n🩺 Vigilância Sentinela — Síndrome Gripal\nMonitora a circulação viral na comunidade por meio de unidades sentinela selecionadas.\n\n\n\nAbrangência\nUnidades sentinela cadastradas\n\n\nPerfil\nAmbulatoriais — casos leves a moderados\n\n\nFonte\nSIVEP-Gripe (módulo SG sentinela)\n\n\n\n→ Acessar dados de SG"
-  },
-  {
-    "objectID": "index.html#o-que-cada-sistema-monitora",
-    "href": "index.html#o-que-cada-sistema-monitora",
-    "title": "Boletim Epidemiológico",
-    "section": "O que cada sistema monitora",
-    "text": "O que cada sistema monitora\n\n\n\n\n\n\n\n\n\nSRAG (Universal)\nSG (Sentinela)\n\n\n\n\nAbrangência\nTodos os serviços\nUnidades selecionadas\n\n\nTipo de caso\nHospitalizados\nAmbulatoriais\n\n\nGravidade\nAlta\nLeve a moderada\n\n\nObjetivo\nMorbimortalidade grave\nCirculação viral na comunidade\n\n\nColeta laboratorial\nParcial\nSistemática (amostra)"
+    "section": "Vigilância Universal — SRAG",
+    "text": "Vigilância Universal — SRAG\nMonitora todos os casos hospitalizados de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.\n\n\n\nAbrangência\nTodos os hospitais da rede\n\n\nPerfil\nHospitalizados — casos graves, UTI, óbitos\n\n\nFonte\nSIVEP-Gripe (módulo hospitalar)\n\n\n\n→ Acessar dados de SRAG"
   },
   {
     "objectID": "index.html#área-de-abrangência-15ª-rs",

@@ -27,12 +27,7 @@ Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de 
 
 ---
 
-## Sistemas de vigilância respiratória
-
-::: {.grid}
-
-::: {.g-col-12 .g-col-md-6}
-### 🏥 Vigilância Universal — SRAG
+## Vigilância Universal — SRAG
 
 Monitora **todos os casos hospitalizados** de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.
 
@@ -43,37 +38,6 @@ Monitora **todos os casos hospitalizados** de Síndrome Respiratória Aguda Grav
 | **Fonte** | SIVEP-Gripe (módulo hospitalar) |
 
 [→ Acessar dados de SRAG](srag.qmd){.btn .btn-primary}
-
-:::
-
-::: {.g-col-12 .g-col-md-6}
-### 🩺 Vigilância Sentinela — Síndrome Gripal
-
-Monitora a **circulação viral na comunidade** por meio de unidades sentinela selecionadas.
-
-| | |
-|---|---|
-| **Abrangência** | Unidades sentinela cadastradas |
-| **Perfil** | Ambulatoriais — casos leves a moderados |
-| **Fonte** | SIVEP-Gripe (módulo SG sentinela) |
-
-[→ Acessar dados de SG](sindrome_gripal.qmd){.btn .btn-success}
-
-:::
-
-:::
-
----
-
-## O que cada sistema monitora
-
-| | SRAG (Universal) | SG (Sentinela) |
-|---|---|---|
-| **Abrangência** | Todos os serviços | Unidades selecionadas |
-| **Tipo de caso** | Hospitalizados | Ambulatoriais |
-| **Gravidade** | Alta | Leve a moderada |
-| **Objetivo** | Morbimortalidade grave | Circulação viral na comunidade |
-| **Coleta laboratorial** | Parcial | Sistemática (amostra) |
 
 ---
 
