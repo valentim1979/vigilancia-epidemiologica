@@ -29,6 +29,10 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
 
 ![Casos confirmados de SRAG por semana epidemiológica — 2026.](graficos/08_confirmados_semana_epi.png){.lightbox}
 
+### Variação semanal
+
+![Casos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução.](graficos/07b_variacao_semanal.png){.lightbox}
+
 :::
 
 ---
@@ -74,8 +78,6 @@ Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográfic
 ![Distribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_sarandi_2026.png){.lightbox group="mapas-bairro"}
 
 :::
-
-> **Nota sobre os nomes dos arquivos de mapa:** o script gera os mapas com o ano no nome (`mapa_srag_casos_2026.png`). Se você alterar `ANO_ANALISE` no script para múltiplos anos (ex.: `c(2025, 2026)`), os arquivos terão o padrão `mapa_srag_casos_2025_2026.png` — atualize os caminhos acima nesse caso.
 
 ---
 
