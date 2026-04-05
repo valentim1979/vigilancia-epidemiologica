@@ -1,47 +1,5 @@
 [
   {
-    "objectID": "srag.html",
-    "href": "srag.html",
-    "title": "Vigilância Universal — SRAG",
-    "section": "",
-    "text": "Dica\n\n\n\nAno de referência: 2026  |  Fonte: SIVEP-Gripe (módulo hospitalar)  |  Escopo: 30 municípios da 15ª Regional de Saúde\nNotificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos."
-  },
-  {
-    "objectID": "srag.html#série-temporal",
-    "href": "srag.html#série-temporal",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Série temporal",
-    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanais\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026."
-  },
-  {
-    "objectID": "srag.html#distribuição-geográfica-gráficos",
-    "href": "srag.html#distribuição-geográfica-gráficos",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Distribuição geográfica — gráficos",
-    "text": "Distribuição geográfica — gráficos\n\nIncidência por municípioRegionais do Paraná\n\n\n\n\n\nTaxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).\n\n\n\n\n\n\n\nTotal de notificações de SRAG por Regional de Saúde — Paraná — 2026."
-  },
-  {
-    "objectID": "srag.html#distribuição-geográfica-mapas",
-    "href": "srag.html#distribuição-geográfica-mapas",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Distribuição geográfica — mapas",
-    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\nNota sobre os nomes dos arquivos de mapa: o script gera os mapas com o ano no nome (mapa_srag_casos_2026.png). Se você alterar ANO_ANALISE no script para múltiplos anos (ex.: c(2025, 2026)), os arquivos terão o padrão mapa_srag_casos_2025_2026.png — atualize os caminhos acima nesse caso."
-  },
-  {
-    "objectID": "srag.html#perfil-dos-casos",
-    "href": "srag.html#perfil-dos-casos",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Perfil dos casos",
-    "text": "Perfil dos casos\n\nSexoClassificação finalFaixa etáriaPirâmide — NotificadosPirâmide — ÓbitosDesfechoRaça/CorEscolaridade\n\n\n\n\n\nDistribuição de notificações de SRAG por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nClassificação final dos casos de SRAG notificados — 15ª RS — 2026.\n\n\n\n\n\n\n\nComparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026."
-  },
-  {
-    "objectID": "srag.html#circulação-viral",
-    "href": "srag.html#circulação-viral",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Circulação viral",
-    "text": "Circulação viral\n\nVírus detectados — totalTendência semanalTipos de Influenza\n\n\n\n\n\nAgentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nTendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.\n\n\n\n\n\n\n\nTipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.\n\n\n\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
-  },
-  {
     "objectID": "sindrome_gripal.html",
     "href": "sindrome_gripal.html",
     "title": "Vigilância Sentinela — Síndrome Gripal",
@@ -145,5 +103,47 @@
     "title": "Sobre",
     "section": "Equipe técnica",
     "text": "Equipe técnica\nSCVGE — 15ª Regional de Saúde\nSandra Ap. Barbosa\nValentim Sala Junior\n\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
+  },
+  {
+    "objectID": "srag.html",
+    "href": "srag.html",
+    "title": "Vigilância Universal — SRAG",
+    "section": "",
+    "text": "Dica\n\n\n\nAno de referência: 2026  |  Fonte: SIVEP-Gripe (módulo hospitalar)  |  Escopo: 30 municípios da 15ª Regional de Saúde\nNotificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos."
+  },
+  {
+    "objectID": "srag.html#série-temporal",
+    "href": "srag.html#série-temporal",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Série temporal",
+    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanais\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026."
+  },
+  {
+    "objectID": "srag.html#distribuição-geográfica-gráficos",
+    "href": "srag.html#distribuição-geográfica-gráficos",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Distribuição geográfica — gráficos",
+    "text": "Distribuição geográfica — gráficos\n\nIncidência por municípioRegionais do Paraná\n\n\n\n\n\nTaxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).\n\n\n\n\n\n\n\nTotal de notificações de SRAG por Regional de Saúde — Paraná — 2026."
+  },
+  {
+    "objectID": "srag.html#distribuição-geográfica-mapas",
+    "href": "srag.html#distribuição-geográfica-mapas",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Distribuição geográfica — mapas",
+    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\nNota sobre os nomes dos arquivos de mapa: o script gera os mapas com o ano no nome (mapa_srag_casos_2026.png). Se você alterar ANO_ANALISE no script para múltiplos anos (ex.: c(2025, 2026)), os arquivos terão o padrão mapa_srag_casos_2025_2026.png — atualize os caminhos acima nesse caso."
+  },
+  {
+    "objectID": "srag.html#perfil-dos-casos",
+    "href": "srag.html#perfil-dos-casos",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Perfil dos casos",
+    "text": "Perfil dos casos\n\nSexoClassificação finalFaixa etáriaPirâmide — NotificadosPirâmide — ÓbitosDesfechoRaça/CorEscolaridade\n\n\n\n\n\nDistribuição de notificações de SRAG por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nClassificação final dos casos de SRAG notificados — 15ª RS — 2026.\n\n\n\n\n\n\n\nComparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026."
+  },
+  {
+    "objectID": "srag.html#circulação-viral",
+    "href": "srag.html#circulação-viral",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Circulação viral",
+    "text": "Circulação viral\n\nVírus detectados — totalTendência semanalTipos de Influenza\n\n\n\n\n\nAgentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nTendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.\n\n\n\n\n\n\n\nTipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.\n\n\n\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
   }
 ]
