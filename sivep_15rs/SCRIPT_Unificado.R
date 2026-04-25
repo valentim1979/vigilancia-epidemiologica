@@ -35,7 +35,7 @@ CAMINHO_SHP_SARANDI    <- "/Users/valentimsalajunior/Documents/GIS/bairros_saran
 # --- 0.4 Parâmetros dos mapas de bairro ---
 CORTE_NOME_BAIRRO     <- 5   # mínimo de casos para exibir nome no mapa — Maringá
 
-CORTE_NOME_BAIRRO_SAR <- 5   # idem para Sarandi
+CORTE_NOME_BAIRRO_SAR <- 1   # idem para Sarandi
 
 # --- 0.5 Pasta de saída (pasta graficos/ do projeto GitHub Pages) ---
 # Ajuste para o caminho completo do seu projeto, ex.:
