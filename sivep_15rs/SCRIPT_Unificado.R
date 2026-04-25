@@ -1105,7 +1105,8 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   
   tmap_save(mapa_casos,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_casos_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2000)
+            width = 2400, height = 2000, 
+          device = png)
   
   mapa_incid <- tm_shape(malha_15rs) +
     tm_polygons(
@@ -1121,7 +1122,8 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   
   tmap_save(mapa_incid,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_incidencia_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2000)
+            width = 2400, height = 2000, 
+          device = png)
   
   message("Mapas por município salvos.")
 } else {
@@ -1215,7 +1217,8 @@ if (file.exists(CAMINHO_SHP_MARINGA)) {
   
   tmap_save(mapa_mar,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_maringa_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400)
+            width = 2400, height = 2400, 
+          device = png)
   message("Mapa de Maringá salvo.")
 } else {
   warning("Shapefile de bairros de Maringá não encontrado: ", CAMINHO_SHP_MARINGA)
@@ -1244,7 +1247,8 @@ if (file.exists(CAMINHO_SHP_SARANDI)) {
   
   tmap_save(mapa_sar,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_sarandi_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400)
+            width = 2400, height = 2400, 
+          device = png)
   message("Mapa de Sarandi salvo.")
 } else {
   warning("Shapefile de bairros de Sarandi não encontrado: ", CAMINHO_SHP_SARANDI)
