@@ -491,9 +491,6 @@ g09 <- casos_municipio %>%
 salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 
 
-# ==============================================================================
-# GRÁFICO 10 — NOTIFICAÇÕES POR REGIONAL DE SAÚDE (PARANÁ)
-# ==============================================================================
 
 # ==============================================================================
 # GRÁFICO 10 — NOTIFICAÇÕES POR REGIONAL DE SAÚDE (PARANÁ)
@@ -1054,8 +1051,6 @@ salvar_grafico(
   paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
   width = 14, height = 6
 )
-
-
 
 # Série por classificação etiológica
 g_class <- casos_semana_class %>%
