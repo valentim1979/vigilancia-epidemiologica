@@ -39,11 +39,13 @@ CORTE_NOME_BAIRRO_SAR <- 5   # idem para Sarandi
 
 # --- 0.5 Pasta de saída (pasta graficos/ do projeto GitHub Pages) ---
 # Ajuste para o caminho completo do seu projeto, ex.:
-DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/Documentos_2026/vigilancia-epidemiologica/graficos"
+DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
 
 # --- 0.6 Data de extração dos dados do SIVEP-Gripe ---
-# Atualize manualmente a cada nova extração
-DATA_EXTRACAO <- as.Date("2026-04-05")
+# Usa a data de modificação do arquivo DBF como data de extração
+DATA_EXTRACAO <- as.Date(file.info(
+  file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(anos_carregar), ".dbf"))
+)$mtime)
 
 # ==============================================================================
 # BLOCO 1 — PACOTES
