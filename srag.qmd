@@ -1,8 +1,8 @@
 ---
 title: "Vigilância Universal — SRAG"
 subtitle: "Síndrome Respiratória Aguda Grave — 15ª RS Maringá/PR"
-date: last-modified
-date-format: "DD/MM/YYYY"
+date: now
+date-format: "DD/MM/YYYY HH:mm"
 ---
 
 ::: {.callout-tip}
