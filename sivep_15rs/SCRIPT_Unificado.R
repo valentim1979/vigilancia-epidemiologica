@@ -42,9 +42,8 @@ CORTE_NOME_BAIRRO_SAR <- 1   # idem para Sarandi
 DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
 
 # --- 0.6 Data de extração dos dados do SIVEP-Gripe ---
-# Usa a data de modificação do arquivo DBF como data de extração
 DATA_EXTRACAO <- as.Date(file.info(
-  file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(anos_carregar), ".dbf"))
+  file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(ANO_ANALISE), ".dbf"))
 )$mtime)
 
 # ==============================================================================
