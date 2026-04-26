@@ -439,6 +439,55 @@ salvar_grafico(g07, "07_notificacoes_semana_epi")
 
 
 # ==============================================================================
+# GRÁFICO 07b — VARIAÇÃO SEMANAL COM MÉDIA E TENDÊNCIA
+# ==============================================================================
+
+casos_semana_var <- base_filtrada %>%
+  group_by(SEM_NOT) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  arrange(SEM_NOT) %>%
+  mutate(
+    media       = round(mean(total), 1),
+    variacao    = round((total - lag(total)) / lag(total) * 100, 1),
+    direcao     = case_when(
+      is.na(variacao)  ~ "neutra",
+      variacao > 0     ~ "aumento",
+      variacao < 0     ~ "reducao",
+      TRUE             ~ "neutra"
+    )
+  )
+
+g07b <- ggplot(casos_semana_var, aes(x = as.integer(SEM_NOT), y = total)) +
+  geom_col(aes(fill = direcao), width = 0.7) +
+  geom_line(aes(y = media), color = "#FF8C00", linewidth = 1,
+            linetype = "dashed") +
+  geom_text(
+    aes(label = ifelse(!is.na(variacao),
+                       paste0(ifelse(variacao > 0, "+", ""), variacao, "%"),
+                       "")),
+    vjust = -0.5, size = 2.8, color = "grey30"
+  ) +
+  annotate("text", x = 1, y = unique(casos_semana_var$media) * 1.03,
+           label = paste0("Média: ", unique(casos_semana_var$media)),
+           hjust = 0, size = 3, color = "#FF8C00", fontface = "italic") +
+  scale_fill_manual(
+    values = c("aumento" = "#2E7D32", "reducao" = "#C62828", "neutra" = "#0057A3"),
+    guide  = "none"
+  ) +
+  scale_x_continuous(breaks = seq(1, 53, by = 2)) +
+  labs(
+    title    = paste0("Variação Semanal de SRAG — ", escopo_titulo),
+    subtitle = "Verde = aumento | Vermelho = redução | Laranja tracejado = média do período",
+    x = "Semana Epidemiológica", y = "Casos Notificados",
+    caption  = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+salvar_grafico(g07b, "07b_variacao_semanal")
+
+
+# ==============================================================================
 # GRÁFICO 08 — CONFIRMADOS POR SEMANA EPIDEMIOLÓGICA
 # ==============================================================================
 
