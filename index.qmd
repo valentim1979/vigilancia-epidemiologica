@@ -1,8 +1,8 @@
 ---
 title: "Boletim Epidemiológico"
 subtitle: "15ª Regional de Saúde — Maringá/PR"
-date: last-modified
-date-format: "DD [de] MMMM [de] YYYY"
+date: now
+date-format: "DD/MM/YYYY HH:mm"
 toc: false
 ---
 
