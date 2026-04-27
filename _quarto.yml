@@ -12,10 +12,9 @@ website:
     foreground: "white"
     left:
       - href: index.qmd
-        text: Início
-      - text: "SRAG (Universal)"
-        href: srag.qmd
-     
+        text: Painel SRAG
+      - href: descritiva.qmd
+        text: Estatística Descritiva
     right:
       - href: sobre.qmd
         text: Sobre
@@ -25,6 +24,12 @@ website:
     left: "15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
     right:
       - text: "Fonte: SIVEP-Gripe"
+
+execute:
+  echo: false
+  warning: false
+  message: false
+  freeze: auto
 
 format:
   html:
