@@ -1,45 +1,80 @@
 [
   {
-    "objectID": "srag.html",
-    "href": "srag.html",
-    "title": "Vigilância Universal — SRAG",
+    "objectID": "descritiva.html#completitude-das-variáveis-chave",
+    "href": "descritiva.html#completitude-das-variáveis-chave",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "1. Completitude das Variáveis-Chave",
+    "text": "1. Completitude das Variáveis-Chave\nProporção de registros com preenchimento válido por campo. Valores abaixo de 80% (linha tracejada) devem ser levados em conta na interpretação de qualquer análise que use aquela variável."
+  },
+  {
+    "objectID": "descritiva.html#oportunidade-de-notificação",
+    "href": "descritiva.html#oportunidade-de-notificação",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "2. Oportunidade de Notificação",
+    "text": "2. Oportunidade de Notificação\n\n2a. Sintomas → Notificação\nIntervalo entre o início dos sintomas e a data de notificação (em dias). A mediana abaixo de 7 dias é usada como referência de oportunidade adequada.\n\n\n\n\n\n\n\n\n\n\n\n2b. Internação → Desfecho\nTempo entre a internação e o desfecho (cura ou óbito por SRAG)."
+  },
+  {
+    "objectID": "descritiva.html#comorbidades",
+    "href": "descritiva.html#comorbidades",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "3. Comorbidades",
+    "text": "3. Comorbidades\n\n3a. Frequência total\n\n\n\n\n\n\n\n\n\n\n\n3b. Notificados vs Óbitos"
+  },
+  {
+    "objectID": "descritiva.html#desfecho-e-gravidade",
+    "href": "descritiva.html#desfecho-e-gravidade",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "4. Desfecho e Gravidade",
+    "text": "4. Desfecho e Gravidade\n\n4a. Letalidade por Faixa Etária\n\n\n\n\n\n\n\n\n\n\n\n4b. Letalidade por Sexo\n\n\n\n\n\n\n\n\n\n\n\n4c. Uso de UTI por Faixa Etária"
+  },
+  {
+    "objectID": "descritiva.html#confirmação-e-tratamento",
+    "href": "descritiva.html#confirmação-e-tratamento",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "5. Confirmação e Tratamento",
+    "text": "5. Confirmação e Tratamento\n\n5a. Critério de Confirmação\nSomente casos com classificação final confirmada (CLASSI_FIN = 1, 2, 3 ou 5).\n\n\n\n\n\n\n\n\n\n\n\n5b. Uso de Antiviral\n\n\n\n\n\n\n\n\n\n\n\n5c. Status Vacinal — COVID-19\n\n⚠️ [Não verificado] A completitude deste campo varia por período e município. Interprete com cautela."
+  },
+  {
+    "objectID": "descritiva.html#mortalidade-por-município",
+    "href": "descritiva.html#mortalidade-por-município",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "6. Mortalidade por Município",
+    "text": "6. Mortalidade por Município\nComplementa o mapa geográfico com ordenação por taxa."
+  },
+  {
+    "objectID": "descritiva.html#tabela-resumo-por-município",
+    "href": "descritiva.html#tabela-resumo-por-município",
+    "title": "Estatística Descritiva — SRAG",
+    "section": "7. Tabela-Resumo por Município",
+    "text": "7. Tabela-Resumo por Município\n\n\n\n\n\nMunicípio\nCasos\nÓbitos\nUTI\nIncidência /100k\nMortalidade /100k\nLetalidade (%)\nUTI (%)\n\n\n\n\nUniflor\n3\n0\n0\n142.5\n0.0\n0.0\n0.0\n\n\nSanto Inacio\n9\n0\n2\n139.3\n0.0\n0.0\n22.2\n\n\nNova Esperanca\n26\n0\n1\n95.8\n0.0\n0.0\n3.8\n\n\nNossa Senhora Das Gracas\n3\n0\n2\n81.8\n0.0\n0.0\n66.7\n\n\nItambe\n4\n0\n1\n64.2\n0.0\n0.0\n25.0\n\n\nOurizona\n2\n0\n0\n62.6\n0.0\n0.0\n0.0\n\n\nFlorai\n3\n0\n1\n62.4\n0.0\n0.0\n33.3\n\n\nSao Jorge Do Ivai\n3\n0\n1\n58.0\n0.0\n0.0\n33.3\n\n\nMaringa\n235\n19\n84\n54.7\n4.4\n8.1\n35.7\n\n\nColorado\n12\n0\n1\n51.5\n0.0\n0.0\n8.3\n\n\nMarialva\n22\n1\n11\n49.2\n2.2\n4.5\n50.0\n\n\nItaguaje\n2\n0\n0\n44.2\n0.0\n0.0\n0.0\n\n\nParanacity\n4\n0\n1\n41.9\n0.0\n0.0\n25.0\n\n\nSarandi\n45\n3\n17\n35.1\n2.3\n6.7\n37.8\n\n\nMandaguacu\n10\n0\n2\n29.0\n0.0\n0.0\n20.0\n\n\nAtalaia\n1\n0\n0\n24.7\n0.0\n0.0\n0.0\n\n\nMunhoz De Melo\n1\n0\n1\n24.6\n0.0\n0.0\n100.0\n\n\nPaicandu\n12\n1\n6\n24.6\n2.1\n8.3\n50.0\n\n\nLobato\n1\n0\n0\n21.2\n0.0\n0.0\n0.0\n\n\nIguaracu\n1\n0\n1\n17.6\n0.0\n0.0\n100.0\n\n\nSanta Fe\n2\n0\n2\n17.1\n0.0\n0.0\n100.0\n\n\nMandaguari\n6\n0\n4\n15.7\n0.0\n0.0\n66.7\n\n\nDoutor Camargo\n1\n0\n0\n15.3\n0.0\n0.0\n0.0\n\n\nAstorga\n3\n0\n0\n11.4\n0.0\n0.0\n0.0\n\n\n\n\n\n\nFonte: SIVEP-Gripe | 15ª Regional de Saúde de Maringá — Paraná"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Boletim Epidemiológico",
     "section": "",
-    "text": "Dica\n\n\n\nAno de referência: 2026  |  Fonte: SIVEP-Gripe (módulo hospitalar)  |  Escopo: 30 municípios da 15ª Regional de Saúde\nNotificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos."
+    "text": "Fonte: SIVEP-Gripe  | \n    Ano de referência: 2026  | \n    Última atualização:\nDados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde."
   },
   {
-    "objectID": "srag.html#série-temporal",
-    "href": "srag.html#série-temporal",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Série temporal",
-    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanaisVariação semanal\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução."
+    "objectID": "index.html#vigilância-universal-srag",
+    "href": "index.html#vigilância-universal-srag",
+    "title": "Boletim Epidemiológico",
+    "section": "Vigilância Universal — SRAG",
+    "text": "Vigilância Universal — SRAG\nMonitora todos os casos hospitalizados de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.\n\n\n\nAbrangência\nTodos os hospitais da rede\n\n\nPerfil\nHospitalizados — casos graves, UTI, óbitos\n\n\nFonte\nSIVEP-Gripe (módulo hospitalar)\n\n\n\n→ Acessar dados de SRAG"
   },
   {
-    "objectID": "srag.html#distribuição-geográfica-gráficos",
-    "href": "srag.html#distribuição-geográfica-gráficos",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Distribuição geográfica — gráficos",
-    "text": "Distribuição geográfica — gráficos\n\nIncidência por municípioRegionais do Paraná\n\n\n\n\n\nTaxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).\n\n\n\n\n\n\n\nTotal de notificações de SRAG por Regional de Saúde — Paraná — 2026."
+    "objectID": "index.html#área-de-abrangência-15ª-rs",
+    "href": "index.html#área-de-abrangência-15ª-rs",
+    "title": "Boletim Epidemiológico",
+    "section": "Área de abrangência — 15ª RS",
+    "text": "Área de abrangência — 15ª RS\nA 15ª Regional de Saúde abrange 30 municípios da região de Maringá, com população estimada de ~958 mil habitantes (IBGE 2025).\nMunicípios-sede da regional: Maringá (429.660 hab.), Sarandi (128.106 hab.) e Paicandu (48.695 hab.) representam juntos cerca de 63% da população regional.\n\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
   },
   {
-    "objectID": "srag.html#distribuição-geográfica-mapas",
-    "href": "srag.html#distribuição-geográfica-mapas",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Distribuição geográfica — mapas",
-    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos."
-  },
-  {
-    "objectID": "srag.html#perfil-dos-casos",
-    "href": "srag.html#perfil-dos-casos",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Perfil dos casos",
-    "text": "Perfil dos casos\n\nSexoClassificação finalFaixa etáriaPirâmide — NotificadosPirâmide — ÓbitosDesfechoRaça/CorEscolaridade\n\n\n\n\n\nDistribuição de notificações de SRAG por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nClassificação final dos casos de SRAG notificados — 15ª RS — 2026.\n\n\n\n\n\n\n\nComparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026."
-  },
-  {
-    "objectID": "srag.html#circulação-viral",
-    "href": "srag.html#circulação-viral",
-    "title": "Vigilância Universal — SRAG",
-    "section": "Circulação viral",
-    "text": "Circulação viral\n\nVírus detectados — totalTendência semanalTipos de Influenza\n\n\n\n\n\nAgentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nTendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.\n\n\n\n\n\n\n\nTipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.\n\n\n\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
+    "objectID": "sivep_15rs/GIS/bairros_sarandi/Bairros_loteamentos.html",
+    "href": "sivep_15rs/GIS/bairros_sarandi/Bairros_loteamentos.html",
+    "title": "15ª RS — Vigilância Epidemiológica",
+    "section": "",
+    "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     \n\n\n                PROJCRS[“SIRGAS 2000 / UTM zone 22S”,BASEGEOGCRS[“SIRGAS 2000”,DATUM[“Sistema de Referencia Geocentrico para las AmericaS 2000”,ELLIPSOID[“GRS 1980”,6378137,298.257222101,LENGTHUNIT[“metre”,1]]],PRIMEM[“Greenwich”,0,ANGLEUNIT[“degree”,0.0174532925199433]],ID[“EPSG”,4674]],CONVERSION[“UTM zone 22S”,METHOD[“Transverse Mercator”,ID[“EPSG”,9807]],PARAMETER[“Latitude of natural origin”,0,ANGLEUNIT[“degree”,0.0174532925199433],ID[“EPSG”,8801]],PARAMETER[“Longitude of natural origin”,-51,ANGLEUNIT[“degree”,0.0174532925199433],ID[“EPSG”,8802]],PARAMETER[“Scale factor at natural origin”,0.9996,SCALEUNIT[“unity”,1],ID[“EPSG”,8805]],PARAMETER[“False easting”,500000,LENGTHUNIT[“metre”,1],ID[“EPSG”,8806]],PARAMETER[“False northing”,10000000,LENGTHUNIT[“metre”,1],ID[“EPSG”,8807]]],CS[Cartesian,2],AXIS[“(E)”,east,ORDER[1],LENGTHUNIT[“metre”,1]],AXIS[“(N)”,north,ORDER[2],LENGTHUNIT[“metre”,1]],USAGE[SCOPE[“Engineering survey, topographic mapping.”],AREA[“Brazil - between 54°W and 48°W, northern and southern hemispheres, onshore and offshore. In remainder of South America - between 54°W and 48°W, southern hemisphere, onshore and offshore.”],BBOX[-54.18,-54,7.04,-47.99]],ID[“EPSG”,31982]] +proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 2675 31982 EPSG:31982 SIRGAS 2000 / UTM zone 22S utm EPSG:7019 false"
   },
   {
     "objectID": "sobre.html",
@@ -84,31 +119,45 @@
     "text": "Equipe técnica\nSCVGE — 15ª Regional de Saúde\nSandra Ap. Barbosa\nValentim Sala Junior\n\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
   },
   {
-    "objectID": "sivep_15rs/GIS/bairros_sarandi/Bairros_loteamentos.html",
-    "href": "sivep_15rs/GIS/bairros_sarandi/Bairros_loteamentos.html",
-    "title": "15ª RS — Vigilância Epidemiológica",
+    "objectID": "srag.html",
+    "href": "srag.html",
+    "title": "Vigilância Universal — SRAG",
     "section": "",
-    "text": "&lt;!DOCTYPE qgis PUBLIC ‘http://mrcc.com/qgis.dtd’ ‘SYSTEM’&gt;     \n\n\n                PROJCRS[“SIRGAS 2000 / UTM zone 22S”,BASEGEOGCRS[“SIRGAS 2000”,DATUM[“Sistema de Referencia Geocentrico para las AmericaS 2000”,ELLIPSOID[“GRS 1980”,6378137,298.257222101,LENGTHUNIT[“metre”,1]]],PRIMEM[“Greenwich”,0,ANGLEUNIT[“degree”,0.0174532925199433]],ID[“EPSG”,4674]],CONVERSION[“UTM zone 22S”,METHOD[“Transverse Mercator”,ID[“EPSG”,9807]],PARAMETER[“Latitude of natural origin”,0,ANGLEUNIT[“degree”,0.0174532925199433],ID[“EPSG”,8801]],PARAMETER[“Longitude of natural origin”,-51,ANGLEUNIT[“degree”,0.0174532925199433],ID[“EPSG”,8802]],PARAMETER[“Scale factor at natural origin”,0.9996,SCALEUNIT[“unity”,1],ID[“EPSG”,8805]],PARAMETER[“False easting”,500000,LENGTHUNIT[“metre”,1],ID[“EPSG”,8806]],PARAMETER[“False northing”,10000000,LENGTHUNIT[“metre”,1],ID[“EPSG”,8807]]],CS[Cartesian,2],AXIS[“(E)”,east,ORDER[1],LENGTHUNIT[“metre”,1]],AXIS[“(N)”,north,ORDER[2],LENGTHUNIT[“metre”,1]],USAGE[SCOPE[“Engineering survey, topographic mapping.”],AREA[“Brazil - between 54°W and 48°W, northern and southern hemispheres, onshore and offshore. In remainder of South America - between 54°W and 48°W, southern hemisphere, onshore and offshore.”],BBOX[-54.18,-54,7.04,-47.99]],ID[“EPSG”,31982]] +proj=utm +zone=22 +south +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs 2675 31982 EPSG:31982 SIRGAS 2000 / UTM zone 22S utm EPSG:7019 false"
+    "text": "Dica\n\n\n\nAno de referência: 2026  |  Fonte: SIVEP-Gripe (módulo hospitalar)  |  Escopo: 30 municípios da 15ª Regional de Saúde\nNotificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos."
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Boletim Epidemiológico",
-    "section": "",
-    "text": "Fonte: SIVEP-Gripe  | \n    Ano de referência: 2026  | \n    Última atualização:\nDados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde."
+    "objectID": "srag.html#série-temporal",
+    "href": "srag.html#série-temporal",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Série temporal",
+    "text": "Série temporal\n\nCurva comparativaNotificações semanaisConfirmados semanaisVariação semanal\n\n\n\n\n\nCurva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.\n\n\n\n\n\n\n\nTotal de notificações de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos confirmados de SRAG por semana epidemiológica — 2026.\n\n\n\n\n\n\n\nCasos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução."
   },
   {
-    "objectID": "index.html#vigilância-universal-srag",
-    "href": "index.html#vigilância-universal-srag",
-    "title": "Boletim Epidemiológico",
-    "section": "Vigilância Universal — SRAG",
-    "text": "Vigilância Universal — SRAG\nMonitora todos os casos hospitalizados de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.\n\n\n\nAbrangência\nTodos os hospitais da rede\n\n\nPerfil\nHospitalizados — casos graves, UTI, óbitos\n\n\nFonte\nSIVEP-Gripe (módulo hospitalar)\n\n\n\n→ Acessar dados de SRAG"
+    "objectID": "srag.html#distribuição-geográfica-gráficos",
+    "href": "srag.html#distribuição-geográfica-gráficos",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Distribuição geográfica — gráficos",
+    "text": "Distribuição geográfica — gráficos\n\nIncidência por municípioRegionais do Paraná\n\n\n\n\n\nTaxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).\n\n\n\n\n\n\n\nTotal de notificações de SRAG por Regional de Saúde — Paraná — 2026."
   },
   {
-    "objectID": "index.html#área-de-abrangência-15ª-rs",
-    "href": "index.html#área-de-abrangência-15ª-rs",
-    "title": "Boletim Epidemiológico",
-    "section": "Área de abrangência — 15ª RS",
-    "text": "Área de abrangência — 15ª RS\nA 15ª Regional de Saúde abrange 30 municípios da região de Maringá, com população estimada de ~958 mil habitantes (IBGE 2025).\nMunicípios-sede da regional: Maringá (429.660 hab.), Sarandi (128.106 hab.) e Paicandu (48.695 hab.) representam juntos cerca de 63% da população regional.\n\n15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR"
+    "objectID": "srag.html#distribuição-geográfica-mapas",
+    "href": "srag.html#distribuição-geográfica-mapas",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Distribuição geográfica — mapas",
+    "text": "Distribuição geográfica — mapas\n\n\n\n\n\n\nNota\n\n\n\nMapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.\n\n\n\nCasos por municípioIncidência por municípioBairros — MaringáBairros — Sarandi\n\n\n\n\n\nMapa de casos absolutos de SRAG por município da 15ª RS — 2026.\n\n\n\n\n\n\n\nMapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.\n\n\n\n\n\n\n\nDistribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos."
+  },
+  {
+    "objectID": "srag.html#perfil-dos-casos",
+    "href": "srag.html#perfil-dos-casos",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Perfil dos casos",
+    "text": "Perfil dos casos\n\nSexoClassificação finalFaixa etáriaPirâmide — NotificadosPirâmide — ÓbitosDesfechoRaça/CorEscolaridade\n\n\n\n\n\nDistribuição de notificações de SRAG por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nClassificação final dos casos de SRAG notificados — 15ª RS — 2026.\n\n\n\n\n\n\n\nComparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nPirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.\n\n\n\n\n\n\n\nDistribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026."
+  },
+  {
+    "objectID": "srag.html#circulação-viral",
+    "href": "srag.html#circulação-viral",
+    "title": "Vigilância Universal — SRAG",
+    "section": "Circulação viral",
+    "text": "Circulação viral\n\nVírus detectados — totalTendência semanalTipos de Influenza\n\n\n\n\n\nAgentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.\n\n\n\n\n\n\n\nTendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.\n\n\n\n\n\n\n\nTipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.\n\n\n\n\n\n\nDados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe."
   }
 ]

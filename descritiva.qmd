@@ -1,0 +1,164 @@
+---
+title: "Estatística Descritiva — SRAG"
+subtitle: "15ª Regional de Saúde de Maringá — Paraná"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Neste painel"
+    page-layout: full
+    theme: cosmo
+execute:
+  echo: false
+  warning: false
+  message: false
+---
+
+```{r setup}
+source("/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/SCRIPT_Unificado.R")
+source("/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/descritiva_srag_15rs.R")
+
+ano_label <- paste(anos_carregar, collapse = "/")
+```
+
+---
+
+> **Nota sobre interpretação:** os percentuais de comorbidade, vacinação e antiviral
+> dependem diretamente da completitude do preenchimento. Consulte o gráfico D01 antes
+> de interpretar os demais.
+
+---
+
+## 1. Completitude das Variáveis-Chave
+
+Proporção de registros com preenchimento válido por campo.
+Valores abaixo de 80% (linha tracejada) devem ser levados em conta na interpretação
+de qualquer análise que use aquela variável.
+
+```{r completitude, fig.width=12, fig.height=8}
+gD01
+```
+
+---
+
+## 2. Oportunidade de Notificação
+
+### 2a. Sintomas → Notificação
+
+Intervalo entre o início dos sintomas e a data de notificação (em dias).
+A mediana abaixo de 7 dias é usada como referência de oportunidade adequada.
+
+```{r oportunidade-notif, fig.width=12, fig.height=6}
+gD02
+```
+
+### 2b. Internação → Desfecho
+
+Tempo entre a internação e o desfecho (cura ou óbito por SRAG).
+
+```{r oportunidade-desf, fig.width=12, fig.height=8}
+if (exists("gD03")) gD03
+```
+
+---
+
+## 3. Comorbidades
+
+### 3a. Frequência total
+
+```{r comorbidades-total, fig.width=12, fig.height=8}
+if (exists("gD04")) gD04
+```
+
+### 3b. Notificados vs Óbitos
+
+```{r comorbidades-obitos, fig.width=12, fig.height=8}
+if (exists("gD05")) gD05
+```
+
+---
+
+## 4. Desfecho e Gravidade
+
+### 4a. Letalidade por Faixa Etária
+
+```{r letalidade-faixa, fig.width=12, fig.height=6}
+gD06
+```
+
+### 4b. Letalidade por Sexo
+
+```{r letalidade-sexo, fig.width=8, fig.height=5}
+gD07
+```
+
+### 4c. Uso de UTI por Faixa Etária
+
+```{r uti-faixa, fig.width=12, fig.height=6}
+gD08
+```
+
+---
+
+## 5. Confirmação e Tratamento
+
+### 5a. Critério de Confirmação
+
+Somente casos com classificação final confirmada (CLASSI_FIN = 1, 2, 3 ou 5).
+
+```{r criterio, fig.width=12, fig.height=5}
+gD09
+```
+
+### 5b. Uso de Antiviral
+
+```{r antiviral, fig.width=10, fig.height=4}
+gD10
+```
+
+### 5c. Status Vacinal — COVID-19
+
+> ⚠️ **[Não verificado]** A completitude deste campo varia por período e município.
+> Interprete com cautela.
+
+```{r vacinal, fig.width=10, fig.height=4}
+gD11
+```
+
+---
+
+## 6. Mortalidade por Município
+
+Complementa o mapa geográfico com ordenação por taxa.
+
+```{r mortalidade-municipio, fig.width=12, fig.height=10}
+gD12
+```
+
+---
+
+## 7. Tabela-Resumo por Município
+
+```{r tabela-mun}
+tabela_resumo_mun %>%
+  dplyr::rename(
+    Município              = municipio,
+    Casos                  = casos,
+    Óbitos                 = obitos_srag,
+    UTI                    = uti,
+    `Incidência /100k`     = incidencia_100k,
+    `Mortalidade /100k`    = mortalidade_100k,
+    `Letalidade (%)`       = letalidade_pct,
+    `UTI (%)`              = pct_uti
+  ) %>%
+  knitr::kable(format.args = list(big.mark = ".")) %>%
+  kableExtra::kable_styling(
+    bootstrap_options = c("striped", "hover", "condensed"),
+    full_width = TRUE,
+    font_size  = 13
+  )
+```
+
+---
+
+*Fonte: SIVEP-Gripe | 15ª Regional de Saúde de Maringá — Paraná*

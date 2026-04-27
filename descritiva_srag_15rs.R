@@ -1,0 +1,587 @@
+# ==============================================================================
+# VIGILÂNCIA EPIDEMIOLÓGICA — 15ª REGIONAL DE SAÚDE DE MARINGÁ
+# Script complementar: Estatística Descritiva
+# Autor   : Valentim Sala Junior
+# Depende : SCRIPT_Unificado.R (deve ser executado antes)
+#           Os objetos base_filtrada, DIR_GRAFICOS e texto_rodape
+#           devem estar no ambiente.
+# Saída   : pasta graficos/descritiva/ do projeto GitHub Pages
+# ==============================================================================
+
+
+# ==============================================================================
+# BLOCO D0 — PASTA DE SAÍDA ESPECÍFICA
+# ==============================================================================
+
+DIR_DESC <- file.path(DIR_GRAFICOS, "descritiva")
+if (!dir.exists(DIR_DESC)) dir.create(DIR_DESC, recursive = TRUE)
+message("Saída descritiva: ", DIR_DESC)
+
+salvar_desc <- function(grafico, nome, width = 12, height = 7) {
+  caminho <- file.path(DIR_DESC, paste0(nome, ".png"))
+  ggsave(
+    filename = caminho, plot = grafico,
+    width = width, height = height, units = "in", dpi = 150, bg = "white"
+  )
+  message("Salvo: ", caminho)
+}
+
+
+# ==============================================================================
+# BLOCO D1 — COMPLETITUDE DAS VARIÁVEIS-CHAVE
+# ==============================================================================
+# Mostra a proporção de registros com preenchimento válido por campo.
+# Interpretação: quanto mais próximo de 100%, melhor a qualidade do dado.
+
+variaveis_chave <- list(
+  "Sexo"                 = "CS_SEXO",
+  "Idade"                = "COD_IDADE",
+  "Raça/Cor"             = "CS_RACA",
+  "Bairro"               = "BAIRRO",
+  "Semana Epidemiológica" = "SEM_NOT",
+  "Critério Confirmação"  = "CRITERIO",
+  "Evolução (Desfecho)"  = "EVOLUCAO",
+  "Data Início Sintomas" = "DT_SIN_PRI",
+  "Data Internação"      = "DT_INTERNA",
+  "Cardiopatia"          = "CARDIOPATI",
+  "Diabetes"             = "DIABETES",
+  "Obesidade"            = "OBESIDADE",
+  "Imunodepressão"       = "IMUNODEPRE",
+  "Antiviral"            = "ANTIVIRAL",
+  "Vacinação COVID"      = "VACINA_COV"
+)
+
+# Valores que representam ausência de informação no SIVEP-Gripe
+eh_ausente <- function(x) {
+  is.na(x) | x %in% c("", " ", "9", 9, "99", 99, "999", 999,
+                       "IGNORADO", "NAO INFORMADO", "SEM INFORMACAO")
+}
+
+completitude <- purrr::map_dfr(names(variaveis_chave), function(label) {
+  col <- variaveis_chave[[label]]
+  if (!col %in% names(base_filtrada)) {
+    return(tibble::tibble(variavel = label, pct_preenchido = NA_real_, n_total = nrow(base_filtrada)))
+  }
+  n_total     <- nrow(base_filtrada)
+  n_ausente   <- sum(eh_ausente(base_filtrada[[col]]))
+  pct         <- round((1 - n_ausente / n_total) * 100, 1)
+  tibble::tibble(variavel = label, pct_preenchido = pct, n_total = n_total)
+}) %>%
+  filter(!is.na(pct_preenchido)) %>%
+  arrange(pct_preenchido)
+
+gD01 <- ggplot(completitude,
+               aes(x = pct_preenchido,
+                   y = fct_reorder(variavel, pct_preenchido),
+                   fill = pct_preenchido)) +
+  geom_col() +
+  geom_text(aes(label = paste0(pct_preenchido, "%")), hjust = -0.1, size = 3.5) +
+  geom_vline(xintercept = 80, linetype = "dashed", color = "#A30000", linewidth = 0.7) +
+  annotate("text", x = 81, y = 1, label = "80% (ref.)",
+           hjust = 0, size = 3, color = "#A30000") +
+  scale_x_continuous(limits = c(0, 115), expand = expansion(mult = c(0, 0))) +
+  scale_fill_gradient(low = "#d73027", high = "#1a9850", limits = c(0, 100), guide = "none") +
+  labs(
+    title    = paste0("Completitude das Variáveis-Chave — ", escopo_titulo),
+    subtitle = paste0("N = ", format(nrow(base_filtrada), big.mark = "."),
+                      " | Linha tracejada = referência 80%"),
+    x = "% de registros preenchidos", y = NULL,
+    caption  = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD01, "D01_completitude_variaveis", height = 8)
+
+
+# ==============================================================================
+# BLOCO D2 — OPORTUNIDADE: SINTOMAS → NOTIFICAÇÃO
+# ==============================================================================
+# Mede o tempo (em dias) entre o início dos sintomas e a notificação.
+# Valores altos podem indicar subnotificação precoce ou atraso no sistema.
+
+oportunidade <- base_filtrada %>%
+  mutate(
+    dt_sin   = parseia_data(DT_SIN_PRI),
+    dt_notif = parseia_data(DT_NOTIFIC),
+    dias_sin_notif = as.integer(dt_notif - dt_sin)
+  ) %>%
+  filter(
+    !is.na(dias_sin_notif),
+    dias_sin_notif >= 0,
+    dias_sin_notif <= 60   # remove outliers extremos (provavelmente erro de digitação)
+  )
+
+n_op   <- nrow(oportunidade)
+med_op <- median(oportunidade$dias_sin_notif)
+p25_op <- quantile(oportunidade$dias_sin_notif, 0.25)
+p75_op <- quantile(oportunidade$dias_sin_notif, 0.75)
+
+gD02 <- ggplot(oportunidade, aes(x = dias_sin_notif)) +
+  geom_histogram(binwidth = 1, fill = "#0057A3", color = "white", alpha = 0.85) +
+  geom_vline(xintercept = med_op, color = "#A30000", linewidth = 1, linetype = "solid") +
+  geom_vline(xintercept = 7,      color = "#FF8C00", linewidth = 0.8, linetype = "dashed") +
+  annotate("text", x = med_op + 0.5, y = Inf, vjust = 1.5, hjust = 0,
+           label = paste0("Mediana: ", med_op, " dias"), color = "#A30000", size = 3.5) +
+  annotate("text", x = 7.5, y = Inf, vjust = 3, hjust = 0,
+           label = "7 dias (ref.)", color = "#FF8C00", size = 3) +
+  scale_x_continuous(breaks = seq(0, 60, by = 5)) +
+  labs(
+    title    = paste0("Oportunidade de Notificação — ", escopo_titulo),
+    subtitle = paste0("Dias entre início dos sintomas e notificação | N = ",
+                      format(n_op, big.mark = "."),
+                      " | Mediana: ", med_op, " dias",
+                      " | P25–P75: ", p25_op, "–", p75_op, " dias"),
+    x = "Dias (sintomas → notificação)", y = "Número de casos",
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD02, "D02_oportunidade_notificacao")
+
+
+# ==============================================================================
+# BLOCO D3 — OPORTUNIDADE: INTERNAÇÃO → DESFECHO
+# ==============================================================================
+
+tempo_desfecho <- base_filtrada %>%
+  mutate(
+    dt_intern  = parseia_data(DT_INTERNA),
+    dt_desfech = parseia_data(DT_EVOLUCA),
+    dias_intern_desf = as.integer(dt_desfech - dt_intern),
+    desfecho = case_when(
+      EVOLUCAO == 1 ~ "Cura",
+      EVOLUCAO == 2 ~ "Óbito por SRAG",
+      EVOLUCAO == 3 ~ "Óbito por Outras Causas",
+      TRUE          ~ "Outros/Ignorado"
+    )
+  ) %>%
+  filter(
+    !is.na(dias_intern_desf),
+    dias_intern_desf >= 0,
+    dias_intern_desf <= 120,
+    desfecho %in% c("Cura", "Óbito por SRAG")
+  )
+
+if (nrow(tempo_desfecho) > 0) {
+  gD03 <- ggplot(tempo_desfecho, aes(x = dias_intern_desf, fill = desfecho)) +
+    geom_histogram(binwidth = 2, color = "white", alpha = 0.85,
+                   position = "identity") +
+    scale_fill_manual(values = c("Cura" = "#1a9850", "Óbito por SRAG" = "#A30000")) +
+    facet_wrap(~ desfecho, scales = "free_y", ncol = 1) +
+    scale_x_continuous(breaks = seq(0, 120, by = 10)) +
+    labs(
+      title    = paste0("Tempo de Internação até o Desfecho — ", escopo_titulo),
+      subtitle = "Dias entre internação e desfecho (cura ou óbito por SRAG)",
+      x = "Dias (internação → desfecho)", y = "Número de casos",
+      fill = NULL, caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold"), legend.position = "none")
+  
+  salvar_desc(gD03, "D03_tempo_internacao_desfecho", height = 8)
+}
+
+
+# ==============================================================================
+# BLOCO D4 — COMORBIDADES: FREQUÊNCIA GERAL
+# ==============================================================================
+# Cada campo binário: 1 = sim, 2 = não, 9 = ignorado.
+# Conta apenas os registros com valor == 1.
+
+campos_comorbidade <- c(
+  "Cardiopatia"          = "CARDIOPATI",
+  "Diabetes"             = "DIABETES",
+  "Obesidade"            = "OBESIDADE",
+  "Doença Renal"         = "RENAL",
+  "Asma"                 = "ASMA",
+  "Imunodepressão"       = "IMUNODEPRE",
+  "Doença Neurológica"   = "NEUROLOGIC",
+  "Doença Hepática"      = "HEPATICA",
+  "Doença Hematológica"  = "HEMATOLO",
+  "Pneumopatia"          = "PNEUMOPATI",
+  "Síndrome de Down"     = "SIND_DOWN",
+  "Puérpera"             = "PUERPERA"
+)
+
+freq_comorbidade <- purrr::map_dfr(names(campos_comorbidade), function(label) {
+  col <- campos_comorbidade[[label]]
+  if (!col %in% names(base_filtrada)) return(NULL)
+  n   <- sum(as.character(base_filtrada[[col]]) == "1", na.rm = TRUE)
+  pct <- round(n / nrow(base_filtrada) * 100, 1)
+  tibble::tibble(comorbidade = label, n = n, pct = pct)
+}) %>%
+  filter(n > 0) %>%
+  arrange(desc(n))
+
+if (nrow(freq_comorbidade) > 0) {
+  gD04 <- ggplot(freq_comorbidade,
+                 aes(x = n, y = fct_reorder(comorbidade, n))) +
+    geom_col(fill = "#6A0572") +
+    geom_text(aes(label = paste0(n, " (", pct, "%)")), hjust = -0.08, size = 3.5) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.22))) +
+    labs(
+      title    = paste0("Comorbidades — Frequência Total — ", escopo_titulo),
+      subtitle = paste0("N = ", format(nrow(base_filtrada), big.mark = "."),
+                        " notificações | % sobre o total de registros"),
+      x = "Número de casos", y = NULL,
+      caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold"))
+  
+  salvar_desc(gD04, "D04_comorbidades_total", height = 8)
+}
+
+
+# ==============================================================================
+# BLOCO D5 — COMORBIDADES: NOTIFICADOS vs ÓBITOS
+# ==============================================================================
+
+freq_comorbidade_obitos <- purrr::map_dfr(names(campos_comorbidade), function(label) {
+  col <- campos_comorbidade[[label]]
+  if (!col %in% names(base_filtrada)) return(NULL)
+  
+  n_total  <- sum(as.character(base_filtrada[[col]]) == "1", na.rm = TRUE)
+  n_obitos <- sum(as.character(base_filtrada[[col]]) == "1" &
+                    base_filtrada$EVOLUCAO == 2, na.rm = TRUE)
+  
+  bind_rows(
+    tibble::tibble(comorbidade = label, grupo = "Notificados", n = n_total),
+    tibble::tibble(comorbidade = label, grupo = "Óbitos",      n = n_obitos)
+  )
+}) %>%
+  filter(n > 0)
+
+if (nrow(freq_comorbidade_obitos) > 0) {
+  gD05 <- ggplot(freq_comorbidade_obitos,
+                 aes(x = n, y = fct_reorder(comorbidade, n), fill = grupo)) +
+    geom_col(position = "dodge") +
+    geom_text(aes(label = n),
+              position = position_dodge(width = 0.9), hjust = -0.1, size = 3) +
+    scale_x_continuous(expand = expansion(mult = c(0, 0.2))) +
+    scale_fill_manual(values = c("Notificados" = "#6A0572", "Óbitos" = "#A30000")) +
+    labs(
+      title    = paste0("Comorbidades — Notificados vs Óbitos — ", escopo_titulo),
+      subtitle = "Registros com campo = 1 (Sim) em cada grupo",
+      x = "Número de casos", y = NULL, fill = NULL,
+      caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(plot.title = element_text(face = "bold"), legend.position = "bottom")
+  
+  salvar_desc(gD05, "D05_comorbidades_obitos", height = 8)
+}
+
+
+# ==============================================================================
+# BLOCO D6 — LETALIDADE POR FAIXA ETÁRIA
+# ==============================================================================
+
+letalidade_faixa <- base_filtrada %>%
+  criar_faixa_etaria() %>%
+  filter(faixa_etaria %in% ORDEM_FAIXAS) %>%
+  group_by(faixa_etaria) %>%
+  summarise(
+    casos   = n(),
+    obitos  = sum(EVOLUCAO == 2, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    faixa_etaria    = factor(faixa_etaria, levels = ORDEM_FAIXAS),
+    letalidade_pct  = round(obitos / casos * 100, 1)
+  ) %>%
+  filter(casos >= 5)   # remove faixas com n muito pequeno
+
+gD06 <- ggplot(letalidade_faixa,
+               aes(x = faixa_etaria, y = letalidade_pct)) +
+  geom_col(fill = "#A30000") +
+  geom_text(aes(label = paste0(letalidade_pct, "%\n(", obitos, "/", casos, ")")),
+            vjust = -0.3, size = 3) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.25))) +
+  labs(
+    title    = paste0("Letalidade por Faixa Etária — ", escopo_titulo),
+    subtitle = "% óbitos por SRAG / total notificados na faixa | Mínimo 5 casos",
+    x = "Faixa Etária", y = "Letalidade (%)",
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x  = element_text(angle = 40, hjust = 1),
+    plot.title   = element_text(face = "bold")
+  )
+
+salvar_desc(gD06, "D06_letalidade_faixa_etaria")
+
+
+# ==============================================================================
+# BLOCO D7 — LETALIDADE POR SEXO
+# ==============================================================================
+
+letalidade_sexo <- base_filtrada %>%
+  padronizar_sexo() %>%
+  filter(sexo != "Ignorado") %>%
+  group_by(sexo) %>%
+  summarise(
+    casos  = n(),
+    obitos = sum(EVOLUCAO == 2, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(letalidade_pct = round(obitos / casos * 100, 1))
+
+gD07 <- ggplot(letalidade_sexo,
+               aes(x = sexo, y = letalidade_pct, fill = sexo)) +
+  geom_col(width = 0.5) +
+  geom_text(aes(label = paste0(letalidade_pct, "%\n(", obitos, "/", casos, ")")),
+            vjust = -0.3, size = 4) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  scale_fill_manual(values = c("Masculino" = "#0057A3", "Feminino" = "#E91E8C"),
+                    guide = "none") +
+  labs(
+    title    = paste0("Letalidade por Sexo — ", escopo_titulo),
+    subtitle = "% óbitos por SRAG / total notificados por sexo",
+    x = NULL, y = "Letalidade (%)",
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD07, "D07_letalidade_sexo", height = 5)
+
+
+# ==============================================================================
+# BLOCO D8 — USO DE UTI POR FAIXA ETÁRIA
+# ==============================================================================
+
+uti_faixa <- base_filtrada %>%
+  criar_faixa_etaria() %>%
+  filter(faixa_etaria %in% ORDEM_FAIXAS) %>%
+  group_by(faixa_etaria) %>%
+  summarise(
+    casos     = n(),
+    uti       = sum(UTI_SIM, na.rm = TRUE),
+    .groups   = "drop"
+  ) %>%
+  mutate(
+    faixa_etaria = factor(faixa_etaria, levels = ORDEM_FAIXAS),
+    pct_uti      = round(uti / casos * 100, 1)
+  ) %>%
+  filter(casos >= 5)
+
+gD08 <- ggplot(uti_faixa,
+               aes(x = faixa_etaria, y = pct_uti)) +
+  geom_col(fill = "#E65100") +
+  geom_text(aes(label = paste0(pct_uti, "%\n(", uti, ")")),
+            vjust = -0.3, size = 3) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.25))) +
+  labs(
+    title    = paste0("Uso de UTI por Faixa Etária — ", escopo_titulo),
+    subtitle = "% internados em UTI / total notificados na faixa | Mínimo 5 casos",
+    x = "Faixa Etária", y = "% em UTI",
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 40, hjust = 1),
+    plot.title  = element_text(face = "bold")
+  )
+
+salvar_desc(gD08, "D08_uti_faixa_etaria")
+
+
+# ==============================================================================
+# BLOCO D9 — CRITÉRIO DE CONFIRMAÇÃO
+# ==============================================================================
+# CRITERIO: 1 = Laboratorial, 2 = Clínico-Epidemiológico,
+#           3 = Clínico-Imagem, 4 = Clínico
+
+criterio_conf <- base_filtrada %>%
+  filter(CLASSI_FIN %in% c(1, 2, 3, 5)) %>%   # apenas confirmados
+  mutate(
+    criterio_label = case_when(
+      CRITERIO == 1 ~ "Laboratorial",
+      CRITERIO == 2 ~ "Clínico-Epidemiológico",
+      CRITERIO == 3 ~ "Clínico-Imagem",
+      CRITERIO == 4 ~ "Clínico",
+      TRUE          ~ "Não informado"
+    )
+  ) %>%
+  group_by(criterio_label) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(pct = round(total / sum(total) * 100, 1)) %>%
+  arrange(desc(total))
+
+n_crit <- sum(criterio_conf$total)
+
+gD09 <- ggplot(criterio_conf,
+               aes(x = total, y = fct_reorder(criterio_label, total))) +
+  geom_col(fill = "#2A9D8F") +
+  geom_text(aes(label = paste0(total, " (", pct, "%)")),
+            hjust = -0.08, size = 3.5) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.22))) +
+  labs(
+    title    = paste0("Critério de Confirmação — SRAG Confirmado — ", escopo_titulo,
+                      " (N = ", format(n_crit, big.mark = "."), ")"),
+    subtitle = "Somente casos com classificação final confirmada (CLASSI_FIN = 1, 2, 3 ou 5)",
+    x = "Casos confirmados", y = NULL,
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD09, "D09_criterio_confirmacao")
+
+
+# ==============================================================================
+# BLOCO D10 — USO DE ANTIVIRAL
+# ==============================================================================
+# ANTIVIRAL: 1 = Sim, 2 = Não, 9 = Ignorado
+
+antiviral_dist <- base_filtrada %>%
+  mutate(
+    antiviral_label = case_when(
+      ANTIVIRAL == 1 ~ "Sim",
+      ANTIVIRAL == 2 ~ "Não",
+      TRUE           ~ "Ignorado/Não registrado"
+    )
+  ) %>%
+  group_by(antiviral_label) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(pct = round(total / sum(total) * 100, 1))
+
+gD10 <- ggplot(antiviral_dist,
+               aes(x = total, y = fct_reorder(antiviral_label, total))) +
+  geom_col(fill = "#457B9D") +
+  geom_text(aes(label = paste0(total, " (", pct, "%)")),
+            hjust = -0.08, size = 3.5) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.22))) +
+  labs(
+    title    = paste0("Uso de Antiviral — ", escopo_titulo,
+                      " (N = ", format(nrow(base_filtrada), big.mark = "."), ")"),
+    x = "Número de casos", y = NULL,
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD10, "D10_antiviral", height = 4)
+
+
+# ==============================================================================
+# BLOCO D11 — STATUS VACINAL (COVID-19)
+# ==============================================================================
+# VACINA_COV: 1 = Sim, 2 = Não, 9 = Ignorado
+
+vacinal_dist <- base_filtrada %>%
+  mutate(
+    vacina_label = case_when(
+      VACINA_COV == 1 ~ "Vacinado",
+      VACINA_COV == 2 ~ "Não vacinado",
+      TRUE            ~ "Ignorado/Não registrado"
+    )
+  ) %>%
+  group_by(vacina_label) %>%
+  summarise(total = n(), .groups = "drop") %>%
+  mutate(pct = round(total / sum(total) * 100, 1))
+
+gD11 <- ggplot(vacinal_dist,
+               aes(x = total, y = fct_reorder(vacina_label, total))) +
+  geom_col(fill = "#264653") +
+  geom_text(aes(label = paste0(total, " (", pct, "%)")),
+            hjust = -0.08, size = 3.5) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.22))) +
+  labs(
+    title    = paste0("Status Vacinal contra COVID-19 — ", escopo_titulo,
+                      " (N = ", format(nrow(base_filtrada), big.mark = "."), ")"),
+    subtitle = "[Não verificado] Completitude deste campo varia muito por período e município.",
+    x = "Número de casos", y = NULL,
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD11, "D11_status_vacinal", height = 4)
+
+
+# ==============================================================================
+# BLOCO D12 — MORTALIDADE POR MUNICÍPIO (gráfico de barras)
+# ==============================================================================
+# Complementa o mapa já existente com uma visualização ordenada.
+
+gD12 <- casos_municipio %>%
+  filter(obitos_srag > 0) %>%
+  mutate(
+    municipio = fct_reorder(str_to_title(municipio), mortalidade_100k),
+    rotulo    = paste0(mortalidade_100k, " /100k  (", obitos_srag, " óbitos)")
+  ) %>%
+  ggplot(aes(x = mortalidade_100k, y = municipio)) +
+  geom_col(fill = "#A30000") +
+  geom_text(aes(label = rotulo), hjust = -0.05, size = 3) +
+  scale_x_continuous(expand = expansion(mult = c(0, 0.3))) +
+  labs(
+    title    = paste0("Mortalidade por SRAG por Município — 15ª RS Maringá",
+                      " (N = ", format(sum(casos_municipio$obitos_srag), big.mark = "."), " óbitos)"),
+    subtitle = paste0("Por 100.000 habitantes | Pop. IBGE 2025",
+                      " | Ano(s): ", paste(anos_carregar, collapse = ", ")),
+    x = "Mortalidade por 100.000 hab.", y = "Município",
+    caption = texto_rodape
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(face = "bold"))
+
+salvar_desc(gD12, "D12_mortalidade_municipio", height = 10)
+
+
+# ==============================================================================
+# BLOCO D13 — TABELA-RESUMO DESCRITIVA POR MUNICÍPIO
+# ==============================================================================
+
+tabela_resumo_mun <- casos_municipio %>%
+  select(municipio, casos, obitos_srag, uti,
+         incidencia_100k, mortalidade_100k, letalidade_pct) %>%
+  mutate(
+    municipio       = str_to_title(municipio),
+    pct_uti         = round(uti / casos * 100, 1)
+  ) %>%
+  arrange(desc(incidencia_100k))
+
+dir_tabelas <- file.path(dirname(DIR_GRAFICOS), "tabelas")
+if (!dir.exists(dir_tabelas)) dir.create(dir_tabelas, recursive = TRUE)
+
+writexl::write_xlsx(
+  list(
+    "resumo_municipios" = tabela_resumo_mun,
+    "completitude"      = completitude,
+    "comorbidades"      = freq_comorbidade,
+    "letalidade_faixa"  = letalidade_faixa,
+    "uti_faixa"         = uti_faixa,
+    "criterio_conf"     = criterio_conf,
+    "antiviral"         = antiviral_dist,
+    "vacinal"           = vacinal_dist
+  ),
+  file.path(dir_tabelas, paste0("descritiva_15rs_", paste(anos_carregar, collapse = "_"), ".xlsx"))
+)
+
+message("Tabela Excel da estatística descritiva salva.")
+
+
+# ==============================================================================
+# RESUMO DO BLOCO DESCRITIVO
+# ==============================================================================
+
+message("\n", strrep("=", 60))
+message("ESTATÍSTICA DESCRITIVA — RESUMO")
+message(strrep("=", 60))
+message("Gráficos gerados : D01 a D12")
+message("Pasta            : ", DIR_DESC)
+message("Excel            : descritiva_15rs_", paste(anos_carregar, collapse = "_"), ".xlsx")
+message(strrep("-", 60))
+message("Completitude média (campos-chave): ",
+        round(mean(completitude$pct_preenchido, na.rm = TRUE), 1), "%")
+if (exists("oportunidade") && nrow(oportunidade) > 0) {
+  message("Oportunidade notificação (mediana): ", med_op, " dias")
+}
+message("Comorbidade mais frequente: ",
+        if (nrow(freq_comorbidade) > 0) freq_comorbidade$comorbidade[1] else "—")
+message(strrep("=", 60))
