@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.8.27">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Estatística Descritiva — SRAG – 15ª RS — Vigilância Epidemiológica</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./assets/favicon.ico" rel="icon">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-4195298d448552af72111a6729222c33.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "Nenhum resultado",
+    "search-matching-documents-text": "documentos correspondentes",
+    "search-copy-link-title": "Copiar link para a busca",
+    "search-hide-matches-text": "Esconder correspondências adicionais",
+    "search-more-match-text": "mais correspondência neste documento",
+    "search-more-matches-text": "mais correspondências neste documento",
+    "search-clear-button-title": "Limpar",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancelar",
+    "search-submit-button-title": "Enviar",
+    "search-label": "Procurar"
+  }
+}</script>
+<script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
+<link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
+
+
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">15ª RS — Vigilância Epidemiológica</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Procurar"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Alternar de navegação" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Painel SRAG</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./descritiva.html"> 
+<span class="menu-text">Estatística Descritiva</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./sobre.html"> <i class="bi bi-info-circle" role="img">
+</i> 
+<span class="menu-text">Sobre</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Neste painel</h2>
+   
+  <ul class="collapse">
+  <li><a href="#completitude-das-variáveis-chave" id="toc-completitude-das-variáveis-chave" class="nav-link active" data-scroll-target="#completitude-das-variáveis-chave">1. Completitude das Variáveis-Chave</a></li>
+  <li><a href="#oportunidade-de-notificação" id="toc-oportunidade-de-notificação" class="nav-link" data-scroll-target="#oportunidade-de-notificação">2. Oportunidade de Notificação</a></li>
+  <li><a href="#comorbidades" id="toc-comorbidades" class="nav-link" data-scroll-target="#comorbidades">3. Comorbidades</a></li>
+  <li><a href="#desfecho-e-gravidade" id="toc-desfecho-e-gravidade" class="nav-link" data-scroll-target="#desfecho-e-gravidade">4. Desfecho e Gravidade</a></li>
+  <li><a href="#confirmação-e-tratamento" id="toc-confirmação-e-tratamento" class="nav-link" data-scroll-target="#confirmação-e-tratamento">5. Confirmação e Tratamento</a></li>
+  <li><a href="#mortalidade-por-município" id="toc-mortalidade-por-município" class="nav-link" data-scroll-target="#mortalidade-por-município">6. Mortalidade por Município</a></li>
+  <li><a href="#tabela-resumo-por-município" id="toc-tabela-resumo-por-município" class="nav-link" data-scroll-target="#tabela-resumo-por-município">7. Tabela-Resumo por Município</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Estatística Descritiva — SRAG</h1>
+<p class="subtitle lead">15ª Regional de Saúde de Maringá — Paraná</p>
+</div>
+
+
+
+<div class="quarto-title-meta column-page-left">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<hr>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Importante
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Leia antes de interpretar:</strong> os percentuais de comorbidade, vacinação e antiviral dependem diretamente da completitude do preenchimento do SIVEP-Gripe. Um valor baixo nesses gráficos pode refletir subnotificação do campo — não necessariamente ausência da condição. Consulte o gráfico de completitude (seção 1) antes de interpretar qualquer outra análise desta página.</p>
+</div>
+</div>
+<hr>
+<section id="completitude-das-variáveis-chave" class="level2">
+<h2 class="anchored" data-anchor-id="completitude-das-variáveis-chave">1. Completitude das Variáveis-Chave</h2>
+<p>A completitude mede a proporção de registros com preenchimento válido em cada campo. Valores abaixo de 80% indicam que aquela variável tem informação ausente em mais de um quinto dos casos — o que pode comprometer análises baseadas nela.</p>
+<p>A linha tracejada vermelha marca o limiar de 80%, adotado como referência mínima de qualidade em sistemas de informação em saúde no Brasil. Esse parâmetro é utilizado pelo Ministério da Saúde na avaliação da qualidade das bases do DATASUS, incluindo o SIVEP-Gripe.</p>
+<p>Campos com baixa completitude não devem ser descartados da análise, mas seus resultados precisam ser apresentados com ressalvas explícitas.</p>
+<p><strong>Referência:</strong> Brasil. Ministério da Saúde. <em>Instrutivo de Preenchimento da Ficha de Notificação de SRAG Hospitalizado</em>. DEVIT/SVS, 2022.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/completitude-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1"><img src="descritiva_1_files/figure-html/completitude-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="oportunidade-de-notificação" class="level2">
+<h2 class="anchored" data-anchor-id="oportunidade-de-notificação">2. Oportunidade de Notificação</h2>
+<section id="a.-sintomas-notificação" class="level3">
+<h3 class="anchored" data-anchor-id="a.-sintomas-notificação">2a. Sintomas → Notificação</h3>
+<p>A oportunidade de notificação mede o tempo (em dias) entre o início dos sintomas e o registro do caso no SIVEP-Gripe. Intervalos curtos indicam detecção precoce — fundamental para que a vigilância epidemiológica possa acionar medidas de resposta em tempo hábil.</p>
+<p>O Ministério da Saúde define como referência de oportunidade adequada a notificação realizada em até <strong>7 dias</strong> após o início dos sintomas. A mediana abaixo desse limiar é um indicador de desempenho do sistema de vigilância.</p>
+<p>Valores elevados podem refletir atraso no reconhecimento clínico do caso, dificuldade de acesso ao sistema de notificação, ou digitação retrospectiva após o desfecho.</p>
+<p><strong>Referência:</strong> Brasil. Ministério da Saúde. <em>Guia de Vigilância em Saúde</em>. 5ª ed.&nbsp;Brasília: SVS, 2022. p.&nbsp;43–47.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/oportunidade-notif-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2"><img src="descritiva_1_files/figure-html/oportunidade-notif-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-internação-desfecho" class="level3">
+<h3 class="anchored" data-anchor-id="b.-internação-desfecho">2b. Internação → Desfecho</h3>
+<p>Este gráfico mostra o tempo entre a internação e o desfecho — separado entre cura e óbito por SRAG. Distribuições com cauda longa à direita são esperadas em casos graves com complicações.</p>
+<p>[Inferência] Tempos medianos de internação até óbito consistentemente menores do que os de cura podem indicar maior gravidade na apresentação clínica dos casos fatais, com progressão rápida da doença. Essa interpretação baseia-se em padrões descritos na literatura sobre SRAG grave, mas <strong>não pode ser confirmada apenas com os dados do SIVEP-Gripe</strong>, que não registra detalhes clínicos evolutivos.</p>
+<p><strong>Referência:</strong> Ranzani OT et al.&nbsp;<em>Characterisation of the first 250 000 hospital admissions for COVID-19 in Brazil: a retrospective analysis of nationwide data</em>. Lancet Respir Med. 2021;9(4):407–418.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/oportunidade-desf-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3"><img src="descritiva_1_files/figure-html/oportunidade-desf-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="comorbidades" class="level2">
+<h2 class="anchored" data-anchor-id="comorbidades">3. Comorbidades</h2>
+<p>As comorbidades são registradas na ficha do SIVEP-Gripe como campos binários (sim/não/ignorado), preenchidos pelo profissional de saúde no momento da notificação. A interpretação dos resultados deve considerar a completitude desses campos (ver seção 1).</p>
+<section id="a.-frequência-total" class="level3">
+<h3 class="anchored" data-anchor-id="a.-frequência-total">3a. Frequência total</h3>
+<p>Mostra quantos casos notificados tinham cada condição registrada como presente. O percentual é calculado sobre o total de notificações — não sobre os casos com campo preenchido. Isso significa que registros com campo “ignorado” ou em branco reduzem artificialmente o percentual observado.</p>
+<p>Cardiopatia, diabetes e obesidade figuram consistentemente entre as comorbidades mais frequentes em casos graves de SRAG no Brasil, padrão documentado desde a pandemia de influenza A(H1N1) em 2009 e reforçado durante a pandemia de COVID-19.</p>
+<p><strong>Referências:</strong> - Straliotto SM et al.&nbsp;<em>Viral etiology of acute respiratory illness in hospitalized and outpatient children in Porto Alegre, Brazil</em>. Braz J Infect Dis. 2002. - GBD 2019 Risk Factors Collaborators. <em>Global burden of 87 risk factors in 204 countries</em>. Lancet. 2020;396(10258):1223–1249.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/comorbidades-total-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4"><img src="descritiva_1_files/figure-html/comorbidades-total-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-notificados-vs-óbitos" class="level3">
+<h3 class="anchored" data-anchor-id="b.-notificados-vs-óbitos">3b. Notificados vs Óbitos</h3>
+<p>Compara a frequência de cada comorbidade entre todos os casos notificados e entre os casos que evoluíram para óbito por SRAG. A diferença proporcional entre os dois grupos indica quais condições estão associadas a desfechos mais graves nesta base.</p>
+<p>[Inferência] Comorbidades com proporção visivelmente maior no grupo de óbitos do que no grupo geral de notificados podem estar associadas a maior risco de morte por SRAG na 15ª RS. Essa leitura é descritiva — o SIVEP-Gripe não permite análise de risco ajustada sem tratamento estatístico adicional (regressão logística ou análise de sobrevida), que não está contemplada neste painel.</p>
+<p><strong>Referência:</strong> Baqui P et al.&nbsp;<em>Ethnic and regional variations in hospital mortality from COVID-19 in Brazil: a cross-sectional observational study</em>. Lancet Glob Health. 2020;8(8):e1018–e1026.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/comorbidades-obitos-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5"><img src="descritiva_1_files/figure-html/comorbidades-obitos-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="desfecho-e-gravidade" class="level2">
+<h2 class="anchored" data-anchor-id="desfecho-e-gravidade">4. Desfecho e Gravidade</h2>
+<section id="a.-letalidade-por-faixa-etária" class="level3">
+<h3 class="anchored" data-anchor-id="a.-letalidade-por-faixa-etária">4a. Letalidade por Faixa Etária</h3>
+<p>A letalidade é calculada como o número de óbitos por SRAG dividido pelo total de notificações em cada faixa etária. <strong>Não é uma taxa de mortalidade populacional</strong> — é uma proporção dentro dos casos notificados hospitalizados.</p>
+<p>Faixas com poucos casos (n &lt; 5) foram excluídas para evitar percentuais instáveis. O denominador pequeno em algumas faixas pode gerar variações expressivas a cada atualização da base.</p>
+<p>O aumento da letalidade com a idade é um padrão consistente na literatura sobre SRAG e infecções respiratórias graves. Idosos acima de 60 anos representam historicamente o grupo de maior risco de morte por vírus respiratórios no Brasil.</p>
+<p><strong>Referência:</strong> Souza WM et al.&nbsp;<em>Epidemiological and clinical characteristics of the COVID-19 epidemic in Brazil</em>. Nat Hum Behav. 2020;4(8):856–865.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/letalidade-faixa-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6"><img src="descritiva_1_files/figure-html/letalidade-faixa-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-letalidade-por-sexo" class="level3">
+<h3 class="anchored" data-anchor-id="b.-letalidade-por-sexo">4b. Letalidade por Sexo</h3>
+<p>Apresenta a proporção de óbitos por SRAG dentro de cada grupo por sexo. Diferenças entre masculino e feminino são documentadas na literatura para diversas infecções respiratórias graves.</p>
+<p>[Inferência] Maior letalidade no sexo masculino, quando observada, pode estar associada a maior prevalência de comorbidades, comportamentos de saúde distintos (como menor adesão ao cuidado preventivo) ou diferenças imunológicas. Essa interpretação está baseada em padrões descritos na literatura — <strong>não pode ser confirmada com os dados do SIVEP-Gripe isoladamente</strong>, que não registra essas variáveis de forma estruturada.</p>
+<p><strong>Referência:</strong> Peckham H et al.&nbsp;<em>Male sex identified by global COVID-19 meta-analysis as a risk factor for death and ITU admission</em>. Nat Commun. 2020;11(1):6317.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/letalidade-sexo-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7"><img src="descritiva_1_files/figure-html/letalidade-sexo-1.png" class="img-fluid figure-img" width="768"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="c.-uso-de-uti-por-faixa-etária" class="level3">
+<h3 class="anchored" data-anchor-id="c.-uso-de-uti-por-faixa-etária">4c. Uso de UTI por Faixa Etária</h3>
+<p>Mostra a proporção de casos internados em UTI dentro de cada faixa etária. O campo UTI no SIVEP-Gripe registra se houve internação em unidade de terapia intensiva durante a hospitalização — não a duração nem o desfecho dentro da UTI.</p>
+<p>A completitude desse campo deve ser verificada na seção 1. Registros com UTI = “ignorado” são tratados como ausentes e não entram no numerador.</p>
+<p>[Inferência] Faixas etárias com alta proporção de UTI e alta letalidade simultaneamente sugerem que, mesmo com suporte intensivo, a evolução foi desfavorável. Essa leitura é descritiva e não substitui análise clínica individualizada.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/uti-faixa-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8"><img src="descritiva_1_files/figure-html/uti-faixa-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="confirmação-e-tratamento" class="level2">
+<h2 class="anchored" data-anchor-id="confirmação-e-tratamento">5. Confirmação e Tratamento</h2>
+<section id="a.-critério-de-confirmação" class="level3">
+<h3 class="anchored" data-anchor-id="a.-critério-de-confirmação">5a. Critério de Confirmação</h3>
+<p>O SIVEP-Gripe permite que o caso confirmado de SRAG seja encerrado por quatro critérios distintos. A distribuição entre eles reflete tanto a disponibilidade de recursos diagnósticos quanto as práticas de cada serviço notificador.</p>
+<ul>
+<li><strong>Laboratorial:</strong> resultado de PCR ou sorologia positivo para o agente etiológico. É o critério de maior especificidade.</li>
+<li><strong>Clínico-epidemiológico:</strong> vínculo epidemiológico com caso confirmado, sem teste laboratorial disponível.</li>
+<li><strong>Clínico-imagem:</strong> quadro clínico compatível com achados de imagem (tomografia ou radiografia).</li>
+<li><strong>Clínico:</strong> quadro clínico isolado, sem exame complementar confirmatório.</li>
+</ul>
+<p>Alta proporção de confirmações por critérios não laboratoriais pode refletir limitação na capacidade de testagem da rede — o que tem impacto direto na identificação do agente etiológico e nos gráficos de circulação viral do painel SRAG.</p>
+<p><strong>Referência:</strong> Brasil. Ministério da Saúde. <em>Nota Técnica SVSA/MS — Critérios de Confirmação de SRAG</em>. 2023.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/criterio-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9"><img src="descritiva_1_files/figure-html/criterio-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="b.-uso-de-antiviral" class="level3">
+<h3 class="anchored" data-anchor-id="b.-uso-de-antiviral">5b. Uso de Antiviral</h3>
+<p>Registra se o paciente recebeu antiviral durante a internação. No contexto do SIVEP-Gripe, o antiviral de referência para influenza é o oseltamivir. O campo não especifica qual antiviral foi utilizado.</p>
+<p>A proporção de casos tratados com antiviral é um indicador indireto de suspeita clínica de influenza e de acesso ao medicamento na rede hospitalar. Casos de COVID-19 confirmados também podem ter recebido antivirais específicos, mas o campo não distingue por agente etiológico.</p>
+<p>[Inferência] Baixa proporção de uso de antiviral em períodos com alta circulação de influenza confirmada pode indicar subprescrição ou indisponibilidade do medicamento. Essa interpretação exige cruzamento com os dados de circulação viral e não pode ser afirmada apenas com este gráfico.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/antiviral-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10"><img src="descritiva_1_files/figure-html/antiviral-1.png" class="img-fluid figure-img" width="960"></a></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="c.-status-vacinal-covid-19" class="level3">
+<h3 class="anchored" data-anchor-id="c.-status-vacinal-covid-19">5c. Status Vacinal — COVID-19</h3>
+<div class="callout callout-style-default callout-warning callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Aviso
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>[Não verificado]</strong> A completitude do campo de vacinação contra COVID-19 no SIVEP-Gripe varia significativamente por período e município. Em muitos registros, o campo permanece como “ignorado”. Os percentuais apresentados abaixo refletem apenas os registros com informação disponível — <strong>não representam a cobertura vacinal real da população notificada.</strong></p>
+</div>
+</div>
+<p>O campo <code>VACINA_COV</code> registra se o paciente tinha esquema vacinal contra COVID-19 no momento da internação. Não especifica o número de doses, o fabricante ou o tempo desde a última dose — informações necessárias para qualquer análise de efetividade vacinal.</p>
+<p>Este gráfico tem valor descritivo limitado e deve ser interpretado exclusivamente como retrato do preenchimento do campo na base local.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/vacinal-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-11"><img src="descritiva_1_files/figure-html/vacinal-1.png" class="img-fluid figure-img" width="960"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+</section>
+<section id="mortalidade-por-município" class="level2">
+<h2 class="anchored" data-anchor-id="mortalidade-por-município">6. Mortalidade por Município</h2>
+<p>A taxa de mortalidade por SRAG é calculada como o número de óbitos por SRAG dividido pela população municipal estimada pelo IBGE para 2025, expressa por 100.000 habitantes.</p>
+<p>Diferente da letalidade (que mede mortes entre os casos notificados), a mortalidade relaciona os óbitos à população total — o que permite comparação entre municípios de tamanhos diferentes.</p>
+<p>Municípios menores tendem a apresentar maior variabilidade nas taxas: pequenas diferenças absolutas no número de óbitos resultam em variações percentuais expressivas. Um município com 2.000 habitantes e 2 óbitos terá taxa de 100/100k — o que não significa necessariamente pior desempenho assistencial.</p>
+<p>[Inferência] Municípios com mortalidade consistentemente acima da média regional podem ter características populacionais (maior proporção de idosos, maior prevalência de comorbidades) ou assistenciais (acesso limitado a UTI, distância de hospitais de referência) que explicam o padrão. Essa hipótese não pode ser confirmada com os dados do SIVEP-Gripe isoladamente.</p>
+<div class="cell">
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><a href="descritiva_1_files/figure-html/mortalidade-municipio-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-12"><img src="descritiva_1_files/figure-html/mortalidade-municipio-1.png" class="img-fluid figure-img" width="1152"></a></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+</section>
+<section id="tabela-resumo-por-município" class="level2">
+<h2 class="anchored" data-anchor-id="tabela-resumo-por-município">7. Tabela-Resumo por Município</h2>
+<p>Consolidação dos principais indicadores epidemiológicos por município da 15ª RS para o(s) ano(s) selecionado(s). Os municípios estão ordenados por taxa de incidência (decrescente).</p>
+<ul>
+<li><strong>Incidência /100k:</strong> casos notificados por 100.000 habitantes</li>
+<li><strong>Mortalidade /100k:</strong> óbitos por SRAG por 100.000 habitantes</li>
+<li><strong>Letalidade (%):</strong> proporção de óbitos entre os casos notificados</li>
+<li><strong>UTI (%):</strong> proporção de casos com internação em UTI registrada</li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<table class="table table-striped table-hover table-condensed caption-top table-sm small">
+<thead>
+<tr class="header">
+<th style="text-align: left;" data-quarto-table-cell-role="th">Município</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Casos</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Óbitos</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">UTI</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Incidência /100k</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Mortalidade /100k</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">Letalidade (%)</th>
+<th style="text-align: right;" data-quarto-table-cell-role="th">UTI (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Uniflor</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">142.5</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Santo Inacio</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">139.3</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">22.2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nova Esperanca</td>
+<td style="text-align: right;">26</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">95.8</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">3.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Nossa Senhora Das Gracas</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">81.8</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">66.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Itambe</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">64.2</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">25.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Ourizona</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">62.6</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Florai</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">62.4</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">33.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sao Jorge Do Ivai</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">58.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">33.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Maringa</td>
+<td style="text-align: right;">235</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">84</td>
+<td style="text-align: right;">54.7</td>
+<td style="text-align: right;">4.4</td>
+<td style="text-align: right;">8.1</td>
+<td style="text-align: right;">35.7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Colorado</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">51.5</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">8.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Marialva</td>
+<td style="text-align: right;">22</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">49.2</td>
+<td style="text-align: right;">2.2</td>
+<td style="text-align: right;">4.5</td>
+<td style="text-align: right;">50.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Itaguaje</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">44.2</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Paranacity</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">41.9</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">25.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Sarandi</td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">35.1</td>
+<td style="text-align: right;">2.3</td>
+<td style="text-align: right;">6.7</td>
+<td style="text-align: right;">37.8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mandaguacu</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">29.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">20.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Atalaia</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">24.7</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Munhoz De Melo</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">24.6</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Paicandu</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">24.6</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">8.3</td>
+<td style="text-align: right;">50.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Lobato</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">21.2</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Iguaracu</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">17.6</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Santa Fe</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">17.1</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">100.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Mandaguari</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">15.7</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">66.7</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Doutor Camargo</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">15.3</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Astorga</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11.4</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Nota
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Sobre os rótulos nesta página</strong></p>
+<p>Trechos marcados com <strong>[Inferência]</strong> apresentam interpretações plausíveis baseadas em padrões descritos na literatura científica, mas que não podem ser confirmadas apenas com os dados do SIVEP-Gripe disponíveis neste painel. Trechos sem rótulo descrevem o que os dados mostram diretamente.</p>
+</div>
+</div>
+<hr>
+<p><em>Fonte: SIVEP-Gripe | 15ª Regional de Saúde de Maringá — Paraná</em></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copiada");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copiada");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+      <ul class="footer-items list-unstyled">
+    <li class="nav-item">
+ Fonte: SIVEP-Gripe
+  </li>  
+</ul>
+    </div>
+  </div>
+</footer>
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>
