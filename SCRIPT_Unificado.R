@@ -729,6 +729,112 @@ if (nrow(virus_semanal) > 0) {
   
   salvar_grafico(g14, "14_tendencia_viral_semanal")
 }
+# ==============================================================================
+# GRÁFICO D13 — VÍRUS PREDOMINANTE POR FAIXA ETÁRIA
+# Inserir no SCRIPT_Unificado.R logo após o GRÁFICO 14
+# Depende de: base_filtrada, criar_faixa_etaria(), ORDEM_FAIXAS,
+#             salvar_grafico(), texto_rodape, escopo_titulo, anos_carregar
+# ==============================================================================
+
+# --- Monta base: um registro por vírus positivo por faixa etária ---
+virus_faixa_wide <- base_filtrada %>%
+  criar_faixa_etaria() %>%
+  filter(faixa_etaria %in% ORDEM_FAIXAS[1:11]) %>%   # remove "Em branco" e "Erro"
+  mutate(
+    faixa_etaria    = factor(faixa_etaria, levels = ORDEM_FAIXAS),
+    Influenza       = POS_PCRFLU == 1,
+    VSR             = PCR_VSR    == 1,
+    `Covid-19`      = PCR_SARS2  == 1,
+    Rinovírus       = PCR_RINO   == 1,
+    Adenovírus      = PCR_ADENO  == 1,
+    Metapneumovírus = PCR_METAP  == 1,
+    Parainfluenza   = (PCR_PARA1 == 1 | PCR_PARA2 == 1 |
+                         PCR_PARA3 == 1 | PCR_PARA4 == 1)
+  )
+
+# --- Agrega: total de positivos por vírus e faixa ---
+virus_faixa_long <- virus_faixa_wide %>%
+  tidyr::pivot_longer(
+    cols      = c(Influenza, VSR, `Covid-19`, Rinovírus,
+                  Adenovírus, Metapneumovírus, Parainfluenza),
+    names_to  = "virus",
+    values_to = "positivo"
+  ) %>%
+  filter(positivo == TRUE) %>%
+  group_by(faixa_etaria, virus) %>%
+  summarise(n = n(), .groups = "drop")
+
+# --- Proporção dentro de cada faixa etária ---
+virus_faixa_prop <- virus_faixa_long %>%
+  group_by(faixa_etaria) %>%
+  mutate(
+    total_faixa = sum(n),
+    pct         = round(n / total_faixa * 100, 1)
+  ) %>%
+  ungroup() %>%
+  filter(total_faixa >= 5)
+
+# --- Heatmap ---
+if (nrow(virus_faixa_prop) > 0) {
+  gD13_heat <- ggplot(virus_faixa_prop,
+                      aes(x = faixa_etaria, y = virus, fill = pct)) +
+    geom_tile(color = "white", linewidth = 0.6) +
+    geom_text(aes(label = paste0(pct, "%")),
+              size = 3.2, color = "grey10") +
+    scale_fill_distiller(
+      palette   = "YlOrRd",
+      direction = 1,
+      limits    = c(0, 100),
+      name      = "% dentro\nda faixa"
+    ) +
+    scale_x_discrete(guide = guide_axis(angle = 40)) +
+    labs(
+      title    = paste0("Vírus Predominante por Faixa Etária — ", escopo_titulo),
+      subtitle = paste0(
+        "% calculado sobre PCR positivos em cada faixa | ",
+        "Ano(s): ", paste(anos_carregar, collapse = ", ")
+      ),
+      x = "Faixa Etária", y = NULL,
+      caption = texto_rodape
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title = element_text(face = "bold"),
+      panel.grid = element_blank(),
+      axis.text.y = element_text(size = 11)
+    )
+  
+  salvar_grafico(gD13_heat, "D13_virus_faixa_etaria_heatmap", width = 14, height = 6)
+}
+
+# --- Barras empilhadas ---
+if (nrow(virus_faixa_long) > 0) {
+  gD13_bar <- ggplot(virus_faixa_long,
+                     aes(x = faixa_etaria, y = n, fill = virus)) +
+    geom_col(position = "fill") +
+    scale_y_continuous(labels = scales::percent_format()) +
+    scale_fill_brewer(palette = "Set1") +
+    scale_x_discrete(guide = guide_axis(angle = 40)) +
+    labs(
+      title    = paste0("Composição Viral por Faixa Etária — ", escopo_titulo),
+      subtitle = paste0(
+        "Proporção de cada vírus no total de PCR positivos da faixa | ",
+        "Ano(s): ", paste(anos_carregar, collapse = ", ")
+      ),
+      x = "Faixa Etária", y = "Proporção",
+      fill = "Vírus", caption = texto_rodape
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+      plot.title      = element_text(face = "bold"),
+      legend.position = "bottom"
+    )
+  
+  salvar_grafico(gD13_bar, "D13_virus_faixa_etaria_barras", width = 14, height = 6)
+}
+
+message("Gráficos D13 salvos.")
+
 
 
 # ==============================================================================
