@@ -123,6 +123,10 @@ O aumento da letalidade com a idade é um padrão consistente na literatura sobr
 gD06
 ```
 
+::: {.callout-note appearance="minimal"}
+**Como ler este gráfico:** cada barra mostra a letalidade (%) daquela faixa etária. Abaixo do percentual aparece a fração **óbitos / total notificados** — por exemplo, `12,5% (3/24)` significa 3 óbitos entre 24 casos notificados naquela faixa.
+:::
+
 ### 4b. Letalidade por Sexo
 
 Apresenta a proporção de óbitos por SRAG dentro de cada grupo por sexo. Diferenças entre masculino e feminino são documentadas na literatura para diversas infecções respiratórias graves.
