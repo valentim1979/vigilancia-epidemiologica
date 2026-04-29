@@ -16,6 +16,10 @@
 # Todos:          ANO_ANALISE <- NULL
 ANO_ANALISE <- 2026
 
+# Ano inicial do histórico para o canal endêmico (pós-pandemia)
+ANO_INICIO_CANAL <- 2022
+
+
 # --- 0.2 Município ---
 # NULL = toda a 15ª RS
 # Ex.: MUNICIPIO_ANALISE <- "MARINGA"
@@ -436,6 +440,154 @@ g07 <- ggplot(casos_semana, aes(x = factor(SEM_NOT), y = total)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 salvar_grafico(g07, "07_notificacoes_semana_epi")
+
+# ==============================================================================
+# GRÁFICO 06b — CANAL ENDÊMICO COM PERCENTIS HISTÓRICOS (PÓS-PANDEMIA)
+# Referência: 2022 em diante, excluindo ano atual
+# ==============================================================================
+
+# Anos históricos — pós-pandemia, excluindo o ano em análise
+ano_atual <- max(anos_carregar)  # ← definido ANTES
+
+# Anos históricos — pós-pandemia, excluindo o ano em análise
+anos_historico <- setdiff(
+  intersect(ANO_INICIO_CANAL:(ano_atual - 1), anos_disponiveis),
+  anos_carregar
+)
+
+message("Canal endêmico — anos de referência: ", paste(anos_historico, collapse = ", "))
+
+if (length(anos_historico) < 2) {
+  message("  [aviso] Menos de 2 anos de referência — canal endêmico não gerado.")
+} else {
+  
+  # Base histórica — casos por semana por ano
+  base_historico <- base_15rs_completa %>%
+    filter(ANO_BASE %in% anos_historico) %>%
+    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
+      filter(., CO_MUN_RES == cod_mun) else . } %>%
+    mutate(Semana = as.integer(SEM_NOT)) %>%
+    filter(!is.na(Semana)) %>%
+    group_by(ANO_BASE, Semana) %>%
+    summarise(total = n(), .groups = "drop")
+  
+  # Percentis históricos por semana
+  canal <- base_historico %>%
+    group_by(Semana) %>%
+    summarise(
+      mediana = median(total),
+      p25     = quantile(total, 0.25),
+      p75     = quantile(total, 0.75),
+      p90     = quantile(total, 0.90),
+      n_anos  = n_distinct(ANO_BASE),
+      .groups = "drop"
+    )
+  
+  # Série do ano atual
+  serie_atual <- base_15rs_completa %>%
+    filter(ANO_BASE %in% anos_carregar) %>%
+    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
+      filter(., CO_MUN_RES == cod_mun) else . } %>%
+    mutate(Semana = as.integer(SEM_NOT)) %>%
+    filter(!is.na(Semana)) %>%
+    group_by(Semana) %>%
+    summarise(total = n(), .groups = "drop")
+  
+  # Classificação por zona
+  serie_atual <- serie_atual %>%
+    left_join(canal, by = "Semana") %>%
+    mutate(
+      zona = case_when(
+        total > p90  ~ "Epidêmico",
+        total > p75  ~ "Alerta",
+        total >= p25 ~ "Esperado",
+        TRUE         ~ "Abaixo do esperado"
+      ),
+      zona = factor(zona, levels = c(
+        "Epidêmico", "Alerta", "Esperado", "Abaixo do esperado"
+      ))
+    )
+  
+  cores_zona <- c(
+    "Epidêmico"          = "#C62828",
+    "Alerta"             = "#FF8F00",
+    "Esperado"           = "#2E7D32",
+    "Abaixo do esperado" = "#1565C0"
+  )
+  
+  n_atual      <- sum(serie_atual$total)
+  n_anos_ref   <- length(anos_historico)
+  label_ref    <- paste0(min(anos_historico), "–", max(anos_historico))
+  semanas_ep   <- sum(serie_atual$zona %in% c("Epidêmico", "Alerta"), na.rm = TRUE)
+  
+  g06b <- ggplot() +
+    # Zona de alerta (P75–P90)
+    geom_ribbon(
+      data = canal,
+      aes(x = Semana, ymin = p75, ymax = p90),
+      fill = "#FFECB3", alpha = 0.85
+    ) +
+    # Zona esperada (P25–P75)
+    geom_ribbon(
+      data = canal,
+      aes(x = Semana, ymin = p25, ymax = p75),
+      fill = "#C8E6C9", alpha = 0.85
+    ) +
+    # Mediana histórica
+    geom_line(
+      data = canal,
+      aes(x = Semana, y = mediana),
+      color = "#388E3C", linewidth = 0.8, linetype = "dashed"
+    ) +
+    # Linha do ano atual
+    geom_line(
+      data = serie_atual,
+      aes(x = Semana, y = total),
+      color = "#1A237E", linewidth = 1.2
+    ) +
+    # Pontos coloridos por zona
+    geom_point(
+      data = serie_atual,
+      aes(x = Semana, y = total, color = zona),
+      size = 3
+    ) +
+    # Labels dos valores
+    geom_text(
+      data = serie_atual,
+      aes(x = Semana, y = total, label = total),
+      vjust = -0.8, size = 2.8, color = "grey30"
+    ) +
+    scale_color_manual(values = cores_zona, name = "Zona") +
+    scale_x_continuous(breaks = seq(1, 53, by = 4), limits = c(1, 53)) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
+    labs(
+      title    = paste0(
+        "Canal Endêmico de SRAG — ", escopo_titulo,
+        " (", ano_atual, " | N = ", format(n_atual, big.mark = "."), ")"
+      ),
+      subtitle = paste0(
+        "Zona verde = esperado (P25–P75)  |  ",
+        "Zona amarela = alerta (P75–P90)  |  ",
+        "Acima = epidêmico (> P90)\n",
+        "Referência pós-pandêmica: ", label_ref,
+        " (", n_anos_ref, " anos)  |  ",
+        "Semanas em alerta ou acima: ", semanas_ep
+      ),
+      x       = "Semana Epidemiológica",
+      y       = "Casos Notificados",
+      caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title    = element_text(face = "bold"),
+      plot.subtitle = element_text(size = 8.5, color = "grey40", lineheight = 1.3),
+      legend.position = "bottom"
+    )
+  
+  salvar_grafico(g06b, "06b_canal_endemico")
+}
+
+
 
 
 # ==============================================================================
