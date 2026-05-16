@@ -1302,17 +1302,20 @@ if (nrow(casos_bairro_sar) > 0) {
 # Heatmap bairro x semana — Maringá
 top15 <- head(casos_bairro$BAIRRO, 15)
 
+lookup_mar <- casos_bairro %>%
+  distinct(BAIRRO, .keep_all = TRUE) %>%          # garante 1 linha por bairro
+  select(BAIRRO, total_bairro = casos)
+
 g_heat_mar <- casos_bairro_sem %>%
   filter(BAIRRO %in% top15) %>%
-  left_join(
-    casos_bairro %>% select(BAIRRO, total_bairro = casos),
-    by = "BAIRRO"
+  left_join(lookup_mar, by = "BAIRRO") %>%
+  mutate(
+    total_bairro = replace_na(total_bairro, 0L),
+    LABEL        = paste0(str_to_title(BAIRRO), " (", total_bairro, ")")
   ) %>%
-  mutate(LABEL = fct_reorder(
-    paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-    total_bairro,
-    sum
-  )) %>%
+  mutate(
+    LABEL = fct_reorder(LABEL, total_bairro)      # sem `sum` — usa mediana por nível
+  ) %>%
   ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
   geom_tile(color = "white") +
   scale_fill_distiller(palette = "Blues", direction = 1) +
@@ -1324,22 +1327,28 @@ g_heat_mar <- casos_bairro_sem %>%
     caption = texto_rodape
   ) +
   theme_minimal()
-salvar_grafico(g_heat_mar,
-               paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
-               width = 14, height = 6)
+
+salvar_grafico(
+  g_heat_mar,
+  paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
+  width = 14, height = 6
+)
 
 # Heatmap bairro x semana — Sarandi
+lookup_sar <- casos_bairro_sar %>%
+  distinct(BAIRRO, .keep_all = TRUE) %>%
+  select(BAIRRO, total_bairro = casos)
+
 g_heat_sar <- casos_bairro_sem_sar %>%
   filter(BAIRRO %in% head(casos_bairro_sar$BAIRRO, 15)) %>%
-  left_join(
-    casos_bairro_sar %>% select(BAIRRO, total_bairro = casos),
-    by = "BAIRRO"
+  left_join(lookup_sar, by = "BAIRRO") %>%
+  mutate(
+    total_bairro = replace_na(total_bairro, 0L),
+    LABEL        = paste0(str_to_title(BAIRRO), " (", total_bairro, ")")
   ) %>%
-  mutate(LABEL = fct_reorder(
-    paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-    total_bairro,
-    sum
-  )) %>%
+  mutate(
+    LABEL = fct_reorder(LABEL, total_bairro)
+  ) %>%
   ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
   geom_tile(color = "white") +
   scale_fill_distiller(palette = "Greens", direction = 1) +
@@ -1357,7 +1366,6 @@ salvar_grafico(
   paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
   width = 14, height = 6
 )
-
 # Série por classificação etiológica
 g_class <- casos_semana_class %>%
   ggplot(aes(x = SEM_EPI, y = casos, color = CLASSIFICACAO, group = CLASSIFICACAO)) +
