@@ -1,0 +1,37 @@
+---
+title: "Painel SRAG — 15ª Regional de Saúde"
+subtitle: "Síndrome Respiratória Aguda Grave · SIVEP-Gripe · Macrorregião Noroeste"
+date: last-modified
+date-format: "DD/MM/YYYY"
+lang: pt
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Navegação"
+---
+
+```{=html}
+<p class="text-muted small">
+Fonte: SIVEP-Gripe / DATASUS. Dados referentes aos municípios da 15ª Regional de Saúde de Maringá.
+Sujeitos a revisão conforme fluxo de digitação.
+</p>
+```
+
+## Situação Atual — 2026
+
+### Série Epidêmica 2025–2026
+
+![Comparação da curva epidêmica de SRAG entre 2025 e 2026, 15ª RS de Maringá.](graficos/graficos_15rs_2026/15rs_serie_2026.png){fig-alt="Série SRAG 15ª RS 2025-2026" width="100%"}
+
+### Circulação Viral 2026
+
+![Comparativo da circulação viral por ano, 15ª RS de Maringá.](graficos/graficos_15rs_2026/15rs_viral_comparativo.png){fig-alt="Comparativo viral anual 15ª RS" width="100%"}
+
+### Perfil dos Casos 2026
+
+![Distribuição por faixa etária segundo desfecho (cura/óbito), 15ª RS de Maringá, 2026.](graficos/graficos_15rs_2026/15rs_faixa_desfecho_2026.png){fig-alt="Faixa etária e desfecho SRAG 15ª RS 2026" width="100%"}
+
+### Distribuição Geográfica 2026
+
+![Incidência de SRAG por município, 15ª RS de Maringá, 2026.](graficos/graficos_15rs_2026/15rs_mapa_incidencia_2026.png){fig-alt="Mapa de incidência SRAG 15ª RS 2026" width="100%"}

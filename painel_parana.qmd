@@ -1,0 +1,68 @@
+---
+title: "Painel SRAG — Paraná"
+subtitle: "Síndrome Respiratória Aguda Grave · SIVEP-Gripe"
+date: last-modified
+date-format: "DD/MM/YYYY"
+lang: pt
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    toc-title: "Navegação"
+---
+
+```{=html}
+<p class="text-muted small">
+Fonte: SIVEP-Gripe / DATASUS. Dados sujeitos a revisão. Atualização conforme fluxo de digitação.
+</p>
+```
+
+## Série Histórica (2019–2026)
+
+::: {layout-ncol=2}
+![Série temporal de casos de SRAG notificados no Paraná, 2019–2026.](graficos/graficos_parana/pr_serie_temporal.png){fig-alt="Série temporal SRAG Paraná 2019-2026"}
+
+![Evolução de casos de SRAG por período, Paraná.](graficos/graficos_parana/pr_evolucao.png){fig-alt="Evolução de casos SRAG Paraná"}
+:::
+
+![Curva epidêmica comparativa entre anos, Paraná.](graficos/graficos_parana/pr_curva_comparativa.png){fig-alt="Curva epidêmica comparativa Paraná" width="100%"}
+
+## Circulação Viral (2019–2026)
+
+![Circulação dos vírus respiratórios identificados em casos de SRAG, Paraná, 2019–2026.](graficos/graficos_parana/pr_circulacao_viral.png){fig-alt="Circulação viral SRAG Paraná 2019-2026" width="100%"}
+
+## Perfil dos Casos (2019–2026)
+
+::: {layout-ncol=2}
+![Distribuição de casos de SRAG por faixa etária, Paraná, 2019–2026.](graficos/graficos_parana/pr_faixa_etaria.png){fig-alt="Faixa etária SRAG Paraná"}
+
+![Distribuição por faixa etária segundo desfecho (cura/óbito), Paraná, 2019–2026.](graficos/graficos_parana/pr_faixa_desfecho.png){fig-alt="Faixa etária e desfecho SRAG Paraná"}
+:::
+
+## Distribuição Geográfica (2019–2026)
+
+::: {layout-ncol=2}
+![Incidência de SRAG por município, Paraná, 2019–2026.](graficos/graficos_parana/pr_mapa_incidencia.png){fig-alt="Mapa de incidência SRAG Paraná"}
+
+![Casos absolutos de SRAG por município, Paraná, 2019–2026.](graficos/graficos_parana/pr_mapa_casos.png){fig-alt="Mapa de casos SRAG Paraná"}
+:::
+
+---
+
+## Situação Atual — 2026 {.mt-4}
+
+### Série Epidêmica 2025–2026
+
+![Comparação da curva epidêmica de SRAG entre 2025 e 2026, Paraná.](graficos/graficos_parana_2026/pr_serie_2026.png){fig-alt="Série SRAG Paraná 2025-2026" width="100%"}
+
+### Circulação Viral 2026
+
+::: {layout-ncol=2}
+![Circulação viral em casos de SRAG, Paraná, 2026.](graficos/graficos_parana_2026/pr_circulacao_viral_2026.png){fig-alt="Circulação viral SRAG Paraná 2026"}
+
+![Comparativo da circulação viral por ano, Paraná.](graficos/graficos_parana_2026/pr_viral_comparativo_anual.png){fig-alt="Comparativo viral anual Paraná"}
+:::
+
+### Perfil dos Casos 2026
+
+![Distribuição por faixa etária segundo desfecho, Paraná, 2026.](graficos/graficos_parana_2026/pr_faixa_desfecho_2026.png){fig-alt="Faixa etária e desfecho SRAG Paraná 2026" width="100%"}
