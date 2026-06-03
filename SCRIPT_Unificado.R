@@ -364,7 +364,6 @@ casos_semana_class <- base_filtrada %>%
   summarise(casos = n(), .groups = "drop") %>%
   arrange(SEM_EPI)
 
-
 # ==============================================================================
 # GRÁFICO 06 — CURVA EPIDÊMICA COMPARATIVA
 # ==============================================================================
@@ -923,8 +922,14 @@ virus_faixa_prop <- virus_faixa_long %>%
     total_faixa = sum(n),
     pct         = round(n / total_faixa * 100, 1)
   ) %>%
-  ungroup() %>%
-  filter(total_faixa >= 5)
+  ungroup()
+
+# --- Labels do eixo X com N por faixa ---
+n_por_faixa <- virus_faixa_prop %>%
+  distinct(faixa_etaria, total_faixa) %>%
+  mutate(label_faixa = paste0(as.character(faixa_etaria), "\n(n=", total_faixa, ")"))
+
+labels_faixas <- setNames(n_por_faixa$label_faixa, n_por_faixa$faixa_etaria)
 
 # --- Heatmap ---
 if (nrow(virus_faixa_prop) > 0) {
@@ -939,7 +944,7 @@ if (nrow(virus_faixa_prop) > 0) {
       limits    = c(0, 100),
       name      = "% dentro\nda faixa"
     ) +
-    scale_x_discrete(guide = guide_axis(angle = 40)) +
+    scale_x_discrete(labels = labels_faixas, guide = guide_axis(angle = 40)) +
     labs(
       title    = paste0("Vírus Predominante por Faixa Etária — ", escopo_titulo),
       subtitle = paste0(
