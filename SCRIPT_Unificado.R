@@ -622,13 +622,13 @@ g07b <- ggplot(casos_semana_var, aes(x = as.integer(SEM_NOT), y = total)) +
            label = paste0("Média: ", unique(casos_semana_var$media)),
            hjust = 0, size = 3, color = "#FF8C00", fontface = "italic") +
   scale_fill_manual(
-    values = c("aumento" = "#2E7D32", "reducao" = "#C62828", "neutra" = "#0057A3"),
+    values = c("aumento" = "#C62828", "reducao" = "#2E7D32", "neutra" = "#0057A3"),
     guide  = "none"
   ) +
   scale_x_continuous(breaks = seq(1, 53, by = 2)) +
   labs(
     title    = paste0("Variação Semanal de SRAG — ", escopo_titulo),
-    subtitle = "Verde = aumento | Vermelho = redução | Laranja tracejado = média do período",
+    subtitle = "Vermelho = aumento | Verde = redução | Laranja tracejado = média do período",
     x = "Semana Epidemiológica", y = "Casos Notificados",
     caption  = texto_rodape
   ) +
