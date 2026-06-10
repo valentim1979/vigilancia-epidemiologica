@@ -10,13 +10,7 @@ website:
     background: "#003366"
     left:
       - href: srag.qmd
-        text: "Painel SRAG"
-      - href: painel_parana.qmd
-        text: "Paraná"
-      - href: painel_15rs.qmd
-        text: "15ª RS"
-      - href: descritiva.qmd
-        text: "Estatística Descritiva"
+        text: "Vigilância Universal — SRAG"
       - href: sobre.qmd
         text: "Sobre"
   page-footer:
