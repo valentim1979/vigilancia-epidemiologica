@@ -163,6 +163,10 @@ Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográfic
 
 ![Tipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.](graficos/15_tipos_linhagens_influenza.png){.lightbox}
 
+### Variação anual
+
+![Variação anual das detecções de vírus respiratórios por RT-PCR — 15ª RS — 2022 em diante. Anos 2020–2021 excluídos por perfil pandêmico atípico. Dados de 2026 parciais.](graficos/22_virus_tendencia_anual.png){.lightbox}
+
 ### Vírus por faixa etária — predominância
 
 ![Percentual de cada vírus dentro do total de PCR positivos por faixa etária. Células mais escuras indicam maior predominância do vírus naquela faixa — 15ª RS — 2026.](graficos/D13_virus_faixa_etaria_heatmap.png){.lightbox}
