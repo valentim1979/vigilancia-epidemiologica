@@ -292,6 +292,42 @@ message("Escopo    : ", escopo_titulo)
 message("Registros : ", format(nrow(base_filtrada), big.mark = "."))
 message("Pop. IBGE : ", format(POPULACAO_ESCOPO, big.mark = "."))
 
+# ==============================================================================
+# BLOCO 4b — CARGA HISTÓRICA PARA ANÁLISE VIRAL (2019 até ano atual)
+# Carrega anos não incluídos em anos_a_carregar sem alterar base_filtrada
+# ==============================================================================
+
+anos_virus_historico <- setdiff(2019:(max(anos_carregar) - 1), anos_a_carregar)
+
+if (length(anos_virus_historico) > 0) {
+  message("\nCarregando anos históricos para gráfico de vírus: ",
+          paste(anos_virus_historico, collapse = ", "))
+  
+  lista_bases_hist <- Filter(Negate(is.null),
+                             lapply(anos_virus_historico, carregar_base,
+                                    diretorio = DIRETORIO_DBF))
+  
+  if (length(lista_bases_hist) > 0) {
+    base_hist_extra <- bind_rows(lista_bases_hist)
+    names(base_hist_extra) <- toupper(names(base_hist_extra))
+    base_hist_extra <- base_hist_extra %>%
+      mutate(CO_MUN_RES = as.integer(CO_MUN_RES))
+    
+    base_15rs_historica <- bind_rows(
+      base_15rs_completa,
+      base_hist_extra %>% filter(CO_MUN_RES %in% municipios_15rs$codigo_ibge_6)
+    )
+    message("[OK] base_15rs_historica: ",
+            n_distinct(base_15rs_historica$ANO_BASE), " anos | ",
+            format(nrow(base_15rs_historica), big.mark = "."), " registros")
+  } else {
+    base_15rs_historica <- base_15rs_completa
+    message("  [aviso] Nenhum ano histórico adicional encontrado.")
+  }
+} else {
+  base_15rs_historica <- base_15rs_completa
+}
+
 
 # ==============================================================================
 # BLOCO 5 — AGREGAÇÕES PARA MAPAS
@@ -1039,6 +1075,167 @@ if (nrow(influenza_tipos) > 0) {
   salvar_grafico(g15, "15_tipos_linhagens_influenza")
 }
 
+## ==============================================================================
+# GRÁFICO 22 — TENDÊNCIA ANUAL DE VÍRUS RESPIRATÓRIOS (2022 em diante)
+# Gráfico de linhas: eixo X = ano, eixo Y = detecções, uma linha por vírus
+# ==============================================================================
+
+if (!requireNamespace("tidytext", quietly = TRUE)) install.packages("tidytext")
+library(tidytext)
+
+colunas_virus <- c(
+  "PCR_SARS2", "PCR_VSR", "PCR_PARA1", "PCR_PARA2", "PCR_PARA3", "PCR_PARA4",
+  "PCR_ADENO", "PCR_METAP", "PCR_BOCA", "PCR_RINO", "PCR_OUTRO"
+)
+
+nomes_virus <- c(
+  PCR_SARS2 = "SARS-CoV-2",      PCR_VSR   = "VSR",
+  PCR_PARA1 = "Parainfluenza 1", PCR_PARA2 = "Parainfluenza 2",
+  PCR_PARA3 = "Parainfluenza 3", PCR_PARA4 = "Parainfluenza 4",
+  PCR_ADENO = "Adenovírus",      PCR_METAP = "Metapneumovírus",
+  PCR_BOCA  = "Bocavírus",       PCR_RINO  = "Rinovírus",
+  PCR_OUTRO = "Outro vírus respiratório"
+)
+
+colunas_presentes <- intersect(colunas_virus, names(base_15rs_historica))
+flu_presente      <- "POS_PCRFLU" %in% names(base_15rs_historica)
+
+ANO_INICIO_VIRAL <- 2023   # exclui pico pandêmico 2020-2021
+
+if (length(colunas_presentes) > 0 && flu_presente) {
+  
+  base_virus_hist <- base_15rs_historica %>%
+    filter(ANO_BASE >= ANO_INICIO_VIRAL) %>%
+    mutate(
+      PCR_FLU = if_else(POS_PCRFLU == 1, "1", NA_character_),
+      across(all_of(colunas_presentes), as.character)
+    ) %>%
+    select(ANO_BASE, all_of(colunas_presentes), PCR_FLU)
+  
+  casos_virus_ano <- base_virus_hist %>%
+    pivot_longer(
+      cols      = c(all_of(colunas_presentes), PCR_FLU),
+      names_to  = "virus_cod",
+      values_to = "marcado"
+    ) %>%
+    filter(marcado == "1") %>%
+    mutate(
+      virus = case_when(
+        virus_cod == "PCR_FLU" ~ "Influenza",
+        TRUE ~ nomes_virus[virus_cod]
+      )
+    ) %>%
+    filter(!is.na(virus)) %>%
+    group_by(ANO_BASE, virus) %>%
+    summarise(casos = n(), .groups = "drop")
+  
+  # --- Remove vírus com zero detecções em todos os anos ---
+  virus_ativos <- casos_virus_ano %>%
+    group_by(virus) %>%
+    summarise(total = sum(casos), .groups = "drop") %>%
+    filter(total > 0) %>%
+    pull(virus)
+  
+  casos_virus_ano <- casos_virus_ano %>%
+    filter(virus %in% virus_ativos) %>%
+    # Preenche anos sem detecção com zero para linha contínua
+    tidyr::complete(ANO_BASE, virus, fill = list(casos = 0))
+  
+  # --- Destaca os 3 vírus mais frequentes no período ---
+  top3 <- casos_virus_ano %>%
+    group_by(virus) %>%
+    summarise(total = sum(casos), .groups = "drop") %>%
+    slice_max(total, n = 3) %>%
+    pull(virus)
+  
+  casos_virus_ano <- casos_virus_ano %>%
+    mutate(
+      destaque   = virus %in% top3,
+      espessura  = if_else(destaque, 1.4, 0.7),
+      alpha_line = if_else(destaque, 1.0, 0.55)
+    )
+  
+  # Ano atual tracejado (dados incompletos)
+  ano_atual_viral <- max(casos_virus_ano$ANO_BASE)
+  
+  g22 <- ggplot(casos_virus_ano,
+                aes(x = ANO_BASE, y = casos,
+                    color = virus, group = virus)) +
+    # Linha tracejada para o ano atual (dados parciais)
+    geom_vline(
+      xintercept = ano_atual_viral - 0.5,
+      linetype = "dotted", color = "grey60", linewidth = 0.7
+    ) +
+    annotate(
+      "text",
+      x = ano_atual_viral - 0.45, y = Inf,
+      label = paste0(ano_atual_viral, "\n(parcial)"),
+      hjust = 0, vjust = 1.3, size = 2.8, color = "grey50"
+    ) +
+    geom_line(aes(linewidth = I(espessura), alpha = I(alpha_line))) +
+    geom_point(aes(size = I(if_else(destaque, 3, 1.8)),
+                   alpha = I(alpha_line))) +
+    geom_text(
+      data = casos_virus_ano %>%
+        filter(ANO_BASE == max(ANO_BASE), casos > 0),
+      aes(label = virus),
+      hjust = -0.1, size = 2.8, fontface = "plain"
+    ) +
+    scale_x_continuous(
+      breaks = sort(unique(casos_virus_ano$ANO_BASE)),
+      expand = expansion(mult = c(0.02, 0.25))
+    ) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.10))) +
+    scale_color_manual(
+      values = c(
+        "Influenza"               = "#E63946",
+        "VSR"                     = "#2A9D8F",
+        "Rinovírus"               = "#F4A261",
+        "SARS-CoV-2"              = "#457B9D",
+        "Metapneumovírus"         = "#6A0572",
+        "Adenovírus"              = "#E9C46A",
+        "Parainfluenza 1"         = "#264653",
+        "Parainfluenza 2"         = "#A8DADC",
+        "Parainfluenza 3"         = "#8D99AE",
+        "Parainfluenza 4"         = "#B5838D",
+        "Bocavírus"               = "#6B705C",
+        "Outro vírus respiratório"= "#CDB4DB"
+      ),
+      guide = guide_legend(
+        ncol = 2,
+        override.aes = list(linewidth = 1.2, size = 3)
+      )
+    ) +
+    labs(
+      title    = paste0(
+        "Variação Anual de Vírus Respiratórios — ", escopo_titulo
+      ),
+      subtitle = paste0(
+        "Detecções por RT-PCR | ",
+        ANO_INICIO_VIRAL, "–", ano_atual_viral,
+        " (exclui pico pandêmico 2020–2021) | ",
+        "Vírus em destaque: ", paste(top3, collapse = ", ")
+      ),
+      x       = "Ano",
+      y       = "Casos detectados (RT-PCR)",
+      color   = "Vírus",
+      caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title      = element_text(face = "bold"),
+      plot.subtitle   = element_text(size = 8.5, color = "grey40"),
+      legend.position = "bottom",
+      legend.title    = element_blank(),
+      panel.grid.minor = element_blank()
+    )
+  
+  salvar_grafico(g22, "22_virus_tendencia_anual", width = 13, height = 7)
+  message("[OK] Gráfico 22 salvo.")
+  
+} else {
+  message("  [aviso] Colunas de PCR não encontradas — gráfico 22 não gerado.")
+}
 # ==============================================================================
 # GRÁFICO 16 — FAIXA ETÁRIA: NOTIFICADOS vs CONFIRMADOS
 # ==============================================================================
