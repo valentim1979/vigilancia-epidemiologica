@@ -11,18 +11,10 @@
 # ==============================================================================
 
 # --- 0.1 Anos de análise ---
-# Um único ano:   ANO_ANALISE <- 2025
-# Múltiplos:      ANO_ANALISE <- c(2024, 2025)
-# Todos:          ANO_ANALISE <- NULL
 ANO_ANALISE <- 2026
-
-# Ano inicial do histórico para o canal endêmico (pós-pandemia)
 ANO_INICIO_CANAL <- 2022
 
-
 # --- 0.2 Município ---
-# NULL = toda a 15ª RS
-# Ex.: MUNICIPIO_ANALISE <- "MARINGA"
 MUNICIPIO_ANALISE <- NULL
 
 # --- 0.3 Caminhos ---
@@ -37,18 +29,20 @@ CAMINHO_SHP_MARINGA    <- "/Users/valentimsalajunior/Documents/GIS/bairros/Bairr
 CAMINHO_SHP_SARANDI    <- "/Users/valentimsalajunior/Documents/GIS/bairros_sarandi/Bairros_loteamentos.shp"
 
 # --- 0.4 Parâmetros dos mapas de bairro ---
-CORTE_NOME_BAIRRO     <- 5   # mínimo de casos para exibir nome no mapa — Maringá
+CORTE_NOME_BAIRRO     <- 5
+CORTE_NOME_BAIRRO_SAR <- 1
 
-CORTE_NOME_BAIRRO_SAR <- 1   # idem para Sarandi
-
-# --- 0.5 Pasta de saída (pasta graficos/ do projeto GitHub Pages) ---
-# Ajuste para o caminho completo do seu projeto, ex.:
+# --- 0.5 Pasta de saída ---
 DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
 
-# --- 0.6 Data de extração dos dados do SIVEP-Gripe ---
+# --- 0.6 Data de extração ---
 DATA_EXTRACAO <- as.Date(file.info(
   file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(ANO_ANALISE), ".dbf"))
 )$mtime)
+
+# --- 0.7 Estação INMET ---
+INMET_ESTACAO <- "A826"  # Maringá — altere se necessário
+
 
 # ==============================================================================
 # BLOCO 1 — PACOTES
@@ -56,7 +50,8 @@ DATA_EXTRACAO <- as.Date(file.info(
 
 pacotes <- c(
   "sf", "foreign", "dplyr", "ggplot2", "scales", "tidyr",
-  "readr", "stringr", "lubridate", "forcats", "tmap", "writexl"
+  "readr", "stringr", "lubridate", "forcats", "tmap", "writexl",
+  "httr", "jsonlite"
 )
 
 for (pkg in pacotes) {
@@ -113,7 +108,6 @@ message("Municípios: ", nrow(municipios_15rs),
 # BLOCO 3 — FUNÇÕES AUXILIARES
 # ==============================================================================
 
-# Cria pasta de saída se não existir
 if (!dir.exists(DIR_GRAFICOS)) dir.create(DIR_GRAFICOS, recursive = TRUE)
 message("Saída: ", DIR_GRAFICOS)
 
@@ -237,7 +231,6 @@ names(base_completa) <- toupper(names(base_completa))
 
 message("Total de registros: ", format(nrow(base_completa), big.mark = "."))
 
-# --- Limpeza e padronização ---
 base_completa <- base_completa %>%
   mutate(
     CO_MUN_RES     = as.integer(CO_MUN_RES),
@@ -262,15 +255,11 @@ base_completa <- base_completa %>%
     UTI_SIM      = UTI == 1
   )
 
-# --- Filtro geográfico ---
-# Usa CO_MUN_RES para garantir só municípios da 15ª RS
 base_15rs_completa <- base_completa %>%
   filter(CO_MUN_RES %in% municipios_15rs$codigo_ibge_6)
 
-# Base do ano principal para os gráficos 06–21
 base_ano_principal <- base_15rs_completa %>% filter(ANO_BASE %in% anos_carregar)
 
-# Filtro por município (se configurado)
 if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE))) {
   cod_mun <- municipios_15rs %>%
     filter(toupper(municipio) == toupper(trimws(MUNICIPIO_ANALISE))) %>%
@@ -292,9 +281,9 @@ message("Escopo    : ", escopo_titulo)
 message("Registros : ", format(nrow(base_filtrada), big.mark = "."))
 message("Pop. IBGE : ", format(POPULACAO_ESCOPO, big.mark = "."))
 
+
 # ==============================================================================
-# BLOCO 4b — CARGA HISTÓRICA PARA ANÁLISE VIRAL (2019 até ano atual)
-# Carrega anos não incluídos em anos_a_carregar sem alterar base_filtrada
+# BLOCO 4b — CARGA HISTÓRICA PARA ANÁLISE VIRAL
 # ==============================================================================
 
 anos_virus_historico <- setdiff(2019:(max(anos_carregar) - 1), anos_a_carregar)
@@ -333,7 +322,6 @@ if (length(anos_virus_historico) > 0) {
 # BLOCO 5 — AGREGAÇÕES PARA MAPAS
 # ==============================================================================
 
-# Por município
 casos_municipio <- base_15rs_completa %>%
   filter(ANO_BASE %in% anos_carregar) %>%
   group_by(CO_MUN_RES) %>%
@@ -352,7 +340,6 @@ casos_municipio <- base_15rs_completa %>%
   ) %>%
   arrange(desc(incidencia_100k))
 
-# Por bairro — Maringá
 cod_maringa <- 411520
 
 casos_bairro <- base_15rs_completa %>%
@@ -373,7 +360,6 @@ casos_bairro_sem <- base_15rs_completa %>%
   group_by(BAIRRO, SEM_EPI) %>%
   summarise(casos = n(), .groups = "drop")
 
-# Por bairro — Sarandi
 cod_sarandi <- 412625
 
 casos_bairro_sar <- base_15rs_completa %>%
@@ -400,6 +386,7 @@ casos_semana_class <- base_filtrada %>%
   summarise(casos = n(), .groups = "drop") %>%
   arrange(SEM_EPI)
 
+
 # ==============================================================================
 # GRÁFICO 06 — CURVA EPIDÊMICA COMPARATIVA
 # ==============================================================================
@@ -410,8 +397,8 @@ base_curva <- base_15rs_completa %>%
 
 casos_semana_ano <- base_curva %>%
   mutate(
-    Ano       = as.character(ANO_BASE),
-    Semana    = as.integer(SEM_NOT)
+    Ano    = as.character(ANO_BASE),
+    Semana = as.integer(SEM_NOT)
   ) %>%
   filter(!is.na(Semana)) %>%
   group_by(Ano, Semana) %>%
@@ -424,9 +411,9 @@ if (nrow(casos_semana_ano) > 0) {
   cores_curva   <- setNames(paleta[seq_along(todos_anos)], todos_anos)
   espessuras    <- setNames(ifelse(todos_anos %in% anos_destaque, 2.2, 0.9), todos_anos)
   
-  n_por_ano     <- casos_semana_ano %>% group_by(Ano) %>% summarise(n = sum(Total), .groups = "drop")
-  rotulos       <- setNames(paste0(n_por_ano$Ano, "  (N = ", format(n_por_ano$n, big.mark = "."), ")"),
-                            n_por_ano$Ano)
+  n_por_ano  <- casos_semana_ano %>% group_by(Ano) %>% summarise(n = sum(Total), .groups = "drop")
+  rotulos    <- setNames(paste0(n_por_ano$Ano, "  (N = ", format(n_por_ano$n, big.mark = "."), ")"),
+                         n_por_ano$Ano)
   
   g06 <- ggplot(casos_semana_ano,
                 aes(x = Semana, y = Total, group = Ano, color = Ano, linewidth = Ano)) +
@@ -446,6 +433,114 @@ if (nrow(casos_semana_ano) > 0) {
     theme(plot.title = element_text(face = "bold"), legend.position = "right")
   
   salvar_grafico(g06, "06_curva_epidemica_comparativa")
+}
+
+
+# ==============================================================================
+# GRÁFICO 06b — CANAL ENDÊMICO COM PERCENTIS HISTÓRICOS (PÓS-PANDEMIA)
+# ==============================================================================
+
+ano_atual <- max(anos_carregar)
+
+anos_historico <- setdiff(
+  intersect(ANO_INICIO_CANAL:(ano_atual - 1), anos_disponiveis),
+  anos_carregar
+)
+
+message("Canal endêmico — anos de referência: ", paste(anos_historico, collapse = ", "))
+
+if (length(anos_historico) < 2) {
+  message("  [aviso] Menos de 2 anos de referência — canal endêmico não gerado.")
+} else {
+  
+  base_historico <- base_15rs_completa %>%
+    filter(ANO_BASE %in% anos_historico) %>%
+    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
+      filter(., CO_MUN_RES == cod_mun) else . } %>%
+    mutate(Semana = as.integer(SEM_NOT)) %>%
+    filter(!is.na(Semana)) %>%
+    group_by(ANO_BASE, Semana) %>%
+    summarise(total = n(), .groups = "drop")
+  
+  canal <- base_historico %>%
+    group_by(Semana) %>%
+    summarise(
+      mediana = median(total),
+      p25     = quantile(total, 0.25),
+      p75     = quantile(total, 0.75),
+      p90     = quantile(total, 0.90),
+      n_anos  = n_distinct(ANO_BASE),
+      .groups = "drop"
+    )
+  
+  serie_atual <- base_15rs_completa %>%
+    filter(ANO_BASE %in% anos_carregar) %>%
+    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
+      filter(., CO_MUN_RES == cod_mun) else . } %>%
+    mutate(Semana = as.integer(SEM_NOT)) %>%
+    filter(!is.na(Semana)) %>%
+    group_by(Semana) %>%
+    summarise(total = n(), .groups = "drop")
+  
+  serie_atual <- serie_atual %>%
+    left_join(canal, by = "Semana") %>%
+    mutate(
+      zona = case_when(
+        total > p90  ~ "Epidêmico",
+        total > p75  ~ "Alerta",
+        total >= p25 ~ "Esperado",
+        TRUE         ~ "Abaixo do esperado"
+      ),
+      zona = factor(zona, levels = c(
+        "Epidêmico", "Alerta", "Esperado", "Abaixo do esperado"
+      ))
+    )
+  
+  cores_zona <- c(
+    "Epidêmico"          = "#C62828",
+    "Alerta"             = "#FF8F00",
+    "Esperado"           = "#2E7D32",
+    "Abaixo do esperado" = "#1565C0"
+  )
+  
+  n_atual    <- sum(serie_atual$total)
+  n_anos_ref <- length(anos_historico)
+  label_ref  <- paste0(min(anos_historico), "–", max(anos_historico))
+  semanas_ep <- sum(serie_atual$zona %in% c("Epidêmico", "Alerta"), na.rm = TRUE)
+  
+  g06b <- ggplot() +
+    geom_ribbon(data = canal, aes(x = Semana, ymin = p75, ymax = p90),
+                fill = "#FFECB3", alpha = 0.85) +
+    geom_ribbon(data = canal, aes(x = Semana, ymin = p25, ymax = p75),
+                fill = "#C8E6C9", alpha = 0.85) +
+    geom_line(data = canal, aes(x = Semana, y = mediana),
+              color = "#388E3C", linewidth = 0.8, linetype = "dashed") +
+    geom_line(data = serie_atual, aes(x = Semana, y = total),
+              color = "#1A237E", linewidth = 1.2) +
+    geom_point(data = serie_atual, aes(x = Semana, y = total, color = zona), size = 3) +
+    geom_text(data = serie_atual, aes(x = Semana, y = total, label = total),
+              vjust = -0.8, size = 2.8, color = "grey30") +
+    scale_color_manual(values = cores_zona, name = "Zona") +
+    scale_x_continuous(breaks = seq(1, 53, by = 4), limits = c(1, 53)) +
+    scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
+    labs(
+      title    = paste0("Canal Endêmico de SRAG — ", escopo_titulo,
+                        " (", ano_atual, " | N = ", format(n_atual, big.mark = "."), ")"),
+      subtitle = paste0(
+        "Zona verde = esperado (P25–P75)  |  Zona amarela = alerta (P75–P90)  |  Acima = epidêmico (> P90)\n",
+        "Referência pós-pandêmica: ", label_ref, " (", n_anos_ref, " anos)  |  ",
+        "Semanas em alerta ou acima: ", semanas_ep
+      ),
+      x = "Semana Epidemiológica", y = "Casos Notificados", caption = texto_rodape
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title    = element_text(face = "bold"),
+      plot.subtitle = element_text(size = 8.5, color = "grey40", lineheight = 1.3),
+      legend.position = "bottom"
+    )
+  
+  salvar_grafico(g06b, "06b_canal_endemico")
 }
 
 
@@ -476,153 +571,161 @@ g07 <- ggplot(casos_semana, aes(x = factor(SEM_NOT), y = total)) +
 
 salvar_grafico(g07, "07_notificacoes_semana_epi")
 
+
 # ==============================================================================
-# GRÁFICO 06b — CANAL ENDÊMICO COM PERCENTIS HISTÓRICOS (PÓS-PANDEMIA)
-# Referência: 2022 em diante, excluindo ano atual
+# BLOCO CLIMÁTICO — INMET A826 (Maringá) x SRAG 15ª RS
+# Depende de: casos_semana (criado no Gráfico 07)
 # ==============================================================================
 
-# Anos históricos — pós-pandemia, excluindo o ano em análise
-ano_atual <- max(anos_carregar)  # ← definido ANTES
+ano_clima   <- max(anos_carregar)
+data_inicio <- paste0(ano_clima, "-01-01")
+data_fim    <- format(Sys.Date(), "%Y-%m-%d")
 
-# Anos históricos — pós-pandemia, excluindo o ano em análise
-anos_historico <- setdiff(
-  intersect(ANO_INICIO_CANAL:(ano_atual - 1), anos_disponiveis),
-  anos_carregar
+inmet_url <- paste0(
+  "https://apitempo.inmet.gov.br/estacao/",
+  data_inicio, "/", data_fim, "/", INMET_ESTACAO
 )
 
-message("Canal endêmico — anos de referência: ", paste(anos_historico, collapse = ", "))
-
-if (length(anos_historico) < 2) {
-  message("  [aviso] Menos de 2 anos de referência — canal endêmico não gerado.")
-} else {
-  
-  # Base histórica — casos por semana por ano
-  base_historico <- base_15rs_completa %>%
-    filter(ANO_BASE %in% anos_historico) %>%
-    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
-      filter(., CO_MUN_RES == cod_mun) else . } %>%
-    mutate(Semana = as.integer(SEM_NOT)) %>%
-    filter(!is.na(Semana)) %>%
-    group_by(ANO_BASE, Semana) %>%
-    summarise(total = n(), .groups = "drop")
-  
-  # Percentis históricos por semana
-  canal <- base_historico %>%
-    group_by(Semana) %>%
-    summarise(
-      mediana = median(total),
-      p25     = quantile(total, 0.25),
-      p75     = quantile(total, 0.75),
-      p90     = quantile(total, 0.90),
-      n_anos  = n_distinct(ANO_BASE),
-      .groups = "drop"
-    )
-  
-  # Série do ano atual
-  serie_atual <- base_15rs_completa %>%
-    filter(ANO_BASE %in% anos_carregar) %>%
-    { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
-      filter(., CO_MUN_RES == cod_mun) else . } %>%
-    mutate(Semana = as.integer(SEM_NOT)) %>%
-    filter(!is.na(Semana)) %>%
-    group_by(Semana) %>%
-    summarise(total = n(), .groups = "drop")
-  
-  # Classificação por zona
-  serie_atual <- serie_atual %>%
-    left_join(canal, by = "Semana") %>%
-    mutate(
-      zona = case_when(
-        total > p90  ~ "Epidêmico",
-        total > p75  ~ "Alerta",
-        total >= p25 ~ "Esperado",
-        TRUE         ~ "Abaixo do esperado"
-      ),
-      zona = factor(zona, levels = c(
-        "Epidêmico", "Alerta", "Esperado", "Abaixo do esperado"
-      ))
-    )
-  
-  cores_zona <- c(
-    "Epidêmico"          = "#C62828",
-    "Alerta"             = "#FF8F00",
-    "Esperado"           = "#2E7D32",
-    "Abaixo do esperado" = "#1565C0"
+clima_bruto <- tryCatch({
+  resp <- httr::GET(inmet_url, httr::timeout(30))
+  if (httr::status_code(resp) != 200) stop("HTTP ", httr::status_code(resp))
+  jsonlite::fromJSON(httr::content(resp, as = "text", encoding = "UTF-8"))
+}, error = function(e) {
+  message(
+    "\n[aviso] API INMET indisponível: ", conditionMessage(e),
+    "\nBaixe o CSV manualmente em: https://bdmep.inmet.gov.br",
+    "\n  Estação: ", INMET_ESTACAO, " — Maringá | Período: ",
+    data_inicio, " a ", data_fim,
+    "\nBloco climático ignorado.\n"
   )
+  NULL
+})
+
+if (!is.null(clima_bruto) && nrow(clima_bruto) > 0) {
   
-  n_atual      <- sum(serie_atual$total)
-  n_anos_ref   <- length(anos_historico)
-  label_ref    <- paste0(min(anos_historico), "–", max(anos_historico))
-  semanas_ep   <- sum(serie_atual$zona %in% c("Epidêmico", "Alerta"), na.rm = TRUE)
-  
-  g06b <- ggplot() +
-    # Zona de alerta (P75–P90)
-    geom_ribbon(
-      data = canal,
-      aes(x = Semana, ymin = p75, ymax = p90),
-      fill = "#FFECB3", alpha = 0.85
-    ) +
-    # Zona esperada (P25–P75)
-    geom_ribbon(
-      data = canal,
-      aes(x = Semana, ymin = p25, ymax = p75),
-      fill = "#C8E6C9", alpha = 0.85
-    ) +
-    # Mediana histórica
-    geom_line(
-      data = canal,
-      aes(x = Semana, y = mediana),
-      color = "#388E3C", linewidth = 0.8, linetype = "dashed"
-    ) +
-    # Linha do ano atual
-    geom_line(
-      data = serie_atual,
-      aes(x = Semana, y = total),
-      color = "#1A237E", linewidth = 1.2
-    ) +
-    # Pontos coloridos por zona
-    geom_point(
-      data = serie_atual,
-      aes(x = Semana, y = total, color = zona),
-      size = 3
-    ) +
-    # Labels dos valores
-    geom_text(
-      data = serie_atual,
-      aes(x = Semana, y = total, label = total),
-      vjust = -0.8, size = 2.8, color = "grey30"
-    ) +
-    scale_color_manual(values = cores_zona, name = "Zona") +
-    scale_x_continuous(breaks = seq(1, 53, by = 4), limits = c(1, 53)) +
-    scale_y_continuous(expand = expansion(mult = c(0, 0.18))) +
-    labs(
-      title    = paste0(
-        "Canal Endêmico de SRAG — ", escopo_titulo,
-        " (", ano_atual, " | N = ", format(n_atual, big.mark = "."), ")"
-      ),
-      subtitle = paste0(
-        "Zona verde = esperado (P25–P75)  |  ",
-        "Zona amarela = alerta (P75–P90)  |  ",
-        "Acima = epidêmico (> P90)\n",
-        "Referência pós-pandêmica: ", label_ref,
-        " (", n_anos_ref, " anos)  |  ",
-        "Semanas em alerta ou acima: ", semanas_ep
-      ),
-      x       = "Semana Epidemiológica",
-      y       = "Casos Notificados",
-      caption = texto_rodape
-    ) +
-    theme_minimal() +
-    theme(
-      plot.title    = element_text(face = "bold"),
-      plot.subtitle = element_text(size = 8.5, color = "grey40", lineheight = 1.3),
-      legend.position = "bottom"
+  clima_se <- clima_bruto %>%
+    as_tibble() %>%
+    mutate(
+      data   = as.Date(DT_MEDICAO),
+      tmin   = suppressWarnings(as.numeric(TEM_MIN)),
+      tmax   = suppressWarnings(as.numeric(TEM_MAX)),
+      umid   = suppressWarnings(as.numeric(UMD_INS)),
+      precip = suppressWarnings(as.numeric(CHUVA)),
+      se     = lubridate::isoweek(data)
+    ) %>%
+    filter(lubridate::year(data) == ano_clima) %>%
+    group_by(se) %>%
+    summarise(
+      tmin_med   = mean(tmin,        na.rm = TRUE),
+      tmax_med   = mean(tmax,        na.rm = TRUE),
+      amplitude  = mean(tmax - tmin, na.rm = TRUE),
+      umid_med   = mean(umid,        na.rm = TRUE),
+      precip_sum = sum(precip,       na.rm = TRUE),
+      .groups    = "drop"
     )
   
-  salvar_grafico(g06b, "06b_canal_endemico")
+  df_clima <- casos_semana %>%
+    rename(se = SEM_NOT) %>%
+    mutate(se = as.integer(se)) %>%
+    inner_join(clima_se, by = "se") %>%
+    arrange(se)
+  
+  message("Semanas com dados climáticos e epidemiológicos: ", nrow(df_clima))
+  
+  if (nrow(df_clima) >= 3) {
+    
+    dir.create(file.path(DIR_GRAFICOS, "climatico"), showWarnings = FALSE)
+    
+    plot_clima_casos <- function(df, var_clima, label_clima, cor_clima,
+                                 titulo, nome_arquivo) {
+      escala <- max(df$total, na.rm = TRUE) /
+        max(df[[var_clima]], na.rm = TRUE, finite = TRUE)
+      
+      p <- ggplot(df, aes(x = se)) +
+        geom_col(aes(y = total), fill = "#003366", alpha = 0.45, width = 0.7) +
+        geom_line(aes(y = .data[[var_clima]] * escala),
+                  color = cor_clima, linewidth = 1.2) +
+        geom_point(aes(y = .data[[var_clima]] * escala),
+                   color = cor_clima, size = 2) +
+        scale_y_continuous(
+          name = "Casos de SRAG",
+          labels = scales::label_comma(big.mark = ".", decimal.mark = ","),
+          sec.axis = sec_axis(~ . / escala, name = label_clima)
+        ) +
+        scale_x_continuous(
+          breaks = seq(1, max(df$se, na.rm = TRUE), by = 2),
+          name   = "Semana Epidemiológica"
+        ) +
+        labs(
+          title    = paste0(titulo, " — ", escopo_titulo),
+          subtitle = paste0("Ano: ", ano_clima, " | Estação INMET ", INMET_ESTACAO, " — Maringá"),
+          caption  = paste0(texto_rodape, " | Clima: INMET/BDMEP")
+        ) +
+        theme_minimal(base_size = 12) +
+        theme(
+          plot.title         = element_text(face = "bold"),
+          axis.title.y       = element_text(color = "#003366"),
+          axis.title.y.right = element_text(color = cor_clima),
+          panel.grid.minor   = element_blank()
+        )
+      
+      caminho <- file.path(DIR_GRAFICOS, "climatico",
+                           paste0(nome_arquivo, "_", ano_clima, ".png"))
+      ggsave(caminho, plot = p, width = 14, height = 6, dpi = 150, bg = "white")
+      message("Salvo: ", caminho)
+    }
+    
+    plot_clima_casos(df_clima, "tmin_med",   "Temperatura Mínima Média (°C)",  "#C00000",
+                     "SRAG x Temperatura Mínima Semanal",  "clima_tmin_casos")
+    plot_clima_casos(df_clima, "umid_med",   "Umidade Relativa Média (%)",     "#2E75B6",
+                     "SRAG x Umidade Relativa Semanal",    "clima_umid_casos")
+    plot_clima_casos(df_clima, "precip_sum", "Precipitação Acumulada (mm)",    "#70AD47",
+                     "SRAG x Precipitação Semanal",        "clima_precip_casos")
+    plot_clima_casos(df_clima, "amplitude",  "Amplitude Térmica Média (°C)",   "#FF6B00",
+                     "SRAG x Amplitude Térmica Semanal",   "clima_amplitude_casos")
+    
+    # Correlações de Spearman com lag 0–4 semanas
+    vars_clima_cor <- c("tmin_med", "umid_med", "precip_sum", "amplitude")
+    
+    resultados_lag <- expand.grid(
+      variavel = vars_clima_cor, lag = 0:4, stringsAsFactors = FALSE
+    ) %>%
+      rowwise() %>%
+      mutate(
+        n_obs   = sum(complete.cases(df_clima$total,
+                                     dplyr::lag(df_clima[[variavel]], lag))),
+        rho     = if (n_obs >= 5) cor(df_clima$total,
+                                      dplyr::lag(df_clima[[variavel]], lag),
+                                      use = "complete.obs", method = "spearman") else NA_real_,
+        p_valor = if (n_obs >= 5) {
+          idx <- complete.cases(df_clima$total, dplyr::lag(df_clima[[variavel]], lag))
+          cor.test(df_clima$total[idx], dplyr::lag(df_clima[[variavel]], lag)[idx],
+                   method = "spearman", exact = FALSE)$p.value
+        } else NA_real_
+      ) %>%
+      ungroup() %>%
+      mutate(
+        rho     = round(rho, 3),
+        p_valor = round(p_valor, 4),
+        sig     = case_when(
+          is.na(p_valor) ~ "—",
+          p_valor < 0.01 ~ "**",
+          p_valor < 0.05 ~ "*",
+          TRUE           ~ "ns"
+        )
+      ) %>%
+      arrange(variavel, lag)
+    
+    caminho_cor <- file.path(DIR_GRAFICOS, "climatico",
+                             paste0("correlacoes_lag_", ano_clima, ".csv"))
+    write.csv(resultados_lag, caminho_cor, row.names = FALSE)
+    message("Correlações salvas: ", caminho_cor)
+    print(resultados_lag)
+    
+  } else {
+    message("[aviso] Menos de 3 semanas com dados completos — gráficos climáticos não gerados.")
+  }
 }
-
-
 
 
 # ==============================================================================
@@ -634,24 +737,22 @@ casos_semana_var <- base_filtrada %>%
   summarise(total = n(), .groups = "drop") %>%
   arrange(SEM_NOT) %>%
   mutate(
-    media       = round(mean(total), 1),
-    variacao    = round((total - lag(total)) / lag(total) * 100, 1),
-    direcao     = case_when(
-      is.na(variacao)  ~ "neutra",
-      variacao > 0     ~ "aumento",
-      variacao < 0     ~ "reducao",
-      TRUE             ~ "neutra"
+    media    = round(mean(total), 1),
+    variacao = round((total - lag(total)) / lag(total) * 100, 1),
+    direcao  = case_when(
+      is.na(variacao) ~ "neutra",
+      variacao > 0    ~ "aumento",
+      variacao < 0    ~ "reducao",
+      TRUE            ~ "neutra"
     )
   )
 
 g07b <- ggplot(casos_semana_var, aes(x = as.integer(SEM_NOT), y = total)) +
   geom_col(aes(fill = direcao), width = 0.7) +
-  geom_line(aes(y = media), color = "#FF8C00", linewidth = 1,
-            linetype = "dashed") +
+  geom_line(aes(y = media), color = "#FF8C00", linewidth = 1, linetype = "dashed") +
   geom_text(
     aes(label = ifelse(!is.na(variacao),
-                       paste0(ifelse(variacao > 0, "+", ""), variacao, "%"),
-                       "")),
+                       paste0(ifelse(variacao > 0, "+", ""), variacao, "%"), "")),
     vjust = -0.5, size = 2.8, color = "grey30"
   ) +
   annotate("text", x = 1, y = unique(casos_semana_var$media) * 1.03,
@@ -665,8 +766,7 @@ g07b <- ggplot(casos_semana_var, aes(x = as.integer(SEM_NOT), y = total)) +
   labs(
     title    = paste0("Variação Semanal de SRAG — ", escopo_titulo),
     subtitle = "Vermelho = aumento | Verde = redução | Laranja tracejado = média do período",
-    x = "Semana Epidemiológica", y = "Casos Notificados",
-    caption  = texto_rodape
+    x = "Semana Epidemiológica", y = "Casos Notificados", caption = texto_rodape
   ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -726,7 +826,6 @@ g09 <- casos_municipio %>%
 salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 
 
-
 # ==============================================================================
 # GRÁFICO 10 — NOTIFICAÇÕES POR REGIONAL DE SAÚDE (PARANÁ)
 # ==============================================================================
@@ -734,9 +833,7 @@ salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 base_pr <- bind_rows(lista_bases) %>%
   mutate(ID_REGIONA = toupper(trimws(ID_REGIONA))) %>%
   filter(!is.na(ID_REGIONA), ANO_BASE %in% anos_carregar) %>%
-  mutate(
-    num_regional = as.integer(str_extract(ID_REGIONA, "^[0-9]+"))
-  ) %>%
+  mutate(num_regional = as.integer(str_extract(ID_REGIONA, "^[0-9]+"))) %>%
   filter(!is.na(num_regional), num_regional >= 1, num_regional <= 22)
 
 if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
@@ -762,6 +859,7 @@ if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
   
   salvar_grafico(g10, "10_notificacoes_regionais_pr", height = 10)
 }
+
 
 # ==============================================================================
 # GRÁFICO 11 — DISTRIBUIÇÃO POR SEXO
@@ -832,20 +930,19 @@ salvar_grafico(g12, "12_classificacao_final")
 # GRÁFICO 13 — CIRCULAÇÃO VIRAL TOTAL (RT-PCR)
 # ==============================================================================
 
-# Converte o formato wide (uma coluna por vírus) para long
 viral_wide <- base_filtrada %>%
   filter(PCR_RESUL == 1 | POS_PCRFLU == 1 | POS_PCROUT == 1) %>%
   mutate(
-    Influenza      = POS_PCRFLU == 1,
-    VSR            = PCR_VSR    == 1,
-    Rinovírus      = PCR_RINO   == 1,
-    Adenovírus     = PCR_ADENO  == 1,
-    Metapneumovírus = PCR_METAP == 1,
-    `Parainfluenza 1` = PCR_PARA1 == 1,
-    `Parainfluenza 2` = PCR_PARA2 == 1,
-    `Parainfluenza 3` = PCR_PARA3 == 1,
-    `Parainfluenza 4` = PCR_PARA4 == 1,
-    `Covid-19`     = PCR_SARS2  == 1
+    Influenza        = POS_PCRFLU == 1,
+    VSR              = PCR_VSR    == 1,
+    `Rinovírus`      = PCR_RINO   == 1,
+    `Adenovírus`     = PCR_ADENO  == 1,
+    `Metapneumovírus`= PCR_METAP  == 1,
+    `Parainfluenza 1`= PCR_PARA1  == 1,
+    `Parainfluenza 2`= PCR_PARA2  == 1,
+    `Parainfluenza 3`= PCR_PARA3  == 1,
+    `Parainfluenza 4`= PCR_PARA4  == 1,
+    `Covid-19`       = PCR_SARS2  == 1
   )
 
 circulacao_viral <- viral_wide %>%
@@ -878,15 +975,15 @@ salvar_grafico(g13, "13_circulacao_viral_total")
 virus_semanal <- base_filtrada %>%
   filter(!is.na(SEM_NOT)) %>%
   mutate(
-    Influenza        = POS_PCRFLU == 1,
-    VSR              = PCR_VSR    == 1,
-    Rinovírus        = PCR_RINO   == 1,
-    Adenovírus       = PCR_ADENO  == 1,
-    Metapneumovírus  = PCR_METAP  == 1,
-    `Covid-19`       = PCR_SARS2  == 1
+    Influenza       = POS_PCRFLU == 1,
+    VSR             = PCR_VSR    == 1,
+    `Rinovírus`     = PCR_RINO   == 1,
+    `Adenovírus`    = PCR_ADENO  == 1,
+    `Metapneumovírus`= PCR_METAP == 1,
+    `Covid-19`      = PCR_SARS2  == 1
   ) %>%
   tidyr::pivot_longer(
-    cols      = c(Influenza, VSR, Rinovírus, Adenovírus, Metapneumovírus, `Covid-19`),
+    cols      = c(Influenza, VSR, `Rinovírus`, `Adenovírus`, `Metapneumovírus`, `Covid-19`),
     names_to  = "virus",
     values_to = "positivo"
   ) %>%
@@ -898,8 +995,7 @@ if (nrow(virus_semanal) > 0) {
   n_semanal <- nrow(base_filtrada %>% filter(POS_PCRFLU == 1 | POS_PCROUT == 1))
   
   g14 <- ggplot(virus_semanal,
-                aes(x = as.integer(SEM_NOT), y = total,
-                    color = virus, group = virus)) +
+                aes(x = as.integer(SEM_NOT), y = total, color = virus, group = virus)) +
     geom_line(linewidth = 0.8) +
     geom_point(size = 1.5, alpha = 0.8) +
     scale_x_continuous(breaks = seq(1, 53, by = 4)) +
@@ -916,34 +1012,31 @@ if (nrow(virus_semanal) > 0) {
   
   salvar_grafico(g14, "14_tendencia_viral_semanal")
 }
+
+
 # ==============================================================================
 # GRÁFICO D13 — VÍRUS PREDOMINANTE POR FAIXA ETÁRIA
-# Inserir no SCRIPT_Unificado.R logo após o GRÁFICO 14
-# Depende de: base_filtrada, criar_faixa_etaria(), ORDEM_FAIXAS,
-#             salvar_grafico(), texto_rodape, escopo_titulo, anos_carregar
 # ==============================================================================
 
-# --- Monta base: um registro por vírus positivo por faixa etária ---
 virus_faixa_wide <- base_filtrada %>%
   criar_faixa_etaria() %>%
-  filter(faixa_etaria %in% ORDEM_FAIXAS[1:11]) %>%   # remove "Em branco" e "Erro"
+  filter(faixa_etaria %in% ORDEM_FAIXAS[1:11]) %>%
   mutate(
     faixa_etaria    = factor(faixa_etaria, levels = ORDEM_FAIXAS),
     Influenza       = POS_PCRFLU == 1,
     VSR             = PCR_VSR    == 1,
     `Covid-19`      = PCR_SARS2  == 1,
-    Rinovírus       = PCR_RINO   == 1,
-    Adenovírus      = PCR_ADENO  == 1,
-    Metapneumovírus = PCR_METAP  == 1,
+    `Rinovírus`     = PCR_RINO   == 1,
+    `Adenovírus`    = PCR_ADENO  == 1,
+    `Metapneumovírus`= PCR_METAP == 1,
     Parainfluenza   = (PCR_PARA1 == 1 | PCR_PARA2 == 1 |
                          PCR_PARA3 == 1 | PCR_PARA4 == 1)
   )
 
-# --- Agrega: total de positivos por vírus e faixa ---
 virus_faixa_long <- virus_faixa_wide %>%
   tidyr::pivot_longer(
-    cols      = c(Influenza, VSR, `Covid-19`, Rinovírus,
-                  Adenovírus, Metapneumovírus, Parainfluenza),
+    cols      = c(Influenza, VSR, `Covid-19`, `Rinovírus`,
+                  `Adenovírus`, `Metapneumovírus`, Parainfluenza),
     names_to  = "virus",
     values_to = "positivo"
   ) %>%
@@ -951,56 +1044,38 @@ virus_faixa_long <- virus_faixa_wide %>%
   group_by(faixa_etaria, virus) %>%
   summarise(n = n(), .groups = "drop")
 
-# --- Proporção dentro de cada faixa etária ---
 virus_faixa_prop <- virus_faixa_long %>%
   group_by(faixa_etaria) %>%
-  mutate(
-    total_faixa = sum(n),
-    pct         = round(n / total_faixa * 100, 1)
-  ) %>%
+  mutate(total_faixa = sum(n), pct = round(n / total_faixa * 100, 1)) %>%
   ungroup()
 
-# --- Labels do eixo X com N por faixa ---
 n_por_faixa <- virus_faixa_prop %>%
   distinct(faixa_etaria, total_faixa) %>%
   mutate(label_faixa = paste0(as.character(faixa_etaria), "\n(n=", total_faixa, ")"))
 
 labels_faixas <- setNames(n_por_faixa$label_faixa, n_por_faixa$faixa_etaria)
 
-# --- Heatmap ---
 if (nrow(virus_faixa_prop) > 0) {
   gD13_heat <- ggplot(virus_faixa_prop,
                       aes(x = faixa_etaria, y = virus, fill = pct)) +
     geom_tile(color = "white", linewidth = 0.6) +
-    geom_text(aes(label = paste0(pct, "%")),
-              size = 3.2, color = "grey10") +
-    scale_fill_distiller(
-      palette   = "YlOrRd",
-      direction = 1,
-      limits    = c(0, 100),
-      name      = "% dentro\nda faixa"
-    ) +
+    geom_text(aes(label = paste0(pct, "%")), size = 3.2, color = "grey10") +
+    scale_fill_distiller(palette = "YlOrRd", direction = 1,
+                         limits = c(0, 100), name = "% dentro\nda faixa") +
     scale_x_discrete(labels = labels_faixas, guide = guide_axis(angle = 40)) +
     labs(
       title    = paste0("Vírus Predominante por Faixa Etária — ", escopo_titulo),
-      subtitle = paste0(
-        "% calculado sobre PCR positivos em cada faixa | ",
-        "Ano(s): ", paste(anos_carregar, collapse = ", ")
-      ),
-      x = "Faixa Etária", y = NULL,
-      caption = texto_rodape
+      subtitle = paste0("% calculado sobre PCR positivos em cada faixa | Ano(s): ",
+                        paste(anos_carregar, collapse = ", ")),
+      x = "Faixa Etária", y = NULL, caption = texto_rodape
     ) +
     theme_minimal(base_size = 12) +
-    theme(
-      plot.title = element_text(face = "bold"),
-      panel.grid = element_blank(),
-      axis.text.y = element_text(size = 11)
-    )
+    theme(plot.title = element_text(face = "bold"),
+          panel.grid = element_blank(), axis.text.y = element_text(size = 11))
   
   salvar_grafico(gD13_heat, "D13_virus_faixa_etaria_heatmap", width = 14, height = 6)
 }
 
-# --- Barras empilhadas ---
 if (nrow(virus_faixa_long) > 0) {
   gD13_bar <- ggplot(virus_faixa_long,
                      aes(x = faixa_etaria, y = n, fill = virus)) +
@@ -1010,18 +1085,12 @@ if (nrow(virus_faixa_long) > 0) {
     scale_x_discrete(guide = guide_axis(angle = 40)) +
     labs(
       title    = paste0("Composição Viral por Faixa Etária — ", escopo_titulo),
-      subtitle = paste0(
-        "Proporção de cada vírus no total de PCR positivos da faixa | ",
-        "Ano(s): ", paste(anos_carregar, collapse = ", ")
-      ),
-      x = "Faixa Etária", y = "Proporção",
-      fill = "Vírus", caption = texto_rodape
+      subtitle = paste0("Proporção de cada vírus no total de PCR positivos da faixa | Ano(s): ",
+                        paste(anos_carregar, collapse = ", ")),
+      x = "Faixa Etária", y = "Proporção", fill = "Vírus", caption = texto_rodape
     ) +
     theme_minimal(base_size = 12) +
-    theme(
-      plot.title      = element_text(face = "bold"),
-      legend.position = "bottom"
-    )
+    theme(plot.title = element_text(face = "bold"), legend.position = "bottom")
   
   salvar_grafico(gD13_bar, "D13_virus_faixa_etaria_barras", width = 14, height = 6)
 }
@@ -1029,13 +1098,9 @@ if (nrow(virus_faixa_long) > 0) {
 message("Gráficos D13 salvos.")
 
 
-
 # ==============================================================================
 # GRÁFICO 15 — TIPOS E LINHAGENS DE INFLUENZA
 # ==============================================================================
-# TP_FLU_PCR: 1 = Influenza A, 2 = Influenza B
-# PCR_FLUASU: subtipo A (1 = H1N1pdm09, 2 = H3N2, 3 = não subtipado, 4 = não subtipável)
-# PCR_FLUBLI: linhagem B (1 = Vitória, 2 = Yamagata, 3 = não realizado)
 
 influenza_tipos <- base_filtrada %>%
   filter(POS_PCRFLU == 1) %>%
@@ -1045,12 +1110,12 @@ influenza_tipos <- base_filtrada %>%
       TP_FLU_PCR == 1 & PCR_FLUASU == 2 ~ "Influenza A(H3N2)",
       TP_FLU_PCR == 1 & PCR_FLUASU == 3 ~ "Influenza A não subtipado",
       TP_FLU_PCR == 1 & PCR_FLUASU == 4 ~ "Influenza A não subtipável",
-      TP_FLU_PCR == 1                    ~ "Influenza A não subtipado",
+      TP_FLU_PCR == 1                   ~ "Influenza A não subtipado",
       TP_FLU_PCR == 2 & PCR_FLUBLI == 1 ~ "Influenza B – Vitória",
       TP_FLU_PCR == 2 & PCR_FLUBLI == 2 ~ "Influenza B – Yamagata",
       TP_FLU_PCR == 2 & PCR_FLUBLI == 3 ~ "Influenza B – Não realizado",
-      TP_FLU_PCR == 2                    ~ "Influenza B – Não classificado",
-      TRUE                               ~ "Ignorado / Não classificado"
+      TP_FLU_PCR == 2                   ~ "Influenza B – Não classificado",
+      TRUE                              ~ "Ignorado / Não classificado"
     )
   ) %>%
   group_by(tipo_label) %>%
@@ -1075,9 +1140,9 @@ if (nrow(influenza_tipos) > 0) {
   salvar_grafico(g15, "15_tipos_linhagens_influenza")
 }
 
-## ==============================================================================
-# GRÁFICO 22 — TENDÊNCIA ANUAL DE VÍRUS RESPIRATÓRIOS (2022 em diante)
-# Gráfico de linhas: eixo X = ano, eixo Y = detecções, uma linha por vírus
+
+# ==============================================================================
+# GRÁFICO 22 — TENDÊNCIA ANUAL DE VÍRUS RESPIRATÓRIOS
 # ==============================================================================
 
 if (!requireNamespace("tidytext", quietly = TRUE)) install.packages("tidytext")
@@ -1100,7 +1165,7 @@ nomes_virus <- c(
 colunas_presentes <- intersect(colunas_virus, names(base_15rs_historica))
 flu_presente      <- "POS_PCRFLU" %in% names(base_15rs_historica)
 
-ANO_INICIO_VIRAL <- 2023   # exclui pico pandêmico 2020-2021
+ANO_INICIO_VIRAL <- 2023
 
 if (length(colunas_presentes) > 0 && flu_presente) {
   
@@ -1113,122 +1178,70 @@ if (length(colunas_presentes) > 0 && flu_presente) {
     select(ANO_BASE, all_of(colunas_presentes), PCR_FLU)
   
   casos_virus_ano <- base_virus_hist %>%
-    pivot_longer(
-      cols      = c(all_of(colunas_presentes), PCR_FLU),
-      names_to  = "virus_cod",
-      values_to = "marcado"
-    ) %>%
+    pivot_longer(cols = c(all_of(colunas_presentes), PCR_FLU),
+                 names_to = "virus_cod", values_to = "marcado") %>%
     filter(marcado == "1") %>%
-    mutate(
-      virus = case_when(
-        virus_cod == "PCR_FLU" ~ "Influenza",
-        TRUE ~ nomes_virus[virus_cod]
-      )
-    ) %>%
+    mutate(virus = case_when(
+      virus_cod == "PCR_FLU" ~ "Influenza",
+      TRUE ~ nomes_virus[virus_cod]
+    )) %>%
     filter(!is.na(virus)) %>%
     group_by(ANO_BASE, virus) %>%
     summarise(casos = n(), .groups = "drop")
   
-  # --- Remove vírus com zero detecções em todos os anos ---
   virus_ativos <- casos_virus_ano %>%
-    group_by(virus) %>%
-    summarise(total = sum(casos), .groups = "drop") %>%
-    filter(total > 0) %>%
-    pull(virus)
+    group_by(virus) %>% summarise(total = sum(casos), .groups = "drop") %>%
+    filter(total > 0) %>% pull(virus)
   
   casos_virus_ano <- casos_virus_ano %>%
     filter(virus %in% virus_ativos) %>%
-    # Preenche anos sem detecção com zero para linha contínua
     tidyr::complete(ANO_BASE, virus, fill = list(casos = 0))
   
-  # --- Destaca os 3 vírus mais frequentes no período ---
   top3 <- casos_virus_ano %>%
-    group_by(virus) %>%
-    summarise(total = sum(casos), .groups = "drop") %>%
-    slice_max(total, n = 3) %>%
-    pull(virus)
+    group_by(virus) %>% summarise(total = sum(casos), .groups = "drop") %>%
+    slice_max(total, n = 3) %>% pull(virus)
   
   casos_virus_ano <- casos_virus_ano %>%
-    mutate(
-      destaque   = virus %in% top3,
-      espessura  = if_else(destaque, 1.4, 0.7),
-      alpha_line = if_else(destaque, 1.0, 0.55)
-    )
+    mutate(destaque = virus %in% top3,
+           espessura  = if_else(destaque, 1.4, 0.7),
+           alpha_line = if_else(destaque, 1.0, 0.55))
   
-  # Ano atual tracejado (dados incompletos)
   ano_atual_viral <- max(casos_virus_ano$ANO_BASE)
   
   g22 <- ggplot(casos_virus_ano,
-                aes(x = ANO_BASE, y = casos,
-                    color = virus, group = virus)) +
-    # Linha tracejada para o ano atual (dados parciais)
-    geom_vline(
-      xintercept = ano_atual_viral - 0.5,
-      linetype = "dotted", color = "grey60", linewidth = 0.7
-    ) +
-    annotate(
-      "text",
-      x = ano_atual_viral - 0.45, y = Inf,
-      label = paste0(ano_atual_viral, "\n(parcial)"),
-      hjust = 0, vjust = 1.3, size = 2.8, color = "grey50"
-    ) +
+                aes(x = ANO_BASE, y = casos, color = virus, group = virus)) +
+    geom_vline(xintercept = ano_atual_viral - 0.5,
+               linetype = "dotted", color = "grey60", linewidth = 0.7) +
+    annotate("text", x = ano_atual_viral - 0.45, y = Inf,
+             label = paste0(ano_atual_viral, "\n(parcial)"),
+             hjust = 0, vjust = 1.3, size = 2.8, color = "grey50") +
     geom_line(aes(linewidth = I(espessura), alpha = I(alpha_line))) +
-    geom_point(aes(size = I(if_else(destaque, 3, 1.8)),
-                   alpha = I(alpha_line))) +
-    geom_text(
-      data = casos_virus_ano %>%
-        filter(ANO_BASE == max(ANO_BASE), casos > 0),
-      aes(label = virus),
-      hjust = -0.1, size = 2.8, fontface = "plain"
-    ) +
-    scale_x_continuous(
-      breaks = sort(unique(casos_virus_ano$ANO_BASE)),
-      expand = expansion(mult = c(0.02, 0.25))
-    ) +
+    geom_point(aes(size = I(if_else(destaque, 3, 1.8)), alpha = I(alpha_line))) +
+    geom_text(data = casos_virus_ano %>% filter(ANO_BASE == max(ANO_BASE), casos > 0),
+              aes(label = virus), hjust = -0.1, size = 2.8) +
+    scale_x_continuous(breaks = sort(unique(casos_virus_ano$ANO_BASE)),
+                       expand = expansion(mult = c(0.02, 0.25))) +
     scale_y_continuous(expand = expansion(mult = c(0, 0.10))) +
-    scale_color_manual(
-      values = c(
-        "Influenza"               = "#E63946",
-        "VSR"                     = "#2A9D8F",
-        "Rinovírus"               = "#F4A261",
-        "SARS-CoV-2"              = "#457B9D",
-        "Metapneumovírus"         = "#6A0572",
-        "Adenovírus"              = "#E9C46A",
-        "Parainfluenza 1"         = "#264653",
-        "Parainfluenza 2"         = "#A8DADC",
-        "Parainfluenza 3"         = "#8D99AE",
-        "Parainfluenza 4"         = "#B5838D",
-        "Bocavírus"               = "#6B705C",
-        "Outro vírus respiratório"= "#CDB4DB"
-      ),
-      guide = guide_legend(
-        ncol = 2,
-        override.aes = list(linewidth = 1.2, size = 3)
-      )
-    ) +
+    scale_color_manual(values = c(
+      "Influenza" = "#E63946", "VSR" = "#2A9D8F", "Rinovírus" = "#F4A261",
+      "SARS-CoV-2" = "#457B9D", "Metapneumovírus" = "#6A0572",
+      "Adenovírus" = "#E9C46A", "Parainfluenza 1" = "#264653",
+      "Parainfluenza 2" = "#A8DADC", "Parainfluenza 3" = "#8D99AE",
+      "Parainfluenza 4" = "#B5838D", "Bocavírus" = "#6B705C",
+      "Outro vírus respiratório" = "#CDB4DB"
+    ), guide = guide_legend(ncol = 2, override.aes = list(linewidth = 1.2, size = 3))) +
     labs(
-      title    = paste0(
-        "Variação Anual de Vírus Respiratórios — ", escopo_titulo
-      ),
-      subtitle = paste0(
-        "Detecções por RT-PCR | ",
-        ANO_INICIO_VIRAL, "–", ano_atual_viral,
-        " (exclui pico pandêmico 2020–2021) | ",
-        "Vírus em destaque: ", paste(top3, collapse = ", ")
-      ),
-      x       = "Ano",
-      y       = "Casos detectados (RT-PCR)",
-      color   = "Vírus",
-      caption = texto_rodape
+      title    = paste0("Variação Anual de Vírus Respiratórios — ", escopo_titulo),
+      subtitle = paste0("Detecções por RT-PCR | ", ANO_INICIO_VIRAL, "–", ano_atual_viral,
+                        " (exclui pico pandêmico 2020–2021) | Vírus em destaque: ",
+                        paste(top3, collapse = ", ")),
+      x = "Ano", y = "Casos detectados (RT-PCR)", color = "Vírus", caption = texto_rodape
     ) +
     theme_minimal() +
-    theme(
-      plot.title      = element_text(face = "bold"),
-      plot.subtitle   = element_text(size = 8.5, color = "grey40"),
-      legend.position = "bottom",
-      legend.title    = element_blank(),
-      panel.grid.minor = element_blank()
-    )
+    theme(plot.title = element_text(face = "bold"),
+          plot.subtitle = element_text(size = 8.5, color = "grey40"),
+          legend.position = "bottom", legend.title = element_blank(),
+          panel.grid.minor = element_blank())
   
   salvar_grafico(g22, "22_virus_tendencia_anual", width = 13, height = 7)
   message("[OK] Gráfico 22 salvo.")
@@ -1236,6 +1249,8 @@ if (length(colunas_presentes) > 0 && flu_presente) {
 } else {
   message("  [aviso] Colunas de PCR não encontradas — gráfico 22 não gerado.")
 }
+
+
 # ==============================================================================
 # GRÁFICO 16 — FAIXA ETÁRIA: NOTIFICADOS vs CONFIRMADOS
 # ==============================================================================
@@ -1260,17 +1275,15 @@ faixa_combinada <- bind_rows(notif_faixa, conf_faixa) %>%
 n_notif_fe <- sum(notif_faixa$n)
 n_conf_fe  <- sum(conf_faixa$n)
 
-g16 <- ggplot(faixa_combinada,
-              aes(x = n, y = faixa_etaria, fill = status)) +
+g16 <- ggplot(faixa_combinada, aes(x = n, y = faixa_etaria, fill = status)) +
   geom_col(position = "dodge") +
-  geom_text(aes(label = n), position = position_dodge(width = 0.9),
-            hjust = -0.1, size = 3) +
+  geom_text(aes(label = n), position = position_dodge(width = 0.9), hjust = -0.1, size = 3) +
   scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
   scale_fill_manual(values = c("Notificados" = "#0057A3", "Confirmados" = "#1A5C38")) +
   labs(
     title    = paste0("Faixa Etária: Notificados vs Confirmados — ", escopo_titulo,
                       " (Notif.: ", format(n_notif_fe, big.mark = "."),
-                      " | Conf.: ", format(n_conf_fe,  big.mark = "."), ")"),
+                      " | Conf.: ", format(n_conf_fe, big.mark = "."), ")"),
     x = "Quantidade", y = "Faixa Etária", fill = "Status", caption = texto_rodape
   ) +
   theme_minimal() +
@@ -1289,10 +1302,8 @@ piramide_notif <- base_filtrada %>%
   filter(sexo != "Ignorado", faixa_etaria %in% ORDEM_FAIXAS) %>%
   group_by(faixa_etaria, sexo) %>%
   summarise(n = n(), .groups = "drop") %>%
-  mutate(
-    faixa_etaria = factor(faixa_etaria, levels = ORDEM_FAIXAS),
-    value        = ifelse(sexo == "Masculino", -n, n)
-  )
+  mutate(faixa_etaria = factor(faixa_etaria, levels = ORDEM_FAIXAS),
+         value = ifelse(sexo == "Masculino", -n, n))
 
 n_piramide_notif <- sum(piramide_notif$n)
 
@@ -1324,10 +1335,8 @@ piramide_obitos <- base_filtrada %>%
   filter(sexo != "Ignorado", faixa_etaria %in% ORDEM_FAIXAS) %>%
   group_by(faixa_etaria, sexo) %>%
   summarise(n = n(), .groups = "drop") %>%
-  mutate(
-    faixa_etaria = factor(faixa_etaria, levels = ORDEM_FAIXAS),
-    value        = ifelse(sexo == "Masculino", -n, n)
-  )
+  mutate(faixa_etaria = factor(faixa_etaria, levels = ORDEM_FAIXAS),
+         value = ifelse(sexo == "Masculino", -n, n))
 
 if (nrow(piramide_obitos) > 0) {
   n_piramide_obitos <- sum(piramide_obitos$n)
@@ -1463,7 +1472,6 @@ salvar_grafico(g21, "21_escolaridade")
 
 titulo_ano <- paste(anos_carregar, collapse = "/")
 
-# Top 20 bairros — Maringá
 g_bairro_mar <- casos_bairro %>%
   head(20) %>%
   mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
@@ -1481,7 +1489,6 @@ g_bairro_mar <- casos_bairro %>%
 salvar_grafico(g_bairro_mar,
                paste0("srag_top20_bairros_maringa_", paste(anos_carregar, collapse = "_")))
 
-# Top 20 bairros — Sarandi
 if (nrow(casos_bairro_sar) > 0) {
   g_bairro_sar <- casos_bairro_sar %>%
     head(20) %>%
@@ -1501,23 +1508,18 @@ if (nrow(casos_bairro_sar) > 0) {
                  paste0("srag_top20_bairros_sarandi_", paste(anos_carregar, collapse = "_")))
 }
 
-# Heatmap bairro x semana — Maringá
 top15 <- head(casos_bairro$BAIRRO, 15)
 
 lookup_mar <- casos_bairro %>%
-  distinct(BAIRRO, .keep_all = TRUE) %>%          # garante 1 linha por bairro
+  distinct(BAIRRO, .keep_all = TRUE) %>%
   select(BAIRRO, total_bairro = casos)
 
 g_heat_mar <- casos_bairro_sem %>%
   filter(BAIRRO %in% top15) %>%
   left_join(lookup_mar, by = "BAIRRO") %>%
-  mutate(
-    total_bairro = replace_na(total_bairro, 0L),
-    LABEL        = paste0(str_to_title(BAIRRO), " (", total_bairro, ")")
-  ) %>%
-  mutate(
-    LABEL = fct_reorder(LABEL, total_bairro)      # sem `sum` — usa mediana por nível
-  ) %>%
+  mutate(total_bairro = replace_na(total_bairro, 0L),
+         LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
+         LABEL = fct_reorder(LABEL, total_bairro)) %>%
   ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
   geom_tile(color = "white") +
   scale_fill_distiller(palette = "Blues", direction = 1) +
@@ -1525,18 +1527,14 @@ g_heat_mar <- casos_bairro_sem %>%
   labs(
     title    = paste("SRAG por Bairro e Semana Epidemiológica — Maringá |", titulo_ano),
     subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana",
-    caption = texto_rodape
+    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
   ) +
   theme_minimal()
 
-salvar_grafico(
-  g_heat_mar,
-  paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
-  width = 14, height = 6
-)
+salvar_grafico(g_heat_mar,
+               paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
+               width = 14, height = 6)
 
-# Heatmap bairro x semana — Sarandi
 lookup_sar <- casos_bairro_sar %>%
   distinct(BAIRRO, .keep_all = TRUE) %>%
   select(BAIRRO, total_bairro = casos)
@@ -1544,13 +1542,9 @@ lookup_sar <- casos_bairro_sar %>%
 g_heat_sar <- casos_bairro_sem_sar %>%
   filter(BAIRRO %in% head(casos_bairro_sar$BAIRRO, 15)) %>%
   left_join(lookup_sar, by = "BAIRRO") %>%
-  mutate(
-    total_bairro = replace_na(total_bairro, 0L),
-    LABEL        = paste0(str_to_title(BAIRRO), " (", total_bairro, ")")
-  ) %>%
-  mutate(
-    LABEL = fct_reorder(LABEL, total_bairro)
-  ) %>%
+  mutate(total_bairro = replace_na(total_bairro, 0L),
+         LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
+         LABEL = fct_reorder(LABEL, total_bairro)) %>%
   ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
   geom_tile(color = "white") +
   scale_fill_distiller(palette = "Greens", direction = 1) +
@@ -1558,17 +1552,14 @@ g_heat_sar <- casos_bairro_sem_sar %>%
   labs(
     title    = paste("SRAG por Bairro e Semana Epidemiológica — Sarandi |", titulo_ano),
     subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana",
-    caption = texto_rodape
+    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
   ) +
   theme_minimal()
 
-salvar_grafico(
-  g_heat_sar,
-  paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
-  width = 14, height = 6
-)
-# Série por classificação etiológica
+salvar_grafico(g_heat_sar,
+               paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
+               width = 14, height = 6)
+
 g_class <- casos_semana_class %>%
   ggplot(aes(x = SEM_EPI, y = casos, color = CLASSIFICACAO, group = CLASSIFICACAO)) +
   geom_line(linewidth = 0.7) +
@@ -1594,7 +1585,6 @@ salvar_grafico(g_class,
 
 tmap_mode("plot")
 
-# --- Mapa por município ---
 if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   message("\nGerando mapa por município...")
   malha_pr <- sf::st_read(CAMINHO_SHP_MUNICIPIOS, quiet = TRUE)
@@ -1605,12 +1595,10 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
     left_join(casos_municipio, by = c("CO_MUN_6" = "CO_MUN_RES"))
   
   mapa_casos <- tm_shape(malha_15rs) +
-    tm_polygons(
-      fill        = "casos",
-      fill.scale  = tm_scale_continuous(values = "brewer.blues"),
-      fill.legend = tm_legend(title = "Casos de SRAG"),
-      col = "white", lwd = 0.5
-    ) +
+    tm_polygons(fill = "casos",
+                fill.scale  = tm_scale_continuous(values = "brewer.blues"),
+                fill.legend = tm_legend(title = "Casos de SRAG"),
+                col = "white", lwd = 0.5) +
     tm_text("NM_MUN", size = 0.45, col = "grey20") +
     tm_title(paste("SRAG — Casos por Município\n15ª RS Maringá/PR |", titulo_ano)) +
     tm_compass(position = c("right", "top"), size = 1.5) +
@@ -1618,16 +1606,13 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   
   tmap_save(mapa_casos,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_casos_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2000, 
-          device = png)
+            width = 2400, height = 2000, device = png)
   
   mapa_incid <- tm_shape(malha_15rs) +
-    tm_polygons(
-      fill        = "incidencia_100k",
-      fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd"),
-      fill.legend = tm_legend(title = "Casos/100 mil hab."),
-      col = "white", lwd = 0.5
-    ) +
+    tm_polygons(fill = "incidencia_100k",
+                fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd"),
+                fill.legend = tm_legend(title = "Casos/100 mil hab."),
+                col = "white", lwd = 0.5) +
     tm_text("NM_MUN", size = 0.45, col = "grey20") +
     tm_title(paste("SRAG — Incidência\n15ª RS Maringá/PR |", titulo_ano, "| Pop. IBGE 2025")) +
     tm_compass(position = c("right", "top"), size = 1.5) +
@@ -1635,16 +1620,13 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   
   tmap_save(mapa_incid,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_incidencia_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2000, 
-          device = png)
+            width = 2400, height = 2000, device = png)
   
   message("Mapas por município salvos.")
 } else {
   warning("Shapefile de municípios não encontrado: ", CAMINHO_SHP_MUNICIPIOS)
 }
 
-
-# --- Função de mapa por bairro ---
 gera_mapa_bairro <- function(bairros_geo, casos_bairro_mun, col_nome,
                              de_para, corte, nome_municipio, ano) {
   bairros_geo <- bairros_geo %>% mutate(JOIN_KEY = normaliza_bairro(.data[[col_nome]]))
@@ -1657,27 +1639,20 @@ gera_mapa_bairro <- function(bairros_geo, casos_bairro_mun, col_nome,
       select(SHP_KEY, casos, obitos_srag, uti, letalidade)
   ) %>%
     group_by(SHP_KEY) %>%
-    summarise(
-      casos       = sum(casos,       na.rm = TRUE),
-      obitos_srag = sum(obitos_srag, na.rm = TRUE),
-      uti         = sum(uti,         na.rm = TRUE),
-      .groups = "drop"
-    ) %>%
-    mutate(
-      letalidade = round(obitos_srag / casos * 100, 1),
-      casos      = if_else(casos == 0L, NA_integer_, casos)
-    )
+    summarise(casos = sum(casos, na.rm = TRUE),
+              obitos_srag = sum(obitos_srag, na.rm = TRUE),
+              uti = sum(uti, na.rm = TRUE), .groups = "drop") %>%
+    mutate(letalidade = round(obitos_srag / casos * 100, 1),
+           casos = if_else(casos == 0L, NA_integer_, casos))
   
-  mapa_dados    <- bairros_geo %>% left_join(lookup, by = c("JOIN_KEY" = "SHP_KEY"))
-  bairros_nome  <- mapa_dados %>% filter(!is.na(casos) & casos >= corte)
+  mapa_dados   <- bairros_geo %>% left_join(lookup, by = c("JOIN_KEY" = "SHP_KEY"))
+  bairros_nome <- mapa_dados %>% filter(!is.na(casos) & casos >= corte)
   
   mapa <- tm_shape(mapa_dados) +
-    tm_polygons(
-      fill        = "casos",
-      fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd", value.na = "grey90"),
-      fill.legend = tm_legend(title = "Casos de SRAG"),
-      col = "grey40", lwd = 0.5
-    ) +
+    tm_polygons(fill = "casos",
+                fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd", value.na = "grey90"),
+                fill.legend = tm_legend(title = "Casos de SRAG"),
+                col = "grey40", lwd = 0.5) +
     tm_title(paste0("SRAG por Bairro — ", nome_municipio, "/PR | ", ano,
                     "\nNomes exibidos: >= ", corte, " casos")) +
     tm_compass(position = c("right", "top"), size = 1.5) +
@@ -1692,25 +1667,24 @@ gera_mapa_bairro <- function(bairros_geo, casos_bairro_mun, col_nome,
   mapa
 }
 
-# --- Mapa de bairros — Maringá ---
 de_para_maringa <- tibble::tribble(
-  ~SHP_KEY,                                                ~SIVEP_KEY,
-  "JARDIM ALVORADA I PARTE",                               "JARDIM ALVORADA",
-  "JARDIM ALVORADA II PARTE",                              "JARDIM ALVORADA",
-  "SUB LT 77A71 JARDIM ALVORADA III",                      "JARDIM ALVORADA",
-  "CONJUNTO HABITACIONAL REQUIAO I 1 PARTE",               "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 2 PARTE",               "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 3 PARTE",               "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 4 PARTE",               "CONJUNTO HABITACIONAL REQUIAO",
-  "PARQUE ITAIPU I PARTE",                                 "JARDIM ITAIPU",
-  "PARQUE ITAIPU II PARTE",                                "JARDIM ITAIPU",
-  "PARQUE HORTENCIA I PARTE",                              "PARQUE HORTENCIA",
-  "PARQUE HORTENCIA II PARTE",                             "PARQUE HORTENCIA",
-  "LOTEAMENTO LIBERDADE I PARTE",                          "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE II PARTE",                         "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE III PARTE",                        "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE IV PARTE",                         "JARDIM LIBERDADE",
-  "CONJUNTO CIDADE ALTA",                                  "CONJUNTO RESIDENCIAL CIDADE AL"
+  ~SHP_KEY,                                          ~SIVEP_KEY,
+  "JARDIM ALVORADA I PARTE",                         "JARDIM ALVORADA",
+  "JARDIM ALVORADA II PARTE",                        "JARDIM ALVORADA",
+  "SUB LT 77A71 JARDIM ALVORADA III",                "JARDIM ALVORADA",
+  "CONJUNTO HABITACIONAL REQUIAO I 1 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
+  "CONJUNTO HABITACIONAL REQUIAO I 2 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
+  "CONJUNTO HABITACIONAL REQUIAO I 3 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
+  "CONJUNTO HABITACIONAL REQUIAO I 4 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
+  "PARQUE ITAIPU I PARTE",                           "JARDIM ITAIPU",
+  "PARQUE ITAIPU II PARTE",                          "JARDIM ITAIPU",
+  "PARQUE HORTENCIA I PARTE",                        "PARQUE HORTENCIA",
+  "PARQUE HORTENCIA II PARTE",                       "PARQUE HORTENCIA",
+  "LOTEAMENTO LIBERDADE I PARTE",                    "JARDIM LIBERDADE",
+  "LOTEAMENTO LIBERDADE II PARTE",                   "JARDIM LIBERDADE",
+  "LOTEAMENTO LIBERDADE III PARTE",                  "JARDIM LIBERDADE",
+  "LOTEAMENTO LIBERDADE IV PARTE",                   "JARDIM LIBERDADE",
+  "CONJUNTO CIDADE ALTA",                            "CONJUNTO RESIDENCIAL CIDADE AL"
 )
 
 if (file.exists(CAMINHO_SHP_MARINGA)) {
@@ -1719,28 +1693,21 @@ if (file.exists(CAMINHO_SHP_MARINGA)) {
     sf::st_transform(crs = 4326)
   
   mapa_mar <- gera_mapa_bairro(
-    bairros_geo      = bairros_mar,
-    casos_bairro_mun = casos_bairro,
-    col_nome         = "NOME",
-    de_para          = de_para_maringa,
-    corte            = CORTE_NOME_BAIRRO,
-    nome_municipio   = "Maringá",
-    ano              = titulo_ano
+    bairros_geo = bairros_mar, casos_bairro_mun = casos_bairro,
+    col_nome = "NOME", de_para = de_para_maringa,
+    corte = CORTE_NOME_BAIRRO, nome_municipio = "Maringá", ano = titulo_ano
   )
   
   tmap_save(mapa_mar,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_maringa_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400, 
-          device = png)
+            width = 2400, height = 2400, device = png)
   message("Mapa de Maringá salvo.")
 } else {
   warning("Shapefile de bairros de Maringá não encontrado: ", CAMINHO_SHP_MARINGA)
 }
 
-# --- Mapa de bairros — Sarandi ---
 de_para_sarandi <- tibble::tribble(
   ~SHP_KEY, ~SIVEP_KEY
-  # Adicione correspondências conforme necessário
 )
 
 if (file.exists(CAMINHO_SHP_SARANDI)) {
@@ -1749,19 +1716,14 @@ if (file.exists(CAMINHO_SHP_SARANDI)) {
     sf::st_transform(crs = 4326)
   
   mapa_sar <- gera_mapa_bairro(
-    bairros_geo      = bairros_sar,
-    casos_bairro_mun = casos_bairro_sar,
-    col_nome         = "Bairro",
-    de_para          = de_para_sarandi,
-    corte            = CORTE_NOME_BAIRRO_SAR,
-    nome_municipio   = "Sarandi",
-    ano              = titulo_ano
+    bairros_geo = bairros_sar, casos_bairro_mun = casos_bairro_sar,
+    col_nome = "Bairro", de_para = de_para_sarandi,
+    corte = CORTE_NOME_BAIRRO_SAR, nome_municipio = "Sarandi", ano = titulo_ano
   )
   
   tmap_save(mapa_sar,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_sarandi_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400, 
-          device = png)
+            width = 2400, height = 2400, device = png)
   message("Mapa de Sarandi salvo.")
 } else {
   warning("Shapefile de bairros de Sarandi não encontrado: ", CAMINHO_SHP_SARANDI)
@@ -1769,7 +1731,7 @@ if (file.exists(CAMINHO_SHP_SARANDI)) {
 
 
 # ==============================================================================
-# EXPORTAÇÃO EXCEL (opcional)
+# EXPORTAÇÃO EXCEL
 # ==============================================================================
 
 dir_tabelas <- file.path(dirname(DIR_GRAFICOS), "tabelas")
