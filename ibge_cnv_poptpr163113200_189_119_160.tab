@@ -1,0 +1,28 @@
+Titulo1= População Residente - Estimativas para o TCU - Paraná
+Titulo2=População estimada segundo Região de Saúde (CIR)
+Rodape=Período:2023
+Nomemapa=c:\tabwin\pr_regsaud.map
+"Região de Saúde (CIR)";"População_estimada"
+"41001 1ª RS Paranaguá";301405
+"41002 2ª RS Metropolitana";3560258
+"41003 3ª RS Ponta Grossa";635618
+"41004 4ª RS Irati";164469
+"41005 5ª RS Guarapuava";451626
+"41006 6ª RS União da Vitória";162561
+"41007 7ª RS Pato Branco";279819
+"41008 8ª RS Francisco Beltrão";382860
+"41009 9ª RS Foz do Iguaçu";443395
+"41010 10ª RS Cascavel";576817
+"41011 11ª RS Campo Mourão";341931
+"41012 12ª RS Umuarama";289984
+"41013 13ª RS Cianorte";153870
+"41014 14ª RS Paranavaí";272818
+"41015 15ª RS Maringá";865048
+"41016 16ª RS Apucarana";376371
+"41017 17ª RS Londrina";943867
+"41018 18ª RS Cornélio Procópio";214399
+"41019 19ª RS Jacarezinho";292531
+"41020 20ª RS Toledo";418589
+"41021 21ª RS Telêmaco Borba";181345
+"41022 22ª RS Ivaiporã";134799
+"Total";11444380
