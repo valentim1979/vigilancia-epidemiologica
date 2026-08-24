@@ -13,6 +13,120 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
 
 ---
 
+## Notificações por estabelecimento
+
+::: {.callout-note}
+Dados agregados por estabelecimento e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`.
+:::
+
+```{ojs}
+//| echo: false
+dados_estab = FileAttachment("dados/notificacoes_estabelecimento.csv").csv({typed: true})
+```
+
+```{ojs}
+//| echo: false
+lista_estabelecimentos = ["Todos os Estabelecimentos"].concat(
+  [...new Set(dados_estab.map(d => d.ESTABELECIMENTO))].sort()
+)
+```
+
+```{ojs}
+//| echo: false
+viewof estabelecimento_sel = Inputs.select(
+  lista_estabelecimentos,
+  { label: "🏥 Estabelecimento", value: "Todos os Estabelecimentos" }
+)
+```
+
+```{ojs}
+//| echo: false
+dados_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
+  ? dados_estab
+  : dados_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
+```
+
+```{ojs}
+//| echo: false
+serie_semanal = d3.rollups(
+  dados_filtrados,
+  v => ({
+    casos: d3.sum(v, d => d.casos),
+    obitos: d3.sum(v, d => d.obitos),
+    uti: d3.sum(v, d => d.uti),
+    confirmados: d3.sum(v, d => d.confirmados)
+  }),
+  d => d.SEM_EPI
+).map(([SEM_EPI, vals]) => ({ SEM_EPI, ...vals })).sort((a, b) => a.SEM_EPI - b.SEM_EPI)
+```
+
+```{ojs}
+//| echo: false
+total_casos   = d3.sum(dados_filtrados, d => d.casos)
+total_obitos  = d3.sum(dados_filtrados, d => d.obitos)
+total_uti     = d3.sum(dados_filtrados, d => d.uti)
+letalidade_pct = total_casos > 0 ? (total_obitos / total_casos * 100).toFixed(1) : "0.0"
+```
+
+```{ojs}
+//| echo: false
+md`**Notificações:** ${total_casos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Óbitos:** ${total_obitos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **UTI:** ${total_uti.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Letalidade:** ${letalidade_pct}%`
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  title: `Notificações por semana epidemiológica — ${estabelecimento_sel}`,
+  width: 850,
+  height: 380,
+  marginLeft: 50,
+  x: { label: "Semana epidemiológica" },
+  y: { label: "Notificações" },
+  marks: [
+    Plot.barY(serie_semanal, { x: "SEM_EPI", y: "casos", fill: "#003366", tip: true }),
+    Plot.ruleY([0])
+  ]
+})
+```
+
+::: {.callout-tip collapse="true"}
+### Top 15 estabelecimentos por volume (todo o período carregado)
+
+```{ojs}
+//| echo: false
+ranking_estab = d3.rollups(
+  dados_estab,
+  v => d3.sum(v, d => d.casos),
+  d => d.ESTABELECIMENTO
+)
+  .map(([ESTABELECIMENTO, casos]) => ({ ESTABELECIMENTO, casos }))
+  .sort((a, b) => d3.descending(a.casos, b.casos))
+  .slice(0, 15)
+```
+
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 850,
+  height: 420,
+  marginLeft: 220,
+  x: { label: "Notificações" },
+  y: { label: null },
+  marks: [
+    Plot.barX(ranking_estab, {
+      x: "casos",
+      y: "ESTABELECIMENTO",
+      sort: { y: "-x" },
+      fill: d => d.ESTABELECIMENTO === estabelecimento_sel ? "#d62728" : "#334e68",
+      tip: true
+    })
+  ]
+})
+```
+:::
+
+---
+
 ## Série temporal
 
 ::: {.panel-tabset}

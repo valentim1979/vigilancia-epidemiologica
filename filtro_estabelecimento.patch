@@ -1,0 +1,195 @@
+diff --git a/SCRIPT_Unificado.R b/SCRIPT_Unificado.R
+index 0fd0e12..d3de72b 100644
+--- a/SCRIPT_Unificado.R
++++ b/SCRIPT_Unificado.R
+@@ -1750,6 +1750,52 @@ writexl::write_xlsx(
+ )
+ 
+ 
++# ==============================================================================
++# EXPORTAÇÃO — DADOS POR ESTABELECIMENTO (para filtro interativo no site)
++# Gera um CSV agregado (estabelecimento x semana) consumido pelo bloco
++# Observable JS em srag.qmd. Não inclui microdados individuais.
++# ==============================================================================
++
++col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
++col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
++
++if (is.na(col_estab)) {
++  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE) ",
++          "encontrada na base. Exportação para o filtro do site foi pulada.")
++} else {
++  casos_estabelecimento <- base_ano_principal %>%
++    mutate(
++      ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
++      MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)]
++    ) %>%
++    filter(
++      !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
++      !is.na(SEM_EPI)
++    ) %>%
++    group_by(ESTABELECIMENTO, MUNICIPIO, SEM_EPI) %>%
++    summarise(
++      casos       = n(),
++      obitos      = sum(EVOLUCAO == 2, na.rm = TRUE),
++      uti         = sum(UTI == 1, na.rm = TRUE),
++      confirmados = sum(CLASSI_FIN %in% c(1, 2, 3, 5), na.rm = TRUE),
++      .groups     = "drop"
++    ) %>%
++    arrange(ESTABELECIMENTO, SEM_EPI)
++
++  dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
++  if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
++
++  readr::write_csv(
++    casos_estabelecimento,
++    file.path(dir_dados, "notificacoes_estabelecimento.csv")
++  )
++
++  message("Dados por estabelecimento exportados: ",
++          format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
++          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
++}
++
++
+ # ==============================================================================
+ # RESUMO FINAL
+ # ==============================================================================
+diff --git a/_quarto.yml b/_quarto.yml
+index 148db93..e79e398 100644
+--- a/_quarto.yml
++++ b/_quarto.yml
+@@ -1,6 +1,8 @@
+ project:
+   type: website
+   output-dir: docs
++  resources:
++    - "dados/**"
+ 
+ website:
+   title: "15ª RS — Vigilância Epidemiológica"
+diff --git a/srag.qmd b/srag.qmd
+index 5f697a7..908237f 100755
+--- a/srag.qmd
++++ b/srag.qmd
+@@ -13,6 +13,120 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
+ 
+ ---
+ 
++## Notificações por estabelecimento
++
++::: {.callout-note}
++Dados agregados por estabelecimento e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`.
++:::
++
++```{ojs}
++//| echo: false
++dados_estab = FileAttachment("dados/notificacoes_estabelecimento.csv").csv({typed: true})
++```
++
++```{ojs}
++//| echo: false
++lista_estabelecimentos = ["Todos os Estabelecimentos"].concat(
++  [...new Set(dados_estab.map(d => d.ESTABELECIMENTO))].sort()
++)
++```
++
++```{ojs}
++//| echo: false
++viewof estabelecimento_sel = Inputs.select(
++  lista_estabelecimentos,
++  { label: "🏥 Estabelecimento", value: "Todos os Estabelecimentos" }
++)
++```
++
++```{ojs}
++//| echo: false
++dados_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
++  ? dados_estab
++  : dados_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
++```
++
++```{ojs}
++//| echo: false
++serie_semanal = d3.rollups(
++  dados_filtrados,
++  v => ({
++    casos: d3.sum(v, d => d.casos),
++    obitos: d3.sum(v, d => d.obitos),
++    uti: d3.sum(v, d => d.uti),
++    confirmados: d3.sum(v, d => d.confirmados)
++  }),
++  d => d.SEM_EPI
++).map(([SEM_EPI, vals]) => ({ SEM_EPI, ...vals })).sort((a, b) => a.SEM_EPI - b.SEM_EPI)
++```
++
++```{ojs}
++//| echo: false
++total_casos   = d3.sum(dados_filtrados, d => d.casos)
++total_obitos  = d3.sum(dados_filtrados, d => d.obitos)
++total_uti     = d3.sum(dados_filtrados, d => d.uti)
++letalidade_pct = total_casos > 0 ? (total_obitos / total_casos * 100).toFixed(1) : "0.0"
++```
++
++```{ojs}
++//| echo: false
++md`**Notificações:** ${total_casos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Óbitos:** ${total_obitos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **UTI:** ${total_uti.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Letalidade:** ${letalidade_pct}%`
++```
++
++```{ojs}
++//| echo: false
++Plot.plot({
++  title: `Notificações por semana epidemiológica — ${estabelecimento_sel}`,
++  width: 850,
++  height: 380,
++  marginLeft: 50,
++  x: { label: "Semana epidemiológica" },
++  y: { label: "Notificações" },
++  marks: [
++    Plot.barY(serie_semanal, { x: "SEM_EPI", y: "casos", fill: "#003366", tip: true }),
++    Plot.ruleY([0])
++  ]
++})
++```
++
++::: {.callout-tip collapse="true"}
++### Top 15 estabelecimentos por volume (todo o período carregado)
++
++```{ojs}
++//| echo: false
++ranking_estab = d3.rollups(
++  dados_estab,
++  v => d3.sum(v, d => d.casos),
++  d => d.ESTABELECIMENTO
++)
++  .map(([ESTABELECIMENTO, casos]) => ({ ESTABELECIMENTO, casos }))
++  .sort((a, b) => d3.descending(a.casos, b.casos))
++  .slice(0, 15)
++```
++
++```{ojs}
++//| echo: false
++Plot.plot({
++  width: 850,
++  height: 420,
++  marginLeft: 220,
++  x: { label: "Notificações" },
++  y: { label: null },
++  marks: [
++    Plot.barX(ranking_estab, {
++      x: "casos",
++      y: "ESTABELECIMENTO",
++      sort: { y: "-x" },
++      fill: d => d.ESTABELECIMENTO === estabelecimento_sel ? "#d62728" : "#334e68",
++      tip: true
++    })
++  ]
++})
++```
++:::
++
++---
++
+ ## Série temporal
+ 
+ ::: {.panel-tabset}
