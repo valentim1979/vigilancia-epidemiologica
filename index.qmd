@@ -135,6 +135,91 @@ Plot.plot({
 ```
 :::
 
+### Circulação viral no estabelecimento selecionado
+
+```{ojs}
+//| echo: false
+dados_virus_estab = FileAttachment("dados/circulacao_viral_estabelecimento.csv").csv({typed: true})
+```
+
+```{ojs}
+//| echo: false
+virus_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
+  ? dados_virus_estab
+  : dados_virus_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
+```
+
+```{ojs}
+//| echo: false
+virus_total = d3.rollups(
+  virus_filtrados,
+  v => d3.sum(v, d => d.positivos),
+  d => d.virus
+)
+  .map(([virus, positivos]) => ({ virus, positivos }))
+  .filter(d => d.positivos > 0)
+  .sort((a, b) => d3.descending(a.positivos, b.positivos))
+```
+
+```{ojs}
+//| echo: false
+virus_total.length > 0
+  ? Plot.plot({
+      title: `Vírus identificados por RT-PCR — ${estabelecimento_sel}`,
+      width: 850,
+      height: 320,
+      marginLeft: 150,
+      marginRight: 50,
+      x: { label: "Casos positivos" },
+      y: { label: null },
+      marks: [
+        Plot.barX(virus_total, { x: "positivos", y: "virus", sort: { y: "-x" }, fill: "#0057A3", tip: true }),
+        Plot.text(virus_total, {
+          x: "positivos", y: "virus", text: d => d.positivos,
+          dx: 4, textAnchor: "start", fontSize: 10, fill: "#333333"
+        })
+      ]
+    })
+  : md`*Sem detecções virais registradas para **${estabelecimento_sel}** no período carregado.*`
+```
+
+```{ojs}
+//| echo: false
+virus_semanal_estab = d3.rollups(
+  virus_filtrados,
+  v => d3.sum(v, d => d.positivos),
+  d => d.SEM_EPI,
+  d => d.virus
+)
+  .flatMap(([SEM_EPI, porVirus]) =>
+    porVirus.map(([virus, positivos]) => ({ SEM_EPI: +SEM_EPI, virus, positivos }))
+  )
+  .sort((a, b) => a.SEM_EPI - b.SEM_EPI)
+```
+
+```{ojs}
+//| echo: false
+virus_semanal_estab.length > 0
+  ? Plot.plot({
+      title: `Tendência semanal de vírus respiratórios — ${estabelecimento_sel}`,
+      width: 850,
+      height: 380,
+      marginLeft: 50,
+      x: { label: "Semana epidemiológica" },
+      y: { label: "Casos positivos" },
+      color: { legend: true, range: d3.schemeSet1 },
+      marks: [
+        Plot.lineY(virus_semanal_estab, { x: "SEM_EPI", y: "positivos", stroke: "virus", tip: true }),
+        Plot.dot(virus_semanal_estab, { x: "SEM_EPI", y: "positivos", stroke: "virus", r: 2 })
+      ]
+    })
+  : md`*Sem série semanal de vírus disponível para **${estabelecimento_sel}**.*`
+```
+
+::: {.callout-note}
+Circulação viral (RT-PCR) segue os mesmos vírus monitorados nos gráficos gerais da seção "Circulação viral" mais abaixo: Influenza, VSR, Rinovírus, Adenovírus, Metapneumovírus e Covid-19.
+:::
+
 ---
 
 ## Série temporal

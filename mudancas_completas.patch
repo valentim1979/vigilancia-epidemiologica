@@ -1,16 +1,20 @@
 diff --git a/SCRIPT_Unificado.R b/SCRIPT_Unificado.R
-index 0fd0e12..d3de72b 100644
+index 0fd0e12..ff7657e 100644
 --- a/SCRIPT_Unificado.R
 +++ b/SCRIPT_Unificado.R
-@@ -1750,6 +1750,52 @@ writexl::write_xlsx(
+@@ -1750,6 +1750,105 @@ writexl::write_xlsx(
  )
  
  
 +# ==============================================================================
 +# EXPORTAÇÃO — DADOS POR ESTABELECIMENTO (para filtro interativo no site)
-+# Gera um CSV agregado (estabelecimento x semana) consumido pelo bloco
-+# Observable JS em srag.qmd. Não inclui microdados individuais.
++# Gera CSVs agregados (estabelecimento x semana [x vírus]) consumidos pelos
++# blocos Observable JS em index.qmd, na seção "Notificações por estabelecimento".
++# Não inclui microdados individuais.
 +# ==============================================================================
++
++dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
++if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
 +
 +col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
 +col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
@@ -38,9 +42,6 @@ index 0fd0e12..d3de72b 100644
 +    ) %>%
 +    arrange(ESTABELECIMENTO, SEM_EPI)
 +
-+  dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
-+  if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
-+
 +  readr::write_csv(
 +    casos_estabelecimento,
 +    file.path(dir_dados, "notificacoes_estabelecimento.csv")
@@ -49,6 +50,58 @@ index 0fd0e12..d3de72b 100644
 +  message("Dados por estabelecimento exportados: ",
 +          format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
 +          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
++
++  # ----------------------------------------------------------------------------
++  # CIRCULAÇÃO VIRAL POR ESTABELECIMENTO
++  # Mesmos vírus usados nos gráficos 13/14 (circulação viral total / tendência
++  # semanal), agora quebrados por estabelecimento para alimentar o filtro.
++  # ----------------------------------------------------------------------------
++  colunas_virus_estab <- c(
++    POS_PCRFLU = "Influenza",
++    PCR_VSR    = "VSR",
++    PCR_RINO   = "Rinovírus",
++    PCR_ADENO  = "Adenovírus",
++    PCR_METAP  = "Metapneumovírus",
++    PCR_SARS2  = "Covid-19"
++  )
++  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_ano_principal))
++
++  if (length(cols_presentes_virus) == 0) {
++    warning("Nenhuma coluna de PCR viral encontrada na base. ",
++            "Exportação de circulação viral por estabelecimento foi pulada.")
++  } else {
++    circulacao_viral_estab <- base_ano_principal %>%
++      mutate(
++        ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
++        MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)],
++        across(all_of(cols_presentes_virus), ~ .x == 1, .names = "VFLAG_{.col}")
++      ) %>%
++      filter(
++        !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
++        !is.na(SEM_EPI)
++      ) %>%
++      select(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, starts_with("VFLAG_")) %>%
++      tidyr::pivot_longer(
++        cols      = starts_with("VFLAG_"),
++        names_to  = "virus_cod",
++        values_to = "positivo"
++      ) %>%
++      mutate(
++        virus_cod = sub("^VFLAG_", "", virus_cod),
++        virus     = colunas_virus_estab[virus_cod]
++      ) %>%
++      filter(positivo == TRUE) %>%
++      count(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, virus, name = "positivos") %>%
++      arrange(ESTABELECIMENTO, SEM_EPI, virus)
++
++    readr::write_csv(
++      circulacao_viral_estab,
++      file.path(dir_dados, "circulacao_viral_estabelecimento.csv")
++    )
++
++    message("Circulação viral por estabelecimento exportada: ",
++            format(nrow(circulacao_viral_estab), big.mark = "."), " linhas.")
++  }
 +}
 +
 +
@@ -78,10 +131,10 @@ index 148db93..b064c1d 100644
        - href: sobre.qmd
          text: "Sobre"
 diff --git a/index.qmd b/index.qmd
-index 7f32320..7966d4e 100755
+index 7f32320..d7a43db 100755
 --- a/index.qmd
 +++ b/index.qmd
-@@ -1,52 +1,306 @@
+@@ -1,52 +1,391 @@
  ---
 -title: "Boletim Epidemiológico"
 -subtitle: "15ª Regional de Saúde — Maringá/PR"
@@ -234,7 +287,93 @@ index 7f32320..7966d4e 100755
 +    })
 +  ]
 +})
++```
++:::
++
++### Circulação viral no estabelecimento selecionado
++
++```{ojs}
++//| echo: false
++dados_virus_estab = FileAttachment("dados/circulacao_viral_estabelecimento.csv").csv({typed: true})
  ```
+ 
+-Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.
++```{ojs}
++//| echo: false
++virus_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
++  ? dados_virus_estab
++  : dados_virus_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
++```
++
++```{ojs}
++//| echo: false
++virus_total = d3.rollups(
++  virus_filtrados,
++  v => d3.sum(v, d => d.positivos),
++  d => d.virus
++)
++  .map(([virus, positivos]) => ({ virus, positivos }))
++  .filter(d => d.positivos > 0)
++  .sort((a, b) => d3.descending(a.positivos, b.positivos))
++```
++
++```{ojs}
++//| echo: false
++virus_total.length > 0
++  ? Plot.plot({
++      title: `Vírus identificados por RT-PCR — ${estabelecimento_sel}`,
++      width: 850,
++      height: 320,
++      marginLeft: 150,
++      marginRight: 50,
++      x: { label: "Casos positivos" },
++      y: { label: null },
++      marks: [
++        Plot.barX(virus_total, { x: "positivos", y: "virus", sort: { y: "-x" }, fill: "#0057A3", tip: true }),
++        Plot.text(virus_total, {
++          x: "positivos", y: "virus", text: d => d.positivos,
++          dx: 4, textAnchor: "start", fontSize: 10, fill: "#333333"
++        })
++      ]
++    })
++  : md`*Sem detecções virais registradas para **${estabelecimento_sel}** no período carregado.*`
++```
++
++```{ojs}
++//| echo: false
++virus_semanal_estab = d3.rollups(
++  virus_filtrados,
++  v => d3.sum(v, d => d.positivos),
++  d => d.SEM_EPI,
++  d => d.virus
++)
++  .flatMap(([SEM_EPI, porVirus]) =>
++    porVirus.map(([virus, positivos]) => ({ SEM_EPI: +SEM_EPI, virus, positivos }))
++  )
++  .sort((a, b) => a.SEM_EPI - b.SEM_EPI)
++```
++
++```{ojs}
++//| echo: false
++virus_semanal_estab.length > 0
++  ? Plot.plot({
++      title: `Tendência semanal de vírus respiratórios — ${estabelecimento_sel}`,
++      width: 850,
++      height: 380,
++      marginLeft: 50,
++      x: { label: "Semana epidemiológica" },
++      y: { label: "Casos positivos" },
++      color: { legend: true, range: d3.schemeSet1 },
++      marks: [
++        Plot.lineY(virus_semanal_estab, { x: "SEM_EPI", y: "positivos", stroke: "virus", tip: true }),
++        Plot.dot(virus_semanal_estab, { x: "SEM_EPI", y: "positivos", stroke: "virus", r: 2 })
++      ]
++    })
++  : md`*Sem série semanal de vírus disponível para **${estabelecimento_sel}**.*`
++```
++
++::: {.callout-note}
++Circulação viral (RT-PCR) segue os mesmos vírus monitorados nos gráficos gerais da seção "Circulação viral" mais abaixo: Influenza, VSR, Rinovírus, Adenovírus, Metapneumovírus e Covid-19.
 +:::
 +
 +---
@@ -286,8 +425,7 @@ index 7f32320..7966d4e 100755
 +![Casos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução.](graficos/07b_variacao_semanal.png){.lightbox}
 +
 +:::
- 
--Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.
++
 +---
 +
 +## Distribuição geográfica — gráficos
@@ -303,10 +441,9 @@ index 7f32320..7966d4e 100755
 +![Total de notificações de SRAG por Regional de Saúde — Paraná — 2026.](graficos/10_notificacoes_regionais_pr.png){.lightbox}
 +
 +:::
- 
- ---
- 
--## Vigilância Universal — SRAG
++
++---
++
 +## Distribuição geográfica — mapas
 +
 +::: {.callout-note}
@@ -320,18 +457,11 @@ index 7f32320..7966d4e 100755
 +![Mapa de casos absolutos de SRAG por município da 15ª RS — 2026.](graficos/mapa_srag_casos_2026.png){.lightbox group="mapas-municipio"}
 +
 +### Incidência por município
- 
--Monitora **todos os casos hospitalizados** de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.
++
 +![Mapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.](graficos/mapa_srag_incidencia_2026.png){.lightbox group="mapas-municipio"}
- 
--| | |
--|---|---|
--| **Abrangência** | Todos os hospitais da rede |
--| **Perfil** | Hospitalizados — casos graves, UTI, óbitos |
--| **Fonte** | SIVEP-Gripe (módulo hospitalar) |
++
 +### Bairros — Maringá
- 
--[→ Acessar dados de SRAG](srag.qmd){.btn .btn-primary}
++
 +![Distribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_maringa_2026.png){.lightbox group="mapas-bairro"}
 +
 +### Bairros — Sarandi
@@ -342,7 +472,7 @@ index 7f32320..7966d4e 100755
  
  ---
  
--## Área de abrangência — 15ª RS
+-## Vigilância Universal — SRAG
 +## Perfil dos casos
 +
 +::: {.panel-tabset}
@@ -370,19 +500,27 @@ index 7f32320..7966d4e 100755
 +### Desfecho
 +
 +![Distribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.](graficos/19_evolucao_desfecho.png){.lightbox}
-+
+ 
+-Monitora **todos os casos hospitalizados** de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.
 +### Raça/Cor
-+
+ 
+-| | |
+-|---|---|
+-| **Abrangência** | Todos os hospitais da rede |
+-| **Perfil** | Hospitalizados — casos graves, UTI, óbitos |
+-| **Fonte** | SIVEP-Gripe (módulo hospitalar) |
 +![Distribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.](graficos/20_raca_cor.png){.lightbox}
-+
+ 
+-[→ Acessar dados de SRAG](srag.qmd){.btn .btn-primary}
 +### Escolaridade
 +
 +![Distribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026.](graficos/21_escolaridade.png){.lightbox}
 +
 +:::
-+
-+---
-+
+ 
+ ---
+ 
+-## Área de abrangência — 15ª RS
 +## Circulação viral
 +
 +::: {.panel-tabset}
