@@ -1752,9 +1752,13 @@ writexl::write_xlsx(
 
 # ==============================================================================
 # EXPORTAÇÃO — DADOS POR ESTABELECIMENTO (para filtro interativo no site)
-# Gera um CSV agregado (estabelecimento x semana) consumido pelo bloco
-# Observable JS em srag.qmd. Não inclui microdados individuais.
+# Gera CSVs agregados (estabelecimento x semana [x vírus]) consumidos pelos
+# blocos Observable JS em index.qmd, na seção "Notificações por estabelecimento".
+# Não inclui microdados individuais.
 # ==============================================================================
+
+dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
+if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
 
 col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
 col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
@@ -1782,9 +1786,6 @@ if (is.na(col_estab)) {
     ) %>%
     arrange(ESTABELECIMENTO, SEM_EPI)
 
-  dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
-  if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
-
   readr::write_csv(
     casos_estabelecimento,
     file.path(dir_dados, "notificacoes_estabelecimento.csv")
@@ -1793,6 +1794,58 @@ if (is.na(col_estab)) {
   message("Dados por estabelecimento exportados: ",
           format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
           n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
+
+  # ----------------------------------------------------------------------------
+  # CIRCULAÇÃO VIRAL POR ESTABELECIMENTO
+  # Mesmos vírus usados nos gráficos 13/14 (circulação viral total / tendência
+  # semanal), agora quebrados por estabelecimento para alimentar o filtro.
+  # ----------------------------------------------------------------------------
+  colunas_virus_estab <- c(
+    POS_PCRFLU = "Influenza",
+    PCR_VSR    = "VSR",
+    PCR_RINO   = "Rinovírus",
+    PCR_ADENO  = "Adenovírus",
+    PCR_METAP  = "Metapneumovírus",
+    PCR_SARS2  = "Covid-19"
+  )
+  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_ano_principal))
+
+  if (length(cols_presentes_virus) == 0) {
+    warning("Nenhuma coluna de PCR viral encontrada na base. ",
+            "Exportação de circulação viral por estabelecimento foi pulada.")
+  } else {
+    circulacao_viral_estab <- base_ano_principal %>%
+      mutate(
+        ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
+        MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)],
+        across(all_of(cols_presentes_virus), ~ .x == 1, .names = "VFLAG_{.col}")
+      ) %>%
+      filter(
+        !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
+        !is.na(SEM_EPI)
+      ) %>%
+      select(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, starts_with("VFLAG_")) %>%
+      tidyr::pivot_longer(
+        cols      = starts_with("VFLAG_"),
+        names_to  = "virus_cod",
+        values_to = "positivo"
+      ) %>%
+      mutate(
+        virus_cod = sub("^VFLAG_", "", virus_cod),
+        virus     = colunas_virus_estab[virus_cod]
+      ) %>%
+      filter(positivo == TRUE) %>%
+      count(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, virus, name = "positivos") %>%
+      arrange(ESTABELECIMENTO, SEM_EPI, virus)
+
+    readr::write_csv(
+      circulacao_viral_estab,
+      file.path(dir_dados, "circulacao_viral_estabelecimento.csv")
+    )
+
+    message("Circulação viral por estabelecimento exportada: ",
+            format(nrow(circulacao_viral_estab), big.mark = "."), " linhas.")
+  }
 }
 
 
