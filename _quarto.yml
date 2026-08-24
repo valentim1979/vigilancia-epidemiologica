@@ -11,7 +11,7 @@ website:
   navbar:
     background: "#003366"
     left:
-      - href: srag.qmd
+      - href: index.qmd
         text: "Vigilância Universal — SRAG"
       - href: sobre.qmd
         text: "Sobre"
