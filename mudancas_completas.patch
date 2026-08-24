@@ -1,0 +1,622 @@
+diff --git a/SCRIPT_Unificado.R b/SCRIPT_Unificado.R
+index 0fd0e12..d3de72b 100644
+--- a/SCRIPT_Unificado.R
++++ b/SCRIPT_Unificado.R
+@@ -1750,6 +1750,52 @@ writexl::write_xlsx(
+ )
+ 
+ 
++# ==============================================================================
++# EXPORTAÇÃO — DADOS POR ESTABELECIMENTO (para filtro interativo no site)
++# Gera um CSV agregado (estabelecimento x semana) consumido pelo bloco
++# Observable JS em srag.qmd. Não inclui microdados individuais.
++# ==============================================================================
++
++col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
++col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
++
++if (is.na(col_estab)) {
++  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE) ",
++          "encontrada na base. Exportação para o filtro do site foi pulada.")
++} else {
++  casos_estabelecimento <- base_ano_principal %>%
++    mutate(
++      ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
++      MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)]
++    ) %>%
++    filter(
++      !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
++      !is.na(SEM_EPI)
++    ) %>%
++    group_by(ESTABELECIMENTO, MUNICIPIO, SEM_EPI) %>%
++    summarise(
++      casos       = n(),
++      obitos      = sum(EVOLUCAO == 2, na.rm = TRUE),
++      uti         = sum(UTI == 1, na.rm = TRUE),
++      confirmados = sum(CLASSI_FIN %in% c(1, 2, 3, 5), na.rm = TRUE),
++      .groups     = "drop"
++    ) %>%
++    arrange(ESTABELECIMENTO, SEM_EPI)
++
++  dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
++  if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
++
++  readr::write_csv(
++    casos_estabelecimento,
++    file.path(dir_dados, "notificacoes_estabelecimento.csv")
++  )
++
++  message("Dados por estabelecimento exportados: ",
++          format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
++          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
++}
++
++
+ # ==============================================================================
+ # RESUMO FINAL
+ # ==============================================================================
+diff --git a/_quarto.yml b/_quarto.yml
+index 148db93..b064c1d 100644
+--- a/_quarto.yml
++++ b/_quarto.yml
+@@ -1,6 +1,8 @@
+ project:
+   type: website
+   output-dir: docs
++  resources:
++    - "dados/**"
+ 
+ website:
+   title: "15ª RS — Vigilância Epidemiológica"
+@@ -9,7 +11,7 @@ website:
+   navbar:
+     background: "#003366"
+     left:
+-      - href: srag.qmd
++      - href: index.qmd
+         text: "Vigilância Universal — SRAG"
+       - href: sobre.qmd
+         text: "Sobre"
+diff --git a/index.qmd b/index.qmd
+index 7f32320..7966d4e 100755
+--- a/index.qmd
++++ b/index.qmd
+@@ -1,52 +1,306 @@
+ ---
+-title: "Boletim Epidemiológico"
+-subtitle: "15ª Regional de Saúde — Maringá/PR"
++title: "Vigilância Universal — SRAG"
++subtitle: "Síndrome Respiratória Aguda Grave — 15ª RS Maringá/PR"
+ date: now
+ date-format: "DD/MM/YYYY HH:mm"
+-toc: false
+ ---
+ 
+-```{=html}
+-<div class="callout callout-style-default callout-tip">
+-  <div class="callout-body">
+-    <strong>Fonte:</strong> SIVEP-Gripe &nbsp;|&nbsp;
+-    <strong>Ano de referência:</strong> 2026 &nbsp;|&nbsp;
+-    <strong>Última atualização:</strong> <span id="data-atualizacao"></span>
+-    <script>
+-      var d = new Date(document.lastModified);
+-      var dia = String(d.getDate()).padStart(2, '0');
+-      var mes = String(d.getMonth() + 1).padStart(2, '0');
+-      var ano = d.getFullYear();
+-      document.getElementById("data-atualizacao").textContent = dia + "/" + mes + "/" + ano;
+-    </script>
+-  </div>
+-</div>
++::: {.callout-tip}
++**Ano de referência:** 2026 &nbsp;|&nbsp; **Fonte:** SIVEP-Gripe (módulo hospitalar) &nbsp;|&nbsp; **Escopo:** 30 municípios da 15ª Regional de Saúde
++:::
++
++Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos.
++
++---
++
++## Notificações por estabelecimento
++
++::: {.callout-note}
++Dados agregados por estabelecimento e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`.
++:::
++
++```{ojs}
++//| echo: false
++dados_estab = FileAttachment("dados/notificacoes_estabelecimento.csv").csv({typed: true})
++```
++
++```{ojs}
++//| echo: false
++lista_estabelecimentos = ["Todos os Estabelecimentos"].concat(
++  [...new Set(dados_estab.map(d => d.ESTABELECIMENTO))].sort()
++)
++```
++
++```{ojs}
++//| echo: false
++viewof estabelecimento_sel = Inputs.select(
++  lista_estabelecimentos,
++  { label: "🏥 Estabelecimento", value: "Todos os Estabelecimentos" }
++)
++```
++
++```{ojs}
++//| echo: false
++dados_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
++  ? dados_estab
++  : dados_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
++```
++
++```{ojs}
++//| echo: false
++serie_semanal = d3.rollups(
++  dados_filtrados,
++  v => ({
++    casos: d3.sum(v, d => d.casos),
++    obitos: d3.sum(v, d => d.obitos),
++    uti: d3.sum(v, d => d.uti),
++    confirmados: d3.sum(v, d => d.confirmados)
++  }),
++  d => d.SEM_EPI
++).map(([SEM_EPI, vals]) => ({ SEM_EPI, ...vals })).sort((a, b) => a.SEM_EPI - b.SEM_EPI)
++```
++
++```{ojs}
++//| echo: false
++total_casos   = d3.sum(dados_filtrados, d => d.casos)
++total_obitos  = d3.sum(dados_filtrados, d => d.obitos)
++total_uti     = d3.sum(dados_filtrados, d => d.uti)
++letalidade_pct = total_casos > 0 ? (total_obitos / total_casos * 100).toFixed(1) : "0.0"
++```
++
++```{ojs}
++//| echo: false
++md`**Notificações:** ${total_casos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Óbitos:** ${total_obitos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **UTI:** ${total_uti.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Letalidade:** ${letalidade_pct}%`
++```
++
++```{ojs}
++//| echo: false
++Plot.plot({
++  title: `Notificações por semana epidemiológica — ${estabelecimento_sel}`,
++  width: 850,
++  height: 380,
++  marginLeft: 50,
++  marginTop: 30,
++  x: { label: "Semana epidemiológica" },
++  y: { label: "Notificações" },
++  marks: [
++    Plot.barY(serie_semanal, { x: "SEM_EPI", y: "casos", fill: "#0057A3", tip: true }),
++    Plot.text(serie_semanal, {
++      x: "SEM_EPI", y: "casos", text: d => d.casos,
++      dy: -6, fontSize: 10, fill: "#333333"
++    }),
++    Plot.ruleY([0])
++  ]
++})
++```
++
++::: {.callout-tip collapse="true"}
++### Top 15 estabelecimentos por volume (todo o período carregado)
++
++```{ojs}
++//| echo: false
++ranking_estab = d3.rollups(
++  dados_estab,
++  v => d3.sum(v, d => d.casos),
++  d => d.ESTABELECIMENTO
++)
++  .map(([ESTABELECIMENTO, casos]) => ({ ESTABELECIMENTO, casos }))
++  .sort((a, b) => d3.descending(a.casos, b.casos))
++  .slice(0, 15)
++```
++
++```{ojs}
++//| echo: false
++Plot.plot({
++  width: 850,
++  height: 420,
++  marginLeft: 220,
++  marginRight: 50,
++  x: { label: "Notificações" },
++  y: { label: null },
++  marks: [
++    Plot.barX(ranking_estab, {
++      x: "casos",
++      y: "ESTABELECIMENTO",
++      sort: { y: "-x" },
++      fill: "#0057A3",
++      tip: true
++    }),
++    Plot.text(ranking_estab, {
++      x: "casos", y: "ESTABELECIMENTO", text: d => d.casos,
++      dx: 4, textAnchor: "start", fontSize: 10, fill: "#333333"
++    })
++  ]
++})
+ ```
++:::
++
++---
++
++## Série temporal
++
++::: {.panel-tabset}
++
++### Curva comparativa
++
++![Curva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.](graficos/06_curva_epidemica_comparativa.png){.lightbox}
++
++### Canal endêmico
++
++::: {.callout-note}
++**Nota metodológica — Canal endêmico**
++
++O canal endêmico delimita zonas de referência para o número esperado de casos de SRAG por semana epidemiológica, com base no comportamento histórico observado no período pós-pandêmico.
++
++**Período de referência:** 2022–2025.
++
++Os anos de 2020 e 2021 foram excluídos por representarem perfil epidemiológico atípico decorrente da pandemia de COVID-19, com padrão de circulação viral incompatível com a vigilância de rotina. O ano de 2019 foi excluído por ser pré-pandêmico, período anterior à reorganização do perfil de vírus respiratórios que se estabeleceu após 2022.
++
++**Zonas de classificação:**
++
++- 🟢 **Esperado:** entre o P25 e P75 do histórico — comportamento dentro do padrão
++- 🟡 **Alerta:** entre o P75 e P90 do histórico — atenção reforçada recomendada
++- 🔴 **Epidêmico:** acima do P90 do histórico — situação que requer resposta imediata
++
++A linha tracejada verde representa a mediana histórica semanal (referência central).
++
++**Limitação:** com quatro anos de referência (2022–2025), os percentis são estimativas com maior incerteza do que o recomendado internacionalmente (mínimo de 5 anos). O canal se estabilizará progressivamente à medida que novos anos pós-pandêmicos forem incorporados. Os resultados devem ser interpretados com cautela, especialmente nas semanas com menor volume histórico de casos.
++
++**Fonte:** SIVEP-Gripe (módulo hospitalar) | Elaboração: SCVGE — 15ª RS
++:::
++
++![Canal endêmico de SRAG por semana epidemiológica — zona verde = esperado (P25–P75), zona amarela = alerta (P75–P90), pontos acima da zona amarela = nível epidêmico (> P90). Linha tracejada = mediana histórica pós-pandêmica (2022–2025).](graficos/06b_canal_endemico.png){.lightbox}
++
++### Notificações semanais
++
++![Total de notificações de SRAG por semana epidemiológica — 2026.](graficos/07_notificacoes_semana_epi.png){.lightbox}
++
++### Confirmados semanais
++
++![Casos confirmados de SRAG por semana epidemiológica — 2026.](graficos/08_confirmados_semana_epi.png){.lightbox}
++
++### Variação semanal
++
++![Casos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução.](graficos/07b_variacao_semanal.png){.lightbox}
++
++:::
+ 
+-Dados produzidos pela equipe de Vigilância Epidemiológica da 15ª Regional de Saúde a partir dos sistemas oficiais de informação em saúde.
++---
++
++## Distribuição geográfica — gráficos
++
++::: {.panel-tabset}
++
++### Incidência por município
++
++![Taxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).](graficos/09_incidencia_por_municipio.png){.lightbox}
++
++### Regionais do Paraná
++
++![Total de notificações de SRAG por Regional de Saúde — Paraná — 2026.](graficos/10_notificacoes_regionais_pr.png){.lightbox}
++
++:::
+ 
+ ---
+ 
+-## Vigilância Universal — SRAG
++## Distribuição geográfica — mapas
++
++::: {.callout-note}
++Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.
++:::
++
++::: {.panel-tabset}
++
++### Casos por município
++
++![Mapa de casos absolutos de SRAG por município da 15ª RS — 2026.](graficos/mapa_srag_casos_2026.png){.lightbox group="mapas-municipio"}
++
++### Incidência por município
+ 
+-Monitora **todos os casos hospitalizados** de Síndrome Respiratória Aguda Grave na rede de saúde da 15ª RS.
++![Mapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.](graficos/mapa_srag_incidencia_2026.png){.lightbox group="mapas-municipio"}
+ 
+-| | |
+-|---|---|
+-| **Abrangência** | Todos os hospitais da rede |
+-| **Perfil** | Hospitalizados — casos graves, UTI, óbitos |
+-| **Fonte** | SIVEP-Gripe (módulo hospitalar) |
++### Bairros — Maringá
+ 
+-[→ Acessar dados de SRAG](srag.qmd){.btn .btn-primary}
++![Distribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_maringa_2026.png){.lightbox group="mapas-bairro"}
++
++### Bairros — Sarandi
++
++![Distribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_sarandi_2026.png){.lightbox group="mapas-bairro"}
++
++:::
+ 
+ ---
+ 
+-## Área de abrangência — 15ª RS
++## Perfil dos casos
++
++::: {.panel-tabset}
++
++### Sexo
++
++![Distribuição de notificações de SRAG por sexo — 15ª RS — 2026.](graficos/11_distribuicao_sexo.png){.lightbox}
++
++### Classificação final
++
++![Classificação final dos casos de SRAG notificados — 15ª RS — 2026.](graficos/12_classificacao_final.png){.lightbox}
++
++### Faixa etária
++
++![Comparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.](graficos/16_faixa_etaria_notif_confirmados.png){.lightbox}
++
++### Pirâmide — Notificados
++
++![Pirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.](graficos/17_piramide_etaria_notificados.png){.lightbox}
++
++### Pirâmide — Óbitos
++
++![Pirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.](graficos/18_piramide_etaria_obitos.png){.lightbox}
++
++### Desfecho
++
++![Distribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.](graficos/19_evolucao_desfecho.png){.lightbox}
++
++### Raça/Cor
++
++![Distribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.](graficos/20_raca_cor.png){.lightbox}
++
++### Escolaridade
++
++![Distribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026.](graficos/21_escolaridade.png){.lightbox}
++
++:::
++
++---
++
++## Circulação viral
++
++::: {.panel-tabset}
++
++### Vírus detectados — total
++
++![Agentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.](graficos/13_circulacao_viral_total.png){.lightbox}
++
++### Tendência semanal
++
++![Tendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.](graficos/14_tendencia_viral_semanal.png){.lightbox}
++
++### Tipos de Influenza
++
++![Tipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.](graficos/15_tipos_linhagens_influenza.png){.lightbox}
++
++### Variação anual
++
++![Variação anual das detecções de vírus respiratórios por RT-PCR — 15ª RS — 2022 em diante. Anos 2020–2021 excluídos por perfil pandêmico atípico. Dados de 2026 parciais.](graficos/22_virus_tendencia_anual.png){.lightbox}
++
++### Vírus por faixa etária — predominância
++
++![Percentual de cada vírus dentro do total de PCR positivos por faixa etária. Células mais escuras indicam maior predominância do vírus naquela faixa — 15ª RS — 2026.](graficos/D13_virus_faixa_etaria_heatmap.png){.lightbox}
++
++### Vírus por faixa etária — composição
+ 
+-A 15ª Regional de Saúde abrange **30 municípios** da região de Maringá, com população estimada de **~958 mil habitantes** (IBGE 2025).
++![Composição proporcional dos vírus identificados por RT-PCR em cada faixa etária — 15ª RS — 2026.](graficos/D13_virus_faixa_etaria_barras.png){.lightbox}
+ 
+-Municípios-sede da regional: **Maringá** (429.660 hab.), **Sarandi** (128.106 hab.) e **Paicandu** (48.695 hab.) representam juntos cerca de 63% da população regional.
++:::
+ 
+ ---
+ 
+-*15ª Regional de Saúde — Seção de Vigilância Epidemiológica — Maringá/PR*
++*Dados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe.*
+diff --git a/sobre.qmd b/sobre.qmd
+index 1638408..0d75035 100755
+--- a/sobre.qmd
++++ b/sobre.qmd
+@@ -7,6 +7,8 @@ toc: false
+ 
+ A 15ª Regional de Saúde, sediada em Maringá/PR, coordena ações de saúde em 30 municípios da região noroeste do Paraná, com população estimada de aproximadamente 958 mil habitantes (IBGE 2025).
+ 
++Municípios-sede da regional: **Maringá** (429.660 hab.), **Sarandi** (128.106 hab.) e **Paicandu** (48.695 hab.) representam juntos cerca de 63% da população regional.
++
+ ## Vigilância Epidemiológica
+ 
+ A Seção de Vigilância Epidemiológica (SCVGE) monitora agravos de notificação compulsória e produz informações para orientar as ações de controle e prevenção de doenças na regional.
+diff --git a/srag.qmd b/srag.qmd
+deleted file mode 100755
+index 5f697a7..0000000
+--- a/srag.qmd
++++ /dev/null
+@@ -1,182 +0,0 @@
+----
+-title: "Vigilância Universal — SRAG"
+-subtitle: "Síndrome Respiratória Aguda Grave — 15ª RS Maringá/PR"
+-date: now
+-date-format: "DD/MM/YYYY HH:mm"
+----
+-
+-::: {.callout-tip}
+-**Ano de referência:** 2026 &nbsp;|&nbsp; **Fonte:** SIVEP-Gripe (módulo hospitalar) &nbsp;|&nbsp; **Escopo:** 30 municípios da 15ª Regional de Saúde
+-:::
+-
+-Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilância Universal abrange todos os hospitais e serviços de saúde — registra casos graves com necessidade de hospitalização, internações em UTI e óbitos.
+-
+----
+-
+-## Série temporal
+-
+-::: {.panel-tabset}
+-
+-### Curva comparativa
+-
+-![Curva epidêmica por semana epidemiológica — comparativo anual (2024–2026). A linha mais espessa representa o ano corrente.](graficos/06_curva_epidemica_comparativa.png){.lightbox}
+-
+-### Canal endêmico
+-
+-::: {.callout-note}
+-**Nota metodológica — Canal endêmico**
+-
+-O canal endêmico delimita zonas de referência para o número esperado de casos de SRAG por semana epidemiológica, com base no comportamento histórico observado no período pós-pandêmico.
+-
+-**Período de referência:** 2022–2025.
+-
+-Os anos de 2020 e 2021 foram excluídos por representarem perfil epidemiológico atípico decorrente da pandemia de COVID-19, com padrão de circulação viral incompatível com a vigilância de rotina. O ano de 2019 foi excluído por ser pré-pandêmico, período anterior à reorganização do perfil de vírus respiratórios que se estabeleceu após 2022.
+-
+-**Zonas de classificação:**
+-
+-- 🟢 **Esperado:** entre o P25 e P75 do histórico — comportamento dentro do padrão
+-- 🟡 **Alerta:** entre o P75 e P90 do histórico — atenção reforçada recomendada
+-- 🔴 **Epidêmico:** acima do P90 do histórico — situação que requer resposta imediata
+-
+-A linha tracejada verde representa a mediana histórica semanal (referência central).
+-
+-**Limitação:** com quatro anos de referência (2022–2025), os percentis são estimativas com maior incerteza do que o recomendado internacionalmente (mínimo de 5 anos). O canal se estabilizará progressivamente à medida que novos anos pós-pandêmicos forem incorporados. Os resultados devem ser interpretados com cautela, especialmente nas semanas com menor volume histórico de casos.
+-
+-**Fonte:** SIVEP-Gripe (módulo hospitalar) | Elaboração: SCVGE — 15ª RS
+-:::
+-
+-![Canal endêmico de SRAG por semana epidemiológica — zona verde = esperado (P25–P75), zona amarela = alerta (P75–P90), pontos acima da zona amarela = nível epidêmico (> P90). Linha tracejada = mediana histórica pós-pandêmica (2022–2025).](graficos/06b_canal_endemico.png){.lightbox}
+-
+-### Notificações semanais
+-
+-![Total de notificações de SRAG por semana epidemiológica — 2026.](graficos/07_notificacoes_semana_epi.png){.lightbox}
+-
+-### Confirmados semanais
+-
+-![Casos confirmados de SRAG por semana epidemiológica — 2026.](graficos/08_confirmados_semana_epi.png){.lightbox}
+-
+-### Variação semanal
+-
+-![Casos de SRAG por semana epidemiológica com linha de média do período e variação percentual semana a semana. Verde = aumento em relação à semana anterior. Vermelho = redução.](graficos/07b_variacao_semanal.png){.lightbox}
+-
+-:::
+-
+----
+-
+-## Distribuição geográfica — gráficos
+-
+-::: {.panel-tabset}
+-
+-### Incidência por município
+-
+-![Taxa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. (Pop. IBGE 2025).](graficos/09_incidencia_por_municipio.png){.lightbox}
+-
+-### Regionais do Paraná
+-
+-![Total de notificações de SRAG por Regional de Saúde — Paraná — 2026.](graficos/10_notificacoes_regionais_pr.png){.lightbox}
+-
+-:::
+-
+----
+-
+-## Distribuição geográfica — mapas
+-
+-::: {.callout-note}
+-Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.
+-:::
+-
+-::: {.panel-tabset}
+-
+-### Casos por município
+-
+-![Mapa de casos absolutos de SRAG por município da 15ª RS — 2026.](graficos/mapa_srag_casos_2026.png){.lightbox group="mapas-municipio"}
+-
+-### Incidência por município
+-
+-![Mapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.](graficos/mapa_srag_incidencia_2026.png){.lightbox group="mapas-municipio"}
+-
+-### Bairros — Maringá
+-
+-![Distribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_maringa_2026.png){.lightbox group="mapas-bairro"}
+-
+-### Bairros — Sarandi
+-
+-![Distribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_sarandi_2026.png){.lightbox group="mapas-bairro"}
+-
+-:::
+-
+----
+-
+-## Perfil dos casos
+-
+-::: {.panel-tabset}
+-
+-### Sexo
+-
+-![Distribuição de notificações de SRAG por sexo — 15ª RS — 2026.](graficos/11_distribuicao_sexo.png){.lightbox}
+-
+-### Classificação final
+-
+-![Classificação final dos casos de SRAG notificados — 15ª RS — 2026.](graficos/12_classificacao_final.png){.lightbox}
+-
+-### Faixa etária
+-
+-![Comparativo de faixa etária entre notificados e confirmados de SRAG — 15ª RS — 2026.](graficos/16_faixa_etaria_notif_confirmados.png){.lightbox}
+-
+-### Pirâmide — Notificados
+-
+-![Pirâmide etária dos casos notificados de SRAG, por sexo — 15ª RS — 2026.](graficos/17_piramide_etaria_notificados.png){.lightbox}
+-
+-### Pirâmide — Óbitos
+-
+-![Pirâmide etária dos óbitos por SRAG, por sexo — 15ª RS — 2026.](graficos/18_piramide_etaria_obitos.png){.lightbox}
+-
+-### Desfecho
+-
+-![Distribuição dos casos de SRAG por evolução (desfecho) — cura, óbito e em investigação — 15ª RS — 2026.](graficos/19_evolucao_desfecho.png){.lightbox}
+-
+-### Raça/Cor
+-
+-![Distribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.](graficos/20_raca_cor.png){.lightbox}
+-
+-### Escolaridade
+-
+-![Distribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026.](graficos/21_escolaridade.png){.lightbox}
+-
+-:::
+-
+----
+-
+-## Circulação viral
+-
+-::: {.panel-tabset}
+-
+-### Vírus detectados — total
+-
+-![Agentes virais identificados por RT-PCR nos casos de SRAG — 15ª RS — 2026.](graficos/13_circulacao_viral_total.png){.lightbox}
+-
+-### Tendência semanal
+-
+-![Tendência semanal dos principais vírus respiratórios por RT-PCR — Influenza, Covid-19, VSR, Rinovírus, Adenovírus, Metapneumovírus — 15ª RS — 2026.](graficos/14_tendencia_viral_semanal.png){.lightbox}
+-
+-### Tipos de Influenza
+-
+-![Tipos e linhagens de Influenza identificados por RT-PCR — 15ª RS — 2026.](graficos/15_tipos_linhagens_influenza.png){.lightbox}
+-
+-### Variação anual
+-
+-![Variação anual das detecções de vírus respiratórios por RT-PCR — 15ª RS — 2022 em diante. Anos 2020–2021 excluídos por perfil pandêmico atípico. Dados de 2026 parciais.](graficos/22_virus_tendencia_anual.png){.lightbox}
+-
+-### Vírus por faixa etária — predominância
+-
+-![Percentual de cada vírus dentro do total de PCR positivos por faixa etária. Células mais escuras indicam maior predominância do vírus naquela faixa — 15ª RS — 2026.](graficos/D13_virus_faixa_etaria_heatmap.png){.lightbox}
+-
+-### Vírus por faixa etária — composição
+-
+-![Composição proporcional dos vírus identificados por RT-PCR em cada faixa etária — 15ª RS — 2026.](graficos/D13_virus_faixa_etaria_barras.png){.lightbox}
+-
+-:::
+-
+----
+-
+-*Dados sujeitos a revisão conforme encerramento de casos. Fonte: SIVEP-Gripe.*
