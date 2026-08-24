@@ -1751,6 +1751,52 @@ writexl::write_xlsx(
 
 
 # ==============================================================================
+# EXPORTAÇÃO — DADOS POR ESTABELECIMENTO (para filtro interativo no site)
+# Gera um CSV agregado (estabelecimento x semana) consumido pelo bloco
+# Observable JS em srag.qmd. Não inclui microdados individuais.
+# ==============================================================================
+
+col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
+col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
+
+if (is.na(col_estab)) {
+  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE) ",
+          "encontrada na base. Exportação para o filtro do site foi pulada.")
+} else {
+  casos_estabelecimento <- base_ano_principal %>%
+    mutate(
+      ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
+      MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)]
+    ) %>%
+    filter(
+      !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
+      !is.na(SEM_EPI)
+    ) %>%
+    group_by(ESTABELECIMENTO, MUNICIPIO, SEM_EPI) %>%
+    summarise(
+      casos       = n(),
+      obitos      = sum(EVOLUCAO == 2, na.rm = TRUE),
+      uti         = sum(UTI == 1, na.rm = TRUE),
+      confirmados = sum(CLASSI_FIN %in% c(1, 2, 3, 5), na.rm = TRUE),
+      .groups     = "drop"
+    ) %>%
+    arrange(ESTABELECIMENTO, SEM_EPI)
+
+  dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
+  if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
+
+  readr::write_csv(
+    casos_estabelecimento,
+    file.path(dir_dados, "notificacoes_estabelecimento.csv")
+  )
+
+  message("Dados por estabelecimento exportados: ",
+          format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
+          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
+}
+
+
+# ==============================================================================
 # RESUMO FINAL
 # ==============================================================================
 
