@@ -1582,40 +1582,14 @@ salvar_grafico(g20, "20_raca_cor")
 
 # ==============================================================================
 # GRÁFICO 21 — ESCOLARIDADE (> 18 ANOS)
+# ------------------------------------------------------------------------------
+# REMOVIDO por decisão manual: não agrega valor ao dashboard.
+# [Inferência, não verificado nos dados] O filtro usava NU_IDADE_N > 18 sem
+# checar TP_IDADE (unidade: dia/mês/ano) — diferente de COD_IDADE, usado nos
+# gráficos de faixa etária (16/17/18), que já vem com a unidade embutida no
+# código. Se for esse o motivo do excesso de "Analfabeto", o resto do script
+# tem o padrão certo (COD_IDADE) pra usar numa eventual reconstrução futura.
 # ==============================================================================
-
-casos_escol <- base_filtrada %>%
-  filter(NU_IDADE_N > 18) %>%
-  mutate(
-    escolaridade_label = case_when(
-      CS_ESCOL_N == "0" ~ "Analfabeto",
-      CS_ESCOL_N == "1" ~ "Fund. 1º Ciclo (1ª–5ª série)",
-      CS_ESCOL_N == "2" ~ "Fund. 2º Ciclo (6ª–9ª série)",
-      CS_ESCOL_N == "3" ~ "Ensino Médio",
-      CS_ESCOL_N == "4" ~ "Ensino Superior",
-      CS_ESCOL_N == "5" ~ "Não se aplica",
-      CS_ESCOL_N == "9" ~ "Ignorado",
-      TRUE              ~ "Não Registrado"
-    )
-  ) %>%
-  group_by(escolaridade_label) %>%
-  summarise(total = n(), .groups = "drop")
-
-n_escol <- sum(casos_escol$total)
-
-g21 <- ggplot(casos_escol,
-              aes(x = total, y = fct_reorder(escolaridade_label, total))) +
-  geom_col(fill = "#FF8C00") +
-  geom_text(aes(label = total), hjust = -0.1, size = 4) +
-  scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
-  labs(
-    title   = paste0("Casos por Escolaridade (> 18 anos) — ", escopo_titulo,
-                     " (N = ", format(n_escol, big.mark = "."), ")"),
-    x = "Número de Casos", y = "Escolaridade", caption = texto_rodape
-  ) +
-  theme_minimal()
-
-salvar_grafico(g21, "21_escolaridade")
 
 
 # ==============================================================================

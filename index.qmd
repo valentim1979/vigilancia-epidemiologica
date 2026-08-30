@@ -340,10 +340,6 @@ Mapas gerados a partir dos shapefiles do IBGE (municípios). Clique em qualquer 
 
 ![Distribuição de casos de SRAG por raça/cor autodeclarada — 15ª RS — 2026.](graficos/20_raca_cor.png){.lightbox}
 
-### Escolaridade
-
-![Distribuição de casos de SRAG por escolaridade — maiores de 18 anos — 15ª RS — 2026.](graficos/21_escolaridade.png){.lightbox}
-
 :::
 
 ---
