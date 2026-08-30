@@ -37,9 +37,15 @@ CORTE_NOME_BAIRRO_SAR <- 1
 DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
 
 # --- 0.6 Data de extração ---
-DATA_EXTRACAO <- as.Date(file.info(
-  file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(ANO_ANALISE), ".dbf"))
-)$mtime)
+# Se o DBF local do ano de análise não existir (ex.: execução 100% via API,
+# como num runner de CI sem os arquivos baixados), usa a data de hoje como
+# referência em vez de deixar DATA_EXTRACAO como NA.
+CAMINHO_DBF_ANO_ANALISE <- file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(ANO_ANALISE), ".dbf"))
+DATA_EXTRACAO <- if (file.exists(CAMINHO_DBF_ANO_ANALISE)) {
+  as.Date(file.info(CAMINHO_DBF_ANO_ANALISE)$mtime)
+} else {
+  Sys.Date()
+}
 
 # --- 0.7 Estação INMET ---
 INMET_ESTACAO <- "A826"  # Maringá — altere se necessário
@@ -498,6 +504,39 @@ casos_semana_class <- base_filtrada %>%
   group_by(SEM_EPI, CLASSIFICACAO) %>%
   summarise(casos = n(), .groups = "drop") %>%
   arrange(SEM_EPI)
+
+# ------------------------------------------------------------------------------
+# Disponibilidade de dado de bairro (NM_BAIRRO não existe no CSV público da
+# API dados.gov.br — confirmado em validar_campos_dbf_api(). Anos carregados
+# via API ficam sem BAIRRO; gráficos/mapas de bairro usam só os anos com
+# DBF local.
+# ------------------------------------------------------------------------------
+DADOS_BAIRRO_OK <- nrow(casos_bairro) > 0
+
+anos_com_bairro <- base_15rs_completa %>%
+  filter(ANO_BASE %in% anos_carregar, !is.na(BAIRRO)) %>%
+  distinct(ANO_BASE) %>%
+  pull(ANO_BASE) %>%
+  sort()
+
+anos_bairro_faltando <- setdiff(anos_carregar, anos_com_bairro)
+
+if (length(anos_bairro_faltando) > 0) {
+  message(
+    "[aviso] Sem dado de bairro (NM_BAIRRO) para: ",
+    paste(anos_bairro_faltando, collapse = ", "),
+    " — provavelmente carregado via API dados.gov.br, que não inclui esse campo. ",
+    "Gráficos e mapas de bairro consideram só: ",
+    if (length(anos_com_bairro) > 0) paste(anos_com_bairro, collapse = ", ") else "nenhum ano disponível"
+  )
+}
+
+if (!DADOS_BAIRRO_OK) {
+  message(
+    "[aviso] Nenhum dado de bairro disponível para os anos selecionados — ",
+    "gráficos e mapas de bairro (Maringá/Sarandi) serão pulados nesta execução."
+  )
+}
 
 
 # ==============================================================================
@@ -1581,97 +1620,113 @@ salvar_grafico(g21, "21_escolaridade")
 
 # ==============================================================================
 # GRÁFICOS DE BAIRRO — TOP 20 MARINGÁ E SARANDI
+# ------------------------------------------------------------------------------
+# DESABILITADO por decisão manual (não por DADOS_BAIRRO_OK): com o esquema
+# misto DBF local (até 2025) + API (2026 em diante), anos_carregar pode conter
+# uma combinação de anos com e sem NM_BAIRRO. Depender só de "existe algum
+# dado de bairro" arriscava gerar um mapa/gráfico que parece atual mas reflete
+# só os anos antigos com DBF local, sem deixar isso óbvio. Preferimos manter
+# desligado até revisar com calma. Para reativar: troque "if (FALSE)" por
+# "if (DADOS_BAIRRO_OK)" (ou "if (TRUE)") logo abaixo.
 # ==============================================================================
 
 titulo_ano <- paste(anos_carregar, collapse = "/")
 
-g_bairro_mar <- casos_bairro %>%
-  head(20) %>%
-  mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
-  ggplot(aes(x = casos, y = BAIRRO)) +
-  geom_col(fill = "#2166ac") +
-  geom_text(aes(label = casos), hjust = -0.2, size = 3) +
-  scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
-  labs(
-    title    = paste("Top 20 Bairros — Casos de SRAG (Maringá/PR) |", titulo_ano),
-    subtitle = "Fonte: SIVEP-GRIPE | Residência do paciente",
-    x = "Casos notificados", y = NULL, caption = texto_rodape
-  ) +
-  theme_minimal()
+if (FALSE) {
 
-salvar_grafico(g_bairro_mar,
-               paste0("srag_top20_bairros_maringa_", paste(anos_carregar, collapse = "_")))
-
-if (nrow(casos_bairro_sar) > 0) {
-  g_bairro_sar <- casos_bairro_sar %>%
+  g_bairro_mar <- casos_bairro %>%
     head(20) %>%
     mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
     ggplot(aes(x = casos, y = BAIRRO)) +
-    geom_col(fill = "#1b7837") +
+    geom_col(fill = "#2166ac") +
     geom_text(aes(label = casos), hjust = -0.2, size = 3) +
     scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
     labs(
-      title    = paste("Top 20 Bairros — Casos de SRAG (Sarandi/PR) |", titulo_ano),
+      title    = paste("Top 20 Bairros — Casos de SRAG (Maringá/PR) |", titulo_ano),
       subtitle = "Fonte: SIVEP-GRIPE | Residência do paciente",
       x = "Casos notificados", y = NULL, caption = texto_rodape
     ) +
     theme_minimal()
 
-  salvar_grafico(g_bairro_sar,
-                 paste0("srag_top20_bairros_sarandi_", paste(anos_carregar, collapse = "_")))
+  salvar_grafico(g_bairro_mar,
+                 paste0("srag_top20_bairros_maringa_", paste(anos_carregar, collapse = "_")))
+
+  if (nrow(casos_bairro_sar) > 0) {
+    g_bairro_sar <- casos_bairro_sar %>%
+      head(20) %>%
+      mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
+      ggplot(aes(x = casos, y = BAIRRO)) +
+      geom_col(fill = "#1b7837") +
+      geom_text(aes(label = casos), hjust = -0.2, size = 3) +
+      scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
+      labs(
+        title    = paste("Top 20 Bairros — Casos de SRAG (Sarandi/PR) |", titulo_ano),
+        subtitle = "Fonte: SIVEP-GRIPE | Residência do paciente",
+        x = "Casos notificados", y = NULL, caption = texto_rodape
+      ) +
+      theme_minimal()
+
+    salvar_grafico(g_bairro_sar,
+                   paste0("srag_top20_bairros_sarandi_", paste(anos_carregar, collapse = "_")))
+  }
+
+  top15 <- head(casos_bairro$BAIRRO, 15)
+
+  lookup_mar <- casos_bairro %>%
+    distinct(BAIRRO, .keep_all = TRUE) %>%
+    select(BAIRRO, total_bairro = casos)
+
+  g_heat_mar <- casos_bairro_sem %>%
+    filter(BAIRRO %in% top15) %>%
+    left_join(lookup_mar, by = "BAIRRO") %>%
+    mutate(total_bairro = replace_na(total_bairro, 0L),
+           LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
+           LABEL = fct_reorder(LABEL, total_bairro)) %>%
+    ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
+    geom_tile(color = "white") +
+    scale_fill_distiller(palette = "Blues", direction = 1) +
+    scale_x_continuous(breaks = seq(1, 53, by = 4)) +
+    labs(
+      title    = paste("SRAG por Bairro e Semana Epidemiológica — Maringá |", titulo_ano),
+      subtitle = "Top 15 bairros | Total acumulado entre parênteses",
+      x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
+    ) +
+    theme_minimal()
+
+  salvar_grafico(g_heat_mar,
+                 paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
+                 width = 14, height = 6)
+
+  if (nrow(casos_bairro_sar) > 0) {
+    lookup_sar <- casos_bairro_sar %>%
+      distinct(BAIRRO, .keep_all = TRUE) %>%
+      select(BAIRRO, total_bairro = casos)
+
+    g_heat_sar <- casos_bairro_sem_sar %>%
+      filter(BAIRRO %in% head(casos_bairro_sar$BAIRRO, 15)) %>%
+      left_join(lookup_sar, by = "BAIRRO") %>%
+      mutate(total_bairro = replace_na(total_bairro, 0L),
+             LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
+             LABEL = fct_reorder(LABEL, total_bairro)) %>%
+      ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
+      geom_tile(color = "white") +
+      scale_fill_distiller(palette = "Greens", direction = 1) +
+      scale_x_continuous(breaks = seq(1, 53, by = 4)) +
+      labs(
+        title    = paste("SRAG por Bairro e Semana Epidemiológica — Sarandi |", titulo_ano),
+        subtitle = "Top 15 bairros | Total acumulado entre parênteses",
+        x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
+      ) +
+      theme_minimal()
+
+    salvar_grafico(g_heat_sar,
+                   paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
+                   width = 14, height = 6)
+  }
+
+} else {
+  message("[desabilitado] Gráficos de bairro (Top 20 e heatmaps) — desligados manualmente nesta versão do script.")
 }
-
-top15 <- head(casos_bairro$BAIRRO, 15)
-
-lookup_mar <- casos_bairro %>%
-  distinct(BAIRRO, .keep_all = TRUE) %>%
-  select(BAIRRO, total_bairro = casos)
-
-g_heat_mar <- casos_bairro_sem %>%
-  filter(BAIRRO %in% top15) %>%
-  left_join(lookup_mar, by = "BAIRRO") %>%
-  mutate(total_bairro = replace_na(total_bairro, 0L),
-         LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-         LABEL = fct_reorder(LABEL, total_bairro)) %>%
-  ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
-  geom_tile(color = "white") +
-  scale_fill_distiller(palette = "Blues", direction = 1) +
-  scale_x_continuous(breaks = seq(1, 53, by = 4)) +
-  labs(
-    title    = paste("SRAG por Bairro e Semana Epidemiológica — Maringá |", titulo_ano),
-    subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
-  ) +
-  theme_minimal()
-
-salvar_grafico(g_heat_mar,
-               paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
-               width = 14, height = 6)
-
-lookup_sar <- casos_bairro_sar %>%
-  distinct(BAIRRO, .keep_all = TRUE) %>%
-  select(BAIRRO, total_bairro = casos)
-
-g_heat_sar <- casos_bairro_sem_sar %>%
-  filter(BAIRRO %in% head(casos_bairro_sar$BAIRRO, 15)) %>%
-  left_join(lookup_sar, by = "BAIRRO") %>%
-  mutate(total_bairro = replace_na(total_bairro, 0L),
-         LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-         LABEL = fct_reorder(LABEL, total_bairro)) %>%
-  ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
-  geom_tile(color = "white") +
-  scale_fill_distiller(palette = "Greens", direction = 1) +
-  scale_x_continuous(breaks = seq(1, 53, by = 4)) +
-  labs(
-    title    = paste("SRAG por Bairro e Semana Epidemiológica — Sarandi |", titulo_ano),
-    subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-    x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
-  ) +
-  theme_minimal()
-
-salvar_grafico(g_heat_sar,
-               paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
-               width = 14, height = 6)
 
 g_class <- casos_semana_class %>%
   ggplot(aes(x = SEM_EPI, y = casos, color = CLASSIFICACAO, group = CLASSIFICACAO)) +
@@ -1800,7 +1855,11 @@ de_para_maringa <- tibble::tribble(
   "CONJUNTO CIDADE ALTA",                            "CONJUNTO RESIDENCIAL CIDADE AL"
 )
 
-if (file.exists(CAMINHO_SHP_MARINGA)) {
+# DESABILITADO por decisão manual — mesmo motivo do bloco de gráficos de
+# bairro acima (risco de mapa misto DBF+API parecer atual sem ser). Para
+# reativar: troque cada "if (FALSE)" abaixo por "if (DADOS_BAIRRO_OK)"
+# (ou "if (TRUE)" para sempre tentar gerar quando o shapefile existir).
+if (FALSE) {
   message("\nGerando mapa de bairros — Maringá...")
   bairros_mar <- sf::st_read(CAMINHO_SHP_MARINGA, quiet = TRUE) %>%
     sf::st_transform(crs = 4326)
@@ -1816,14 +1875,14 @@ if (file.exists(CAMINHO_SHP_MARINGA)) {
             width = 2400, height = 2400, device = png)
   message("Mapa de Maringá salvo.")
 } else {
-  warning("Shapefile de bairros de Maringá não encontrado: ", CAMINHO_SHP_MARINGA)
+  message("[desabilitado] Mapa de bairro — Maringá — desligado manualmente nesta versão do script.")
 }
 
 de_para_sarandi <- tibble::tribble(
   ~SHP_KEY, ~SIVEP_KEY
 )
 
-if (file.exists(CAMINHO_SHP_SARANDI)) {
+if (FALSE) {
   message("\nGerando mapa de bairros — Sarandi...")
   bairros_sar <- sf::st_read(CAMINHO_SHP_SARANDI, quiet = TRUE) %>%
     sf::st_transform(crs = 4326)
@@ -1839,7 +1898,7 @@ if (file.exists(CAMINHO_SHP_SARANDI)) {
             width = 2400, height = 2400, device = png)
   message("Mapa de Sarandi salvo.")
 } else {
-  warning("Shapefile de bairros de Sarandi não encontrado: ", CAMINHO_SHP_SARANDI)
+  message("[desabilitado] Mapa de bairro — Sarandi — desligado manualmente nesta versão do script.")
 }
 
 
