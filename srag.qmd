@@ -196,7 +196,7 @@ A linha tracejada verde representa a mediana histórica semanal (referência cen
 ## Distribuição geográfica — mapas
 
 ::: {.callout-note}
-Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográficas municipais (bairros). Clique em qualquer mapa para ampliar.
+Mapas gerados a partir dos shapefiles do IBGE (municípios). Clique em qualquer mapa para ampliar.
 :::
 
 ::: {.panel-tabset}
@@ -208,14 +208,6 @@ Mapas gerados a partir dos shapefiles do IBGE (municípios) e bases cartográfic
 ### Incidência por município
 
 ![Mapa de incidência de SRAG por município da 15ª RS — casos por 100 mil hab. — 2026.](graficos/mapa_srag_incidencia_2026.png){.lightbox group="mapas-municipio"}
-
-### Bairros — Maringá
-
-![Distribuição de SRAG por bairro — Maringá/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_maringa_2026.png){.lightbox group="mapas-bairro"}
-
-### Bairros — Sarandi
-
-![Distribuição de SRAG por bairro — Sarandi/PR — 2026. Nomes exibidos apenas para bairros com 5 ou mais casos.](graficos/mapa_srag_bairro_sarandi_2026.png){.lightbox group="mapas-bairro"}
 
 :::
 
