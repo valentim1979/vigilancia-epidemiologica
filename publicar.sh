@@ -6,7 +6,7 @@
 
 set -e   # interrompe se qualquer comando falhar
 
-PROJETO="/Users/valentimsalajunior/Documents/vigilancia-epidemiologica"
+PROJETO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$PROJETO"
 
 echo ""

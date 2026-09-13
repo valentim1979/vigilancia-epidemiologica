@@ -18,23 +18,23 @@ ANO_INICIO_CANAL <- 2022
 # --- 0.2 Município ---
 MUNICIPIO_ANALISE <- NULL
 
-# --- 0.3 Caminhos ---
-DIRETORIO_DBF <- "/Users/valentimsalajunior/Documents/DBF_SIVEP"
+# --- 0.3 Caminhos (relativos à raiz do projeto) ---
+DIRETORIO_DBF <- "dbf_sivep"
 
-ARQUIVO_IBGE <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/sivep_15rs/ibge_cnv_pop.csv"
+ARQUIVO_IBGE <- "sivep_15rs/ibge_cnv_pop.csv"
 
-CAMINHO_SHP_MUNICIPIOS <- "/Users/valentimsalajunior/Documents/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
+CAMINHO_SHP_MUNICIPIOS <- "sivep_15rs/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
 
-CAMINHO_SHP_MARINGA    <- "/Users/valentimsalajunior/Documents/GIS/bairros/Bairros.shp"
+CAMINHO_SHP_MARINGA    <- "sivep_15rs/GIS/bairros/Bairros.shp"
 
-CAMINHO_SHP_SARANDI    <- "/Users/valentimsalajunior/Documents/GIS/bairros_sarandi/Bairros_loteamentos.shp"
+CAMINHO_SHP_SARANDI    <- "sivep_15rs/GIS/bairros_sarandi/Bairros_loteamentos.shp"
 
 # --- 0.4 Parâmetros dos mapas de bairro ---
 CORTE_NOME_BAIRRO     <- 5
 CORTE_NOME_BAIRRO_SAR <- 1
 
 # --- 0.5 Pasta de saída ---
-DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
+DIR_GRAFICOS <- "graficos"
 
 # --- 0.6 Data de extração ---
 # Se o DBF local do ano de análise não existir (ex.: execução 100% via API,
@@ -347,6 +347,13 @@ if (length(lista_bases) == 0) stop("Nenhuma base carregada. Verifique DIRETORIO_
 
 base_completa <- bind_rows(lista_bases)
 names(base_completa) <- toupper(names(base_completa))
+
+# Anos carregados via API (dados.gov.br) não trazem NM_BAIRRO — sem essa
+# coluna, o mutate() abaixo quebraria. Cria como NA para manter o
+# comportamento já previsto mais adiante (avisos de "sem dado de bairro").
+if (!"NM_BAIRRO" %in% names(base_completa)) {
+  base_completa$NM_BAIRRO <- NA_character_
+}
 
 message("Total de registros: ", format(nrow(base_completa), big.mark = "."))
 
