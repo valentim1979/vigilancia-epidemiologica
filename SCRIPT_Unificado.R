@@ -35,6 +35,7 @@ MUNICIPIO_ANALISE <- NULL
 DIRETORIO_CACHE_API <- "dbf_sivep"
 
 ARQUIVO_IBGE <- "sivep_15rs/ibge_cnv_pop.csv"
+ARQUIVO_REGIONAIS_PR <- "sivep_15rs/parana_macrorregiao.csv"
 
 CAMINHO_SHP_MUNICIPIOS <- "sivep_15rs/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
 
@@ -113,6 +114,20 @@ POPULACAO_15RS_TOTAL <- sum(municipios_15rs$populacao_2025)
 
 message("Municípios: ", nrow(municipios_15rs),
         " | Pop. total: ", format(POPULACAO_15RS_TOTAL, big.mark = "."))
+
+
+# ==============================================================================
+# BLOCO 2B — TABELA DE REFERÊNCIA: MACRORREGIÃO / REGIONAL / MUNICÍPIO (PARANÁ)
+# Cobre os 399 municípios do estado (fonte: IBGE 2022, tabela fornecida pelo
+# usuário). Usada para expandir o filtro de estabelecimentos da seção
+# "Notificações por estabelecimento" da 15RS para o Paraná inteiro.
+# ==============================================================================
+ref_regionais_pr <- readr::read_csv(ARQUIVO_REGIONAIS_PR, show_col_types = FALSE) %>%
+  mutate(codigo_ibge_6 = as.integer(codigo_ibge_6))
+
+message("Tabela de referência PR: ", nrow(ref_regionais_pr), " municípios, ",
+        n_distinct(ref_regionais_pr$regional), " regionais, ",
+        n_distinct(ref_regionais_pr$macrorregiao), " macrorregiões.")
 
 
 # ==============================================================================
@@ -757,13 +772,17 @@ salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 # a base é nacional e outros estados também numeram suas regionais de 1 a 22
 # (ex.: PE usa "001", "002"...; RS usa "001 CRS"...), então filtrar só pelo
 # número deixava passar regionais de outros estados junto com as do Paraná.
-base_pr <- bind_rows(lista_bases) %>%
+base_pr <- base_completa %>%
   mutate(
     SG_UF_NOT  = toupper(trimws(SG_UF_NOT)),
     ID_REGIONA = toupper(trimws(ID_REGIONA))
   ) %>%
   filter(SG_UF_NOT == "PR", !is.na(ID_REGIONA), nzchar(ID_REGIONA),
          ANO_BASE %in% anos_carregar)
+# Nota: base_pr agora deriva de base_completa (já com CO_MUN_RES como inteiro,
+# SEM_EPI, CLASSIFICACAO, OBITO_SRAG, UTI_SIM etc.), em vez de bind_rows(lista_bases)
+# cru — mesmas linhas de antes, só que com as colunas derivadas necessárias para
+# o export por estabelecimento (abaixo). O Gráfico 10 não muda.
 
 if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
   casos_regional <- base_pr %>%
@@ -1472,7 +1491,7 @@ if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
 # locais antigos. NM_UN_INTE (unidade de internação) é usada como
 # aproximação: só cobre quem foi hospitalizado, não todas as notificações.
 col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE", "NM_UN_INTE"),
-                       names(base_ano_principal))
+                       names(base_pr))
 col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
 
 if (is.na(col_estab)) {
@@ -1483,16 +1502,23 @@ if (is.na(col_estab)) {
     message("  [aviso] Usando NM_UN_INTE (unidade de internação) como aproximação ",
             "de estabelecimento — cobre só os casos hospitalizados.")
   }
-  casos_estabelecimento <- base_ano_principal %>%
+  # A partir daqui, a exportação cobre o Paraná inteiro (base_pr), não só a
+  # 15RS — MUNICIPIO/REGIONAL/MACRORREGIAO vêm da tabela de referência
+  # ref_regionais_pr (BLOCO 2B), casada por CO_MUN_RES == codigo_ibge_6.
+  # Linhas cujo município de residência não está na tabela (ex.: código
+  # ausente/errado) são descartadas (!is.na(MUNICIPIO)).
+  casos_estabelecimento <- base_pr %>%
     mutate(
       ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
-      MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)]
+      MUNICIPIO       = ref_regionais_pr$municipio[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)],
+      REGIONAL        = ref_regionais_pr$regional[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)],
+      MACRORREGIAO    = ref_regionais_pr$macrorregiao[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)]
     ) %>%
     filter(
       !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
-      !is.na(SEM_EPI)
+      !is.na(SEM_EPI), !is.na(MUNICIPIO)
     ) %>%
-    group_by(ESTABELECIMENTO, MUNICIPIO, SEM_EPI) %>%
+    group_by(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI) %>%
     summarise(
       casos       = n(),
       obitos      = sum(EVOLUCAO == 2, na.rm = TRUE),
@@ -1500,16 +1526,17 @@ if (is.na(col_estab)) {
       confirmados = sum(CLASSI_FIN %in% c(1, 2, 3, 5), na.rm = TRUE),
       .groups     = "drop"
     ) %>%
-    arrange(ESTABELECIMENTO, SEM_EPI)
+    arrange(REGIONAL, ESTABELECIMENTO, SEM_EPI)
 
   readr::write_csv(
     casos_estabelecimento,
     file.path(dir_dados, "notificacoes_estabelecimento.csv")
   )
 
-  message("Dados por estabelecimento exportados: ",
+  message("Dados por estabelecimento exportados (Paraná): ",
           format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
-          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
+          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos, ",
+          n_distinct(casos_estabelecimento$REGIONAL), " regionais.")
 
   # ----------------------------------------------------------------------------
   # CIRCULAÇÃO VIRAL POR ESTABELECIMENTO
@@ -1524,23 +1551,25 @@ if (is.na(col_estab)) {
     PCR_METAP  = "Metapneumovírus",
     PCR_SARS2  = "Covid-19"
   )
-  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_ano_principal))
+  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_pr))
 
   if (length(cols_presentes_virus) == 0) {
     warning("Nenhuma coluna de PCR viral encontrada na base. ",
             "Exportação de circulação viral por estabelecimento foi pulada.")
   } else {
-    circulacao_viral_estab <- base_ano_principal %>%
+    circulacao_viral_estab <- base_pr %>%
       mutate(
         ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
-        MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)],
+        MUNICIPIO       = ref_regionais_pr$municipio[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)],
+        REGIONAL        = ref_regionais_pr$regional[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)],
+        MACRORREGIAO    = ref_regionais_pr$macrorregiao[match(CO_MUN_RES, ref_regionais_pr$codigo_ibge_6)],
         across(all_of(cols_presentes_virus), ~ .x == 1, .names = "VFLAG_{.col}")
       ) %>%
       filter(
         !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
-        !is.na(SEM_EPI)
+        !is.na(SEM_EPI), !is.na(MUNICIPIO)
       ) %>%
-      select(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, starts_with("VFLAG_")) %>%
+      select(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI, starts_with("VFLAG_")) %>%
       tidyr::pivot_longer(
         cols      = starts_with("VFLAG_"),
         names_to  = "virus_cod",
@@ -1551,8 +1580,8 @@ if (is.na(col_estab)) {
         virus     = colunas_virus_estab[virus_cod]
       ) %>%
       filter(positivo == TRUE) %>%
-      count(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, virus, name = "positivos") %>%
-      arrange(ESTABELECIMENTO, SEM_EPI, virus)
+      count(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI, virus, name = "positivos") %>%
+      arrange(REGIONAL, ESTABELECIMENTO, SEM_EPI, virus)
 
     readr::write_csv(
       circulacao_viral_estab,
