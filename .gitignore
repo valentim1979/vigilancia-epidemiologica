@@ -13,3 +13,6 @@
 !/dbf_sivep/.gitkeep
 .RDataTmp*
 .Rapp.history
+
+# Proteção contra clone acidental de outro repo dentro deste (aconteceu em 19/09/2026)
+vigilancia-sentinela/

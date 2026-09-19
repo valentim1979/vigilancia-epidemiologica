@@ -4,6 +4,8 @@ project:
   render:
     - "*.qmd"
     - "!sivep_15rs/"
+    - "!arquivo/"
+    - "!vigilancia-sentinela/"
   resources:
     - "dados/**"
 
