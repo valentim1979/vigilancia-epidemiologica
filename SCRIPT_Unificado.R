@@ -1,11 +1,19 @@
 # ==============================================================================
 # VIGILÂNCIA EPIDEMIOLÓGICA — 15ª REGIONAL DE SAÚDE DE MARINGÁ
-# Script unificado: Gráficos SRAG + Mapas por município e bairro
+# Script unificado: Gráficos SRAG + Mapas por município
 # Autor   : Valentim Sala Junior
 # Saída   : pasta graficos/ do projeto GitHub Pages
-# Versão 2: adiciona fallback via API dados.gov.br + validação de campos
+# Versão 4: carregamento sempre via API dados.gov.br (DBF local removido);
+#           bloco climático (INMET) removido; mapas/gráficos por bairro
+#           removidos (a API não traz NM_BAIRRO) — só ficam os mapas por
+#           município da regional
 # ==============================================================================
 
+
+# ==============================================================================
+# CARREGAMENTO DO TOKEN DA API (necessário — o script agora só usa a API)
+# ==============================================================================
+if (file.exists("~/.Renviron")) readRenviron("~/.Renviron")
 
 # ==============================================================================
 # BLOCO 0 — CONFIGURAÇÃO GLOBAL (EDITE AQUI)
@@ -18,39 +26,29 @@ ANO_INICIO_CANAL <- 2022
 # --- 0.2 Município ---
 MUNICIPIO_ANALISE <- NULL
 
-# --- 0.3 Caminhos ---
-DIRETORIO_DBF <- "/Users/valentimsalajunior/Documents/DBF_SIVEP"
+# --- 0.3 Caminhos (relativos à raiz do projeto) ---
+# Pasta de cache dos CSVs baixados da API dados.gov.br. Os dados de SRAG
+# agora vêm sempre da API — DBFs locais não são mais lidos.
+DIRETORIO_CACHE_API <- "dbf_sivep"
 
-ARQUIVO_IBGE <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/sivep_15rs/ibge_cnv_pop.csv"
+ARQUIVO_IBGE <- "sivep_15rs/ibge_cnv_pop.csv"
 
-CAMINHO_SHP_MUNICIPIOS <- "/Users/valentimsalajunior/Documents/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
-
-CAMINHO_SHP_MARINGA    <- "/Users/valentimsalajunior/Documents/GIS/bairros/Bairros.shp"
-
-CAMINHO_SHP_SARANDI    <- "/Users/valentimsalajunior/Documents/GIS/bairros_sarandi/Bairros_loteamentos.shp"
-
-# --- 0.4 Parâmetros dos mapas de bairro ---
-CORTE_NOME_BAIRRO     <- 5
-CORTE_NOME_BAIRRO_SAR <- 1
+CAMINHO_SHP_MUNICIPIOS <- "sivep_15rs/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
 
 # --- 0.5 Pasta de saída ---
-DIR_GRAFICOS <- "/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/graficos"
+DIR_GRAFICOS <- "graficos"
 
 # --- 0.6 Data de extração ---
-# Se o DBF local do ano de análise não existir (ex.: execução 100% via API,
-# como num runner de CI sem os arquivos baixados), usa a data de hoje como
-# referência em vez de deixar DATA_EXTRACAO como NA.
-CAMINHO_DBF_ANO_ANALISE <- file.path(DIRETORIO_DBF, paste0("SRAGHOSP", max(ANO_ANALISE), ".dbf"))
-DATA_EXTRACAO <- if (file.exists(CAMINHO_DBF_ANO_ANALISE)) {
-  as.Date(file.info(CAMINHO_DBF_ANO_ANALISE)$mtime)
+# Data de referência: mtime do CSV em cache (baixado da API) para o ano de
+# análise, ou a data de hoje se ainda não tiver sido baixado nesta execução.
+CAMINHO_CACHE_ANO_ANALISE <- file.path(DIRETORIO_CACHE_API, paste0("SRAG_API_", max(ANO_ANALISE), ".csv"))
+DATA_EXTRACAO <- if (file.exists(CAMINHO_CACHE_ANO_ANALISE)) {
+  as.Date(file.info(CAMINHO_CACHE_ANO_ANALISE)$mtime)
 } else {
   Sys.Date()
 }
 
-# --- 0.7 Estação INMET ---
-INMET_ESTACAO <- "A826"  # Maringá — altere se necessário
-
-# --- 0.8 API dados.gov.br (fallback quando o DBF local não existir) ---
+# --- 0.7 API dados.gov.br (fonte única dos dados de SRAG) ---
 ID_CONJUNTO_SRAG <- "39a4995f-4a6e-440f-8c8f-b00c81fae0d0"  # SRAG 2019 a 2026
 
 
@@ -61,7 +59,7 @@ ID_CONJUNTO_SRAG <- "39a4995f-4a6e-440f-8c8f-b00c81fae0d0"  # SRAG 2019 a 2026
 pacotes <- c(
   "sf", "foreign", "dplyr", "ggplot2", "scales", "tidyr",
   "readr", "stringr", "lubridate", "forcats", "tmap", "writexl",
-  "httr", "jsonlite"
+  "httr"
 )
 
 for (pkg in pacotes) {
@@ -176,6 +174,8 @@ baixar_via_api <- function(ano, diretorio_cache) {
   link    <- localizar_recurso_ano(ano, "CSV")
   destino <- file.path(diretorio_cache, paste0("SRAG_API_", ano, ".csv"))
 
+  if (!dir.exists(diretorio_cache)) dir.create(diretorio_cache, recursive = TRUE)
+
   if (!file.exists(destino)) {
     message("  Baixando via API dados.gov.br: ", link)
     download.file(link, destfile = destino, mode = "wb")
@@ -197,7 +197,7 @@ baixar_via_api <- function(ano, diretorio_cache) {
 # cabeçalho via conexão). Use isso ANTES de confiar no fallback abaixo — não
 # há garantia de que os dois têm exatamente os mesmos campos (por exemplo,
 # NM_BAIRRO pode existir só na base interna da regional).
-validar_campos_dbf_api <- function(ano, diretorio_dbf = DIRETORIO_DBF) {
+validar_campos_dbf_api <- function(ano, diretorio_dbf = DIRETORIO_CACHE_API) {
 
   caminho_dbf <- file.path(diretorio_dbf, paste0("SRAGHOSP", ano, ".dbf"))
   if (!file.exists(caminho_dbf)) {
@@ -228,35 +228,14 @@ validar_campos_dbf_api <- function(ano, diretorio_dbf = DIRETORIO_DBF) {
   invisible(list(comum = em_comum, so_dbf = so_no_dbf, so_api = so_na_api))
 }
 
-# carregar_base(): tenta o DBF local primeiro; se não achar, tenta baixar o
-# CSV equivalente via API antes de desistir do ano.
+# carregar_base(): baixa sempre o CSV via API dados.gov.br. DBFs locais não
+# são mais lidos — todo o carregamento passa pela API.
 carregar_base <- function(ano, diretorio) {
-  nomes <- c(
-    paste0("SRAGHOSP", ano, ".dbf"),
-    paste0("sraghosp", ano, ".dbf"),
-    paste0("SRAGHOSP", ano, ".DBF")
-  )
-  caminho <- NULL
-  for (n in nomes) {
-    c <- file.path(diretorio, n)
-    if (file.exists(c)) { caminho <- c; break }
-  }
-
-  if (!is.null(caminho)) {
-    df <- tryCatch(
-      { d <- foreign::read.dbf(caminho, as.is = TRUE)
-        message("  [OK] ", basename(caminho), " | ", nrow(d), " registros (DBF local)")
-        d },
-      error = function(e) NULL
-    )
-    if (!is.null(df)) { df$ANO_BASE <- ano; return(df) }
-  }
-
-  message("  [aviso] DBF local não encontrado para ", ano, " — tentando via API dados.gov.br...")
+  message("  Baixando via API dados.gov.br (SRAG ", ano, ")...")
   df <- tryCatch(
     baixar_via_api(ano, diretorio),
     error = function(e) {
-      message("  [erro] API também falhou para ", ano, ": ", conditionMessage(e))
+      message("  [erro] Falha ao baixar via API para ", ano, ": ", conditionMessage(e))
       NULL
     }
   )
@@ -311,15 +290,6 @@ ORDEM_FAIXAS <- c(
   "Em branco/Ignorado", "Erro/Outro"
 )
 
-normaliza_bairro <- function(x) {
-  x %>%
-    str_to_upper() %>% str_trim() %>% str_squish() %>%
-    iconv(to = "ASCII//TRANSLIT") %>%
-    str_replace_all("[^A-Z0-9 ]", "") %>%
-    str_squish()
-}
-
-
 # ==============================================================================
 # BLOCO 4 — CARREGAMENTO E LIMPEZA DOS DADOS
 # ==============================================================================
@@ -341,9 +311,9 @@ anos_a_carregar <- sort(union(anos_carregar, anos_curva))
 message("\nCarregando anos: ", paste(anos_a_carregar, collapse = ", "))
 
 lista_bases <- Filter(Negate(is.null),
-                      lapply(anos_a_carregar, carregar_base, diretorio = DIRETORIO_DBF))
+                      lapply(anos_a_carregar, carregar_base, diretorio = DIRETORIO_CACHE_API))
 
-if (length(lista_bases) == 0) stop("Nenhuma base carregada. Verifique DIRETORIO_DBF.")
+if (length(lista_bases) == 0) stop("Nenhuma base carregada. Verifique a conexão com a API dados.gov.br e o token DADOS_GOV_TOKEN.")
 
 base_completa <- bind_rows(lista_bases)
 names(base_completa) <- toupper(names(base_completa))
@@ -356,11 +326,6 @@ base_completa <- base_completa %>%
     DT_NOTIFIC_DT  = parseia_data(DT_NOTIFIC),
     ANO            = lubridate::year(DT_NOTIFIC_DT),
     SEM_EPI        = as.integer(SEM_NOT),
-    BAIRRO         = NM_BAIRRO %>%
-      str_to_upper() %>% str_trim() %>% str_squish() %>%
-      str_replace_all("[^A-ZÁÉÍÓÚÂÊÎÔÛÃÕÀÈÌÒÙÇ0-9 ]", "") %>%
-      na_if("") %>% na_if("NAO INFORMADO") %>%
-      na_if("IGNORADO") %>% na_if("SEM INFORMACAO") %>% na_if("SEM BAIRRO"),
     CLASSIFICACAO  = case_when(
       CLASSI_FIN == 1 ~ "Influenza",
       CLASSI_FIN == 2 ~ "Outro vírus respiratório",
@@ -413,7 +378,7 @@ if (length(anos_virus_historico) > 0) {
 
   lista_bases_hist <- Filter(Negate(is.null),
                              lapply(anos_virus_historico, carregar_base,
-                                    diretorio = DIRETORIO_DBF))
+                                    diretorio = DIRETORIO_CACHE_API))
 
   if (length(lista_bases_hist) > 0) {
     base_hist_extra <- bind_rows(lista_bases_hist)
@@ -459,84 +424,11 @@ casos_municipio <- base_15rs_completa %>%
   ) %>%
   arrange(desc(incidencia_100k))
 
-cod_maringa <- 411520
-
-casos_bairro <- base_15rs_completa %>%
-  filter(ANO_BASE %in% anos_carregar, CO_MUN_RES == cod_maringa, !is.na(BAIRRO)) %>%
-  group_by(BAIRRO) %>%
-  summarise(
-    casos       = n(),
-    obitos_srag = sum(OBITO_SRAG, na.rm = TRUE),
-    uti         = sum(UTI_SIM,    na.rm = TRUE),
-    letalidade  = round(obitos_srag / casos * 100, 1),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(casos))
-
-casos_bairro_sem <- base_15rs_completa %>%
-  filter(ANO_BASE %in% anos_carregar, CO_MUN_RES == cod_maringa,
-         !is.na(BAIRRO), !is.na(SEM_EPI)) %>%
-  group_by(BAIRRO, SEM_EPI) %>%
-  summarise(casos = n(), .groups = "drop")
-
-cod_sarandi <- 412625
-
-casos_bairro_sar <- base_15rs_completa %>%
-  filter(ANO_BASE %in% anos_carregar, CO_MUN_RES == cod_sarandi, !is.na(BAIRRO)) %>%
-  group_by(BAIRRO) %>%
-  summarise(
-    casos       = n(),
-    obitos_srag = sum(OBITO_SRAG, na.rm = TRUE),
-    uti         = sum(UTI_SIM,    na.rm = TRUE),
-    letalidade  = round(obitos_srag / casos * 100, 1),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(casos))
-
-casos_bairro_sem_sar <- base_15rs_completa %>%
-  filter(ANO_BASE %in% anos_carregar, CO_MUN_RES == cod_sarandi,
-         !is.na(BAIRRO), !is.na(SEM_EPI)) %>%
-  group_by(BAIRRO, SEM_EPI) %>%
-  summarise(casos = n(), .groups = "drop")
-
 casos_semana_class <- base_filtrada %>%
   filter(!is.na(SEM_EPI)) %>%
   group_by(SEM_EPI, CLASSIFICACAO) %>%
   summarise(casos = n(), .groups = "drop") %>%
   arrange(SEM_EPI)
-
-# ------------------------------------------------------------------------------
-# Disponibilidade de dado de bairro (NM_BAIRRO não existe no CSV público da
-# API dados.gov.br — confirmado em validar_campos_dbf_api(). Anos carregados
-# via API ficam sem BAIRRO; gráficos/mapas de bairro usam só os anos com
-# DBF local.
-# ------------------------------------------------------------------------------
-DADOS_BAIRRO_OK <- nrow(casos_bairro) > 0
-
-anos_com_bairro <- base_15rs_completa %>%
-  filter(ANO_BASE %in% anos_carregar, !is.na(BAIRRO)) %>%
-  distinct(ANO_BASE) %>%
-  pull(ANO_BASE) %>%
-  sort()
-
-anos_bairro_faltando <- setdiff(anos_carregar, anos_com_bairro)
-
-if (length(anos_bairro_faltando) > 0) {
-  message(
-    "[aviso] Sem dado de bairro (NM_BAIRRO) para: ",
-    paste(anos_bairro_faltando, collapse = ", "),
-    " — provavelmente carregado via API dados.gov.br, que não inclui esse campo. ",
-    "Gráficos e mapas de bairro consideram só: ",
-    if (length(anos_com_bairro) > 0) paste(anos_com_bairro, collapse = ", ") else "nenhum ano disponível"
-  )
-}
-
-if (!DADOS_BAIRRO_OK) {
-  message(
-    "[aviso] Nenhum dado de bairro disponível para os anos selecionados — ",
-    "gráficos e mapas de bairro (Maringá/Sarandi) serão pulados nesta execução."
-  )
-}
 
 
 # ==============================================================================
@@ -722,162 +614,6 @@ g07 <- ggplot(casos_semana, aes(x = factor(SEM_NOT), y = total)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 salvar_grafico(g07, "07_notificacoes_semana_epi")
-
-
-# ==============================================================================
-# BLOCO CLIMÁTICO — INMET A826 (Maringá) x SRAG 15ª RS
-# Depende de: casos_semana (criado no Gráfico 07)
-# ==============================================================================
-
-ano_clima   <- max(anos_carregar)
-data_inicio <- paste0(ano_clima, "-01-01")
-data_fim    <- format(Sys.Date(), "%Y-%m-%d")
-
-inmet_url <- paste0(
-  "https://apitempo.inmet.gov.br/estacao/",
-  data_inicio, "/", data_fim, "/", INMET_ESTACAO
-)
-
-clima_bruto <- tryCatch({
-  resp <- httr::GET(inmet_url, httr::timeout(30))
-  if (httr::status_code(resp) != 200) stop("HTTP ", httr::status_code(resp))
-  jsonlite::fromJSON(httr::content(resp, as = "text", encoding = "UTF-8"))
-}, error = function(e) {
-  message(
-    "\n[aviso] API INMET indisponível: ", conditionMessage(e),
-    "\nBaixe o CSV manualmente em: https://bdmep.inmet.gov.br",
-    "\n  Estação: ", INMET_ESTACAO, " — Maringá | Período: ",
-    data_inicio, " a ", data_fim,
-    "\nBloco climático ignorado.\n"
-  )
-  NULL
-})
-
-if (!is.null(clima_bruto) && nrow(clima_bruto) > 0) {
-
-  clima_se <- clima_bruto %>%
-    as_tibble() %>%
-    mutate(
-      data   = as.Date(DT_MEDICAO),
-      tmin   = suppressWarnings(as.numeric(TEM_MIN)),
-      tmax   = suppressWarnings(as.numeric(TEM_MAX)),
-      umid   = suppressWarnings(as.numeric(UMD_INS)),
-      precip = suppressWarnings(as.numeric(CHUVA)),
-      se     = lubridate::isoweek(data)
-    ) %>%
-    filter(lubridate::year(data) == ano_clima) %>%
-    group_by(se) %>%
-    summarise(
-      tmin_med   = mean(tmin,        na.rm = TRUE),
-      tmax_med   = mean(tmax,        na.rm = TRUE),
-      amplitude  = mean(tmax - tmin, na.rm = TRUE),
-      umid_med   = mean(umid,        na.rm = TRUE),
-      precip_sum = sum(precip,       na.rm = TRUE),
-      .groups    = "drop"
-    )
-
-  df_clima <- casos_semana %>%
-    rename(se = SEM_NOT) %>%
-    mutate(se = as.integer(se)) %>%
-    inner_join(clima_se, by = "se") %>%
-    arrange(se)
-
-  message("Semanas com dados climáticos e epidemiológicos: ", nrow(df_clima))
-
-  if (nrow(df_clima) >= 3) {
-
-    dir.create(file.path(DIR_GRAFICOS, "climatico"), showWarnings = FALSE)
-
-    plot_clima_casos <- function(df, var_clima, label_clima, cor_clima,
-                                 titulo, nome_arquivo) {
-      escala <- max(df$total, na.rm = TRUE) /
-        max(df[[var_clima]], na.rm = TRUE, finite = TRUE)
-
-      p <- ggplot(df, aes(x = se)) +
-        geom_col(aes(y = total), fill = "#003366", alpha = 0.45, width = 0.7) +
-        geom_line(aes(y = .data[[var_clima]] * escala),
-                  color = cor_clima, linewidth = 1.2) +
-        geom_point(aes(y = .data[[var_clima]] * escala),
-                   color = cor_clima, size = 2) +
-        scale_y_continuous(
-          name = "Casos de SRAG",
-          labels = scales::label_comma(big.mark = ".", decimal.mark = ","),
-          sec.axis = sec_axis(~ . / escala, name = label_clima)
-        ) +
-        scale_x_continuous(
-          breaks = seq(1, max(df$se, na.rm = TRUE), by = 2),
-          name   = "Semana Epidemiológica"
-        ) +
-        labs(
-          title    = paste0(titulo, " — ", escopo_titulo),
-          subtitle = paste0("Ano: ", ano_clima, " | Estação INMET ", INMET_ESTACAO, " — Maringá"),
-          caption  = paste0(texto_rodape, " | Clima: INMET/BDMEP")
-        ) +
-        theme_minimal(base_size = 12) +
-        theme(
-          plot.title         = element_text(face = "bold"),
-          axis.title.y       = element_text(color = "#003366"),
-          axis.title.y.right = element_text(color = cor_clima),
-          panel.grid.minor   = element_blank()
-        )
-
-      caminho <- file.path(DIR_GRAFICOS, "climatico",
-                           paste0(nome_arquivo, "_", ano_clima, ".png"))
-      ggsave(caminho, plot = p, width = 14, height = 6, dpi = 150, bg = "white")
-      message("Salvo: ", caminho)
-    }
-
-    plot_clima_casos(df_clima, "tmin_med",   "Temperatura Mínima Média (°C)",  "#C00000",
-                     "SRAG x Temperatura Mínima Semanal",  "clima_tmin_casos")
-    plot_clima_casos(df_clima, "umid_med",   "Umidade Relativa Média (%)",     "#2E75B6",
-                     "SRAG x Umidade Relativa Semanal",    "clima_umid_casos")
-    plot_clima_casos(df_clima, "precip_sum", "Precipitação Acumulada (mm)",    "#70AD47",
-                     "SRAG x Precipitação Semanal",        "clima_precip_casos")
-    plot_clima_casos(df_clima, "amplitude",  "Amplitude Térmica Média (°C)",   "#FF6B00",
-                     "SRAG x Amplitude Térmica Semanal",   "clima_amplitude_casos")
-
-    # Correlações de Spearman com lag 0–4 semanas
-    vars_clima_cor <- c("tmin_med", "umid_med", "precip_sum", "amplitude")
-
-    resultados_lag <- expand.grid(
-      variavel = vars_clima_cor, lag = 0:4, stringsAsFactors = FALSE
-    ) %>%
-      rowwise() %>%
-      mutate(
-        n_obs   = sum(complete.cases(df_clima$total,
-                                     dplyr::lag(df_clima[[variavel]], lag))),
-        rho     = if (n_obs >= 5) cor(df_clima$total,
-                                      dplyr::lag(df_clima[[variavel]], lag),
-                                      use = "complete.obs", method = "spearman") else NA_real_,
-        p_valor = if (n_obs >= 5) {
-          idx <- complete.cases(df_clima$total, dplyr::lag(df_clima[[variavel]], lag))
-          cor.test(df_clima$total[idx], dplyr::lag(df_clima[[variavel]], lag)[idx],
-                   method = "spearman", exact = FALSE)$p.value
-        } else NA_real_
-      ) %>%
-      ungroup() %>%
-      mutate(
-        rho     = round(rho, 3),
-        p_valor = round(p_valor, 4),
-        sig     = case_when(
-          is.na(p_valor) ~ "—",
-          p_valor < 0.01 ~ "**",
-          p_valor < 0.05 ~ "*",
-          TRUE           ~ "ns"
-        )
-      ) %>%
-      arrange(variavel, lag)
-
-    caminho_cor <- file.path(DIR_GRAFICOS, "climatico",
-                             paste0("correlacoes_lag_", ano_clima, ".csv"))
-    write.csv(resultados_lag, caminho_cor, row.names = FALSE)
-    message("Correlações salvas: ", caminho_cor)
-    print(resultados_lag)
-
-  } else {
-    message("[aviso] Menos de 3 semanas com dados completos — gráficos climáticos não gerados.")
-  }
-}
 
 
 # ==============================================================================
@@ -1592,115 +1328,7 @@ salvar_grafico(g20, "20_raca_cor")
 # ==============================================================================
 
 
-# ==============================================================================
-# GRÁFICOS DE BAIRRO — TOP 20 MARINGÁ E SARANDI
-# ------------------------------------------------------------------------------
-# DESABILITADO por decisão manual (não por DADOS_BAIRRO_OK): com o esquema
-# misto DBF local (até 2025) + API (2026 em diante), anos_carregar pode conter
-# uma combinação de anos com e sem NM_BAIRRO. Depender só de "existe algum
-# dado de bairro" arriscava gerar um mapa/gráfico que parece atual mas reflete
-# só os anos antigos com DBF local, sem deixar isso óbvio. Preferimos manter
-# desligado até revisar com calma. Para reativar: troque "if (FALSE)" por
-# "if (DADOS_BAIRRO_OK)" (ou "if (TRUE)") logo abaixo.
-# ==============================================================================
-
 titulo_ano <- paste(anos_carregar, collapse = "/")
-
-if (FALSE) {
-
-  g_bairro_mar <- casos_bairro %>%
-    head(20) %>%
-    mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
-    ggplot(aes(x = casos, y = BAIRRO)) +
-    geom_col(fill = "#2166ac") +
-    geom_text(aes(label = casos), hjust = -0.2, size = 3) +
-    scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
-    labs(
-      title    = paste("Top 20 Bairros — Casos de SRAG (Maringá/PR) |", titulo_ano),
-      subtitle = "Fonte: SIVEP-GRIPE | Residência do paciente",
-      x = "Casos notificados", y = NULL, caption = texto_rodape
-    ) +
-    theme_minimal()
-
-  salvar_grafico(g_bairro_mar,
-                 paste0("srag_top20_bairros_maringa_", paste(anos_carregar, collapse = "_")))
-
-  if (nrow(casos_bairro_sar) > 0) {
-    g_bairro_sar <- casos_bairro_sar %>%
-      head(20) %>%
-      mutate(BAIRRO = fct_reorder(str_to_title(BAIRRO), casos)) %>%
-      ggplot(aes(x = casos, y = BAIRRO)) +
-      geom_col(fill = "#1b7837") +
-      geom_text(aes(label = casos), hjust = -0.2, size = 3) +
-      scale_x_continuous(expand = expansion(mult = c(0, 0.15))) +
-      labs(
-        title    = paste("Top 20 Bairros — Casos de SRAG (Sarandi/PR) |", titulo_ano),
-        subtitle = "Fonte: SIVEP-GRIPE | Residência do paciente",
-        x = "Casos notificados", y = NULL, caption = texto_rodape
-      ) +
-      theme_minimal()
-
-    salvar_grafico(g_bairro_sar,
-                   paste0("srag_top20_bairros_sarandi_", paste(anos_carregar, collapse = "_")))
-  }
-
-  top15 <- head(casos_bairro$BAIRRO, 15)
-
-  lookup_mar <- casos_bairro %>%
-    distinct(BAIRRO, .keep_all = TRUE) %>%
-    select(BAIRRO, total_bairro = casos)
-
-  g_heat_mar <- casos_bairro_sem %>%
-    filter(BAIRRO %in% top15) %>%
-    left_join(lookup_mar, by = "BAIRRO") %>%
-    mutate(total_bairro = replace_na(total_bairro, 0L),
-           LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-           LABEL = fct_reorder(LABEL, total_bairro)) %>%
-    ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
-    geom_tile(color = "white") +
-    scale_fill_distiller(palette = "Blues", direction = 1) +
-    scale_x_continuous(breaks = seq(1, 53, by = 4)) +
-    labs(
-      title    = paste("SRAG por Bairro e Semana Epidemiológica — Maringá |", titulo_ano),
-      subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-      x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
-    ) +
-    theme_minimal()
-
-  salvar_grafico(g_heat_mar,
-                 paste0("srag_heatmap_bairro_semana_maringa_", paste(anos_carregar, collapse = "_")),
-                 width = 14, height = 6)
-
-  if (nrow(casos_bairro_sar) > 0) {
-    lookup_sar <- casos_bairro_sar %>%
-      distinct(BAIRRO, .keep_all = TRUE) %>%
-      select(BAIRRO, total_bairro = casos)
-
-    g_heat_sar <- casos_bairro_sem_sar %>%
-      filter(BAIRRO %in% head(casos_bairro_sar$BAIRRO, 15)) %>%
-      left_join(lookup_sar, by = "BAIRRO") %>%
-      mutate(total_bairro = replace_na(total_bairro, 0L),
-             LABEL = paste0(str_to_title(BAIRRO), " (", total_bairro, ")"),
-             LABEL = fct_reorder(LABEL, total_bairro)) %>%
-      ggplot(aes(x = SEM_EPI, y = LABEL, fill = casos)) +
-      geom_tile(color = "white") +
-      scale_fill_distiller(palette = "Greens", direction = 1) +
-      scale_x_continuous(breaks = seq(1, 53, by = 4)) +
-      labs(
-        title    = paste("SRAG por Bairro e Semana Epidemiológica — Sarandi |", titulo_ano),
-        subtitle = "Top 15 bairros | Total acumulado entre parênteses",
-        x = "Semana epidemiológica", y = NULL, fill = "Casos\nna semana", caption = texto_rodape
-      ) +
-      theme_minimal()
-
-    salvar_grafico(g_heat_sar,
-                   paste0("srag_heatmap_bairro_semana_sarandi_", paste(anos_carregar, collapse = "_")),
-                   width = 14, height = 6)
-  }
-
-} else {
-  message("[desabilitado] Gráficos de bairro (Top 20 e heatmaps) — desligados manualmente nesta versão do script.")
-}
 
 g_class <- casos_semana_class %>%
   ggplot(aes(x = SEM_EPI, y = casos, color = CLASSIFICACAO, group = CLASSIFICACAO)) +
@@ -1769,113 +1397,6 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   warning("Shapefile de municípios não encontrado: ", CAMINHO_SHP_MUNICIPIOS)
 }
 
-gera_mapa_bairro <- function(bairros_geo, casos_bairro_mun, col_nome,
-                             de_para, corte, nome_municipio, ano) {
-  bairros_geo <- bairros_geo %>% mutate(JOIN_KEY = normaliza_bairro(.data[[col_nome]]))
-  casos_join  <- casos_bairro_mun %>% mutate(JOIN_KEY = normaliza_bairro(BAIRRO))
-
-  lookup <- bind_rows(
-    casos_join %>% rename(SHP_KEY = JOIN_KEY) %>% select(SHP_KEY, casos, obitos_srag, uti, letalidade),
-    de_para %>%
-      left_join(casos_join %>% rename(SIVEP_KEY = JOIN_KEY), by = "SIVEP_KEY") %>%
-      select(SHP_KEY, casos, obitos_srag, uti, letalidade)
-  ) %>%
-    group_by(SHP_KEY) %>%
-    summarise(casos = sum(casos, na.rm = TRUE),
-              obitos_srag = sum(obitos_srag, na.rm = TRUE),
-              uti = sum(uti, na.rm = TRUE), .groups = "drop") %>%
-    mutate(letalidade = round(obitos_srag / casos * 100, 1),
-           casos = if_else(casos == 0L, NA_integer_, casos))
-
-  mapa_dados   <- bairros_geo %>% left_join(lookup, by = c("JOIN_KEY" = "SHP_KEY"))
-  bairros_nome <- mapa_dados %>% filter(!is.na(casos) & casos >= corte)
-
-  mapa <- tm_shape(mapa_dados) +
-    tm_polygons(fill = "casos",
-                fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd", value.na = "grey90"),
-                fill.legend = tm_legend(title = "Casos de SRAG"),
-                col = "grey40", lwd = 0.5) +
-    tm_title(paste0("SRAG por Bairro — ", nome_municipio, "/PR | ", ano,
-                    "\nNomes exibidos: >= ", corte, " casos")) +
-    tm_compass(position = c("right", "top"), size = 1.5) +
-    tm_scalebar(position = c("left", "bottom"))
-
-  if (nrow(bairros_nome) > 0) {
-    mapa <- mapa +
-      tm_shape(bairros_nome) +
-      tm_text(text = col_nome, size = 0.35, col = "grey10",
-              fontface = "bold", remove.overlap = TRUE)
-  }
-  mapa
-}
-
-de_para_maringa <- tibble::tribble(
-  ~SHP_KEY,                                          ~SIVEP_KEY,
-  "JARDIM ALVORADA I PARTE",                         "JARDIM ALVORADA",
-  "JARDIM ALVORADA II PARTE",                        "JARDIM ALVORADA",
-  "SUB LT 77A71 JARDIM ALVORADA III",                "JARDIM ALVORADA",
-  "CONJUNTO HABITACIONAL REQUIAO I 1 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 2 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 3 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
-  "CONJUNTO HABITACIONAL REQUIAO I 4 PARTE",         "CONJUNTO HABITACIONAL REQUIAO",
-  "PARQUE ITAIPU I PARTE",                           "JARDIM ITAIPU",
-  "PARQUE ITAIPU II PARTE",                          "JARDIM ITAIPU",
-  "PARQUE HORTENCIA I PARTE",                        "PARQUE HORTENCIA",
-  "PARQUE HORTENCIA II PARTE",                       "PARQUE HORTENCIA",
-  "LOTEAMENTO LIBERDADE I PARTE",                    "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE II PARTE",                   "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE III PARTE",                  "JARDIM LIBERDADE",
-  "LOTEAMENTO LIBERDADE IV PARTE",                   "JARDIM LIBERDADE",
-  "CONJUNTO CIDADE ALTA",                            "CONJUNTO RESIDENCIAL CIDADE AL"
-)
-
-# DESABILITADO por decisão manual — mesmo motivo do bloco de gráficos de
-# bairro acima (risco de mapa misto DBF+API parecer atual sem ser). Para
-# reativar: troque cada "if (FALSE)" abaixo por "if (DADOS_BAIRRO_OK)"
-# (ou "if (TRUE)" para sempre tentar gerar quando o shapefile existir).
-if (FALSE) {
-  message("\nGerando mapa de bairros — Maringá...")
-  bairros_mar <- sf::st_read(CAMINHO_SHP_MARINGA, quiet = TRUE) %>%
-    sf::st_transform(crs = 4326)
-
-  mapa_mar <- gera_mapa_bairro(
-    bairros_geo = bairros_mar, casos_bairro_mun = casos_bairro,
-    col_nome = "NOME", de_para = de_para_maringa,
-    corte = CORTE_NOME_BAIRRO, nome_municipio = "Maringá", ano = titulo_ano
-  )
-
-  tmap_save(mapa_mar,
-            file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_maringa_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400, device = png)
-  message("Mapa de Maringá salvo.")
-} else {
-  message("[desabilitado] Mapa de bairro — Maringá — desligado manualmente nesta versão do script.")
-}
-
-de_para_sarandi <- tibble::tribble(
-  ~SHP_KEY, ~SIVEP_KEY
-)
-
-if (FALSE) {
-  message("\nGerando mapa de bairros — Sarandi...")
-  bairros_sar <- sf::st_read(CAMINHO_SHP_SARANDI, quiet = TRUE) %>%
-    sf::st_transform(crs = 4326)
-
-  mapa_sar <- gera_mapa_bairro(
-    bairros_geo = bairros_sar, casos_bairro_mun = casos_bairro_sar,
-    col_nome = "Bairro", de_para = de_para_sarandi,
-    corte = CORTE_NOME_BAIRRO_SAR, nome_municipio = "Sarandi", ano = titulo_ano
-  )
-
-  tmap_save(mapa_sar,
-            file.path(DIR_GRAFICOS, paste0("mapa_srag_bairro_sarandi_", paste(anos_carregar, collapse = "_"), ".png")),
-            width = 2400, height = 2400, device = png)
-  message("Mapa de Sarandi salvo.")
-} else {
-  message("[desabilitado] Mapa de bairro — Sarandi — desligado manualmente nesta versão do script.")
-}
-
-
 # ==============================================================================
 # EXPORTAÇÃO EXCEL
 # ==============================================================================
@@ -1887,8 +1408,6 @@ writexl::write_xlsx(
   list(
     "municipios_15rs"         = municipios_15rs,
     "casos_municipio"         = casos_municipio,
-    "casos_bairro_maringa"    = casos_bairro,
-    "casos_bairro_sarandi"    = casos_bairro_sar,
     "serie_temporal"          = casos_semana,
     "serie_por_classificacao" = casos_semana_class
   ),

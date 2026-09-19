@@ -7,3 +7,9 @@
 **/*.quarto_ipynb
 .DS_Store
 **/.DS_Store
+
+# Cache local de DBF/CSV do SIVEP-Gripe (baixados via API dados.gov.br)
+/dbf_sivep/*
+!/dbf_sivep/.gitkeep
+.RDataTmp*
+.Rapp.history

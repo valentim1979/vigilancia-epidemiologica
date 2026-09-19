@@ -15,8 +15,8 @@ execute:
 ---
 
 ```{r setup}
-source("/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/SCRIPT_Unificado.R")
-source("/Users/valentimsalajunior/Documents/vigilancia-epidemiologica/descritiva_srag_15rs.R")
+source("SCRIPT_Unificado.R")
+source("descritiva_srag_15rs.R")
 
 ano_label <- paste(anos_carregar, collapse = "/")
 ```
