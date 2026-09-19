@@ -13,10 +13,10 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
 
 ---
 
-## Notificações por estabelecimento
+## Notificações por estabelecimento (unidade de internação)
 
 ::: {.callout-note}
-Dados agregados por estabelecimento e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`.
+Dados agregados por unidade de internação e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`. **Cobre apenas os casos hospitalizados**: a API pública do dados.gov.br não traz o estabelecimento notificador, só a unidade onde o paciente foi internado.
 :::
 
 ```{ojs}
@@ -76,7 +76,7 @@ md`**Notificações:** ${total_casos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Ó
 ```{ojs}
 //| echo: false
 Plot.plot({
-  title: `Notificações por semana epidemiológica — ${estabelecimento_sel}`,
+  title: `Pacientes internados por estabelecimento — ${estabelecimento_sel}`,
   width: 850,
   height: 380,
   marginLeft: 50,

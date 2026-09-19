@@ -322,3 +322,36 @@ Output created: docs/index.html
 
 
 [4/5] Enviando para o GitHub...
+[main a29f150] Atualização de dados — 19/09/2026
+ 113 files changed, 991 insertions(+), 635 deletions(-)
+ create mode 100644 com.valentim.vigilancia-publicar.plist
+ rename docs/{ => arquivo}/painel_15rs.html (92%)
+ rename docs/{ => arquivo}/painel_parana.html (92%)
+ rename docs/{ => arquivo}/srag.html (97%)
+ delete mode 100644 docs/graficos/graficos_15rs_2026/15rs_faixa_desfecho_2026.png
+ delete mode 100644 docs/graficos/graficos_15rs_2026/15rs_mapa_incidencia_2026.png
+ delete mode 100644 docs/graficos/graficos_15rs_2026/15rs_serie_2026.png
+ delete mode 100644 docs/graficos/graficos_15rs_2026/15rs_viral_comparativo.png
+ delete mode 100644 docs/graficos/graficos_parana/pr_mapa_casos.png
+ delete mode 100644 docs/graficos/graficos_parana/pr_mapa_incidencia.png
+ delete mode 100644 docs/graficos/graficos_parana_2026/pr_circulacao_viral_2026.png
+ delete mode 100644 docs/graficos/graficos_parana_2026/pr_faixa_desfecho_2026.png
+ delete mode 100644 docs/graficos/graficos_parana_2026/pr_serie_2026.png
+ delete mode 100644 docs/graficos/graficos_parana_2026/pr_viral_comparativo_anual.png
+ create mode 100644 docs/site_libs/bootstrap/bootstrap-30e9a4428f9d282bf6329f78bbea72b8.min.css
+ delete mode 100644 docs/site_libs/bootstrap/bootstrap-8a5b0047cf64b6df0ea2a3b5b393159a.min.css
+ create mode 100644 docs/site_libs/bootstrap/bootstrap-bfe5bbce511c90f9940a3aaa7a0bbe31.min.css
+ delete mode 100644 docs/site_libs/bootstrap/bootstrap-e71002fb930de0bba6cdb4c100f8fae3.min.css
+ create mode 100644 docs/site_libs/quarto-html/axe/axe-check.js
+ rename docs/site_libs/quarto-html/{quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css => quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css} (98%)
+ create mode 100644 graficos/mapa_srag_casos_2026.png
+ create mode 100644 graficos/mapa_srag_incidencia_2026.png
+ create mode 100644 publicar.log
+To github.com:valentim1979/vigilancia-epidemiologica.git
+   4058ba0..a29f150  main -> main
+
+[5/5] Publicado.
+==================================================
+  Site: https://valentim1979.github.io/vigilancia-epidemiologica
+==================================================
+

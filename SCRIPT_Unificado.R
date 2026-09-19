@@ -753,11 +753,17 @@ salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 # GRÁFICO 10 — NOTIFICAÇÕES POR REGIONAL DE SAÚDE (PARANÁ)
 # ==============================================================================
 
+# Filtra por SG_UF_NOT == "PR" (não pelo número no início de ID_REGIONA):
+# a base é nacional e outros estados também numeram suas regionais de 1 a 22
+# (ex.: PE usa "001", "002"...; RS usa "001 CRS"...), então filtrar só pelo
+# número deixava passar regionais de outros estados junto com as do Paraná.
 base_pr <- bind_rows(lista_bases) %>%
-  mutate(ID_REGIONA = toupper(trimws(ID_REGIONA))) %>%
-  filter(!is.na(ID_REGIONA), ANO_BASE %in% anos_carregar) %>%
-  mutate(num_regional = as.integer(str_extract(ID_REGIONA, "^[0-9]+"))) %>%
-  filter(!is.na(num_regional), num_regional >= 1, num_regional <= 22)
+  mutate(
+    SG_UF_NOT  = toupper(trimws(SG_UF_NOT)),
+    ID_REGIONA = toupper(trimws(ID_REGIONA))
+  ) %>%
+  filter(SG_UF_NOT == "PR", !is.na(ID_REGIONA), nzchar(ID_REGIONA),
+         ANO_BASE %in% anos_carregar)
 
 if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
   casos_regional <- base_pr %>%
@@ -1460,13 +1466,23 @@ writexl::write_xlsx(
 dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
 if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
 
-col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
+# [Não verificado] A API pública do dados.gov.br não traz o estabelecimento
+# notificador (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE não existem em nenhum ano
+# testado, 2019-2026) — provavelmente esses campos só existiam nos DBFs
+# locais antigos. NM_UN_INTE (unidade de internação) é usada como
+# aproximação: só cobre quem foi hospitalizado, não todas as notificações.
+col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE", "NM_UN_INTE"),
+                       names(base_ano_principal))
 col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
 
 if (is.na(col_estab)) {
-  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE) ",
-          "encontrada na base. Exportação para o filtro do site foi pulada.")
+  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE/",
+          "NM_UN_INTE) encontrada na base. Exportação para o filtro do site foi pulada.")
 } else {
+  if (col_estab == "NM_UN_INTE") {
+    message("  [aviso] Usando NM_UN_INTE (unidade de internação) como aproximação ",
+            "de estabelecimento — cobre só os casos hospitalizados.")
+  }
   casos_estabelecimento <- base_ano_principal %>%
     mutate(
       ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
