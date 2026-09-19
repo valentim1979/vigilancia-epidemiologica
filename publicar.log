@@ -639,3 +639,59 @@ Output created: docs/index.html
 
 
 [4/5] Enviando para o GitHub...
+warning: adding embedded git repository: vigilancia-sentinela
+hint: You've added another git repository inside your current repository.
+hint: Clones of the outer repository will not contain the contents of
+hint: the embedded repository and will not know how to obtain it.
+hint: If you meant to add a submodule, use:
+hint:
+hint: 	git submodule add <url> vigilancia-sentinela
+hint:
+hint: If you added this path by mistake, you can remove it from the
+hint: index with:
+hint:
+hint: 	git rm --cached vigilancia-sentinela
+hint:
+hint: See "git help submodule" for more information.
+hint: Disable this message with "git config set advice.addEmbeddedRepo false"
+[main fb1b137] Atualização de dados — 19/09/2026
+ 37 files changed, 4331 insertions(+), 140 deletions(-)
+ create mode 100644 _freeze/vigilancia-sentinela/indicadores/execute-results/html.json
+ create mode 100644 docs/vigilancia-sentinela/circulacao-viral.html
+ create mode 100644 docs/vigilancia-sentinela/dados/circulacao_viral_especifica.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/circulacao_viral_especifica_faixa.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_02.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_03.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_04.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_05.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_06.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_07.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_08.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_09.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_11.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_12.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_13.csv
+ create mode 100644 docs/vigilancia-sentinela/dados/indicador_14.csv
+ create mode 100644 docs/vigilancia-sentinela/img/amostras_semanais.png
+ create mode 100644 docs/vigilancia-sentinela/img/circulacao_viral_especifica.png
+ create mode 100644 docs/vigilancia-sentinela/img/circulacao_viral_especifica_faixa.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_05_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_06_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_07_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_08_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_09_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_11_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_12_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_13_faixa.png
+ create mode 100644 docs/vigilancia-sentinela/img/indicador_14_semanal.png
+ create mode 100644 docs/vigilancia-sentinela/index.html
+ create mode 100644 docs/vigilancia-sentinela/indicadores.html
+ create mode 160000 vigilancia-sentinela
+To https://github.com/valentim1979/vigilancia-epidemiologica.git
+   3ac3416..fb1b137  main -> main
+
+[5/5] Publicado.
+==================================================
+  Site: https://valentim1979.github.io/vigilancia-epidemiologica
+==================================================
+
