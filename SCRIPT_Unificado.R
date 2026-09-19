@@ -15,6 +15,9 @@
 # ==============================================================================
 if (file.exists("~/.Renviron")) readRenviron("~/.Renviron")
 
+# Timeout maior para downloads grandes via API (alguns anos passam de 1 GB)
+options(timeout = 1800)
+
 # ==============================================================================
 # BLOCO 0 — CONFIGURAÇÃO GLOBAL (EDITE AQUI)
 # ==============================================================================
@@ -176,9 +179,41 @@ baixar_via_api <- function(ano, diretorio_cache) {
 
   if (!dir.exists(diretorio_cache)) dir.create(diretorio_cache, recursive = TRUE)
 
-  if (!file.exists(destino)) {
+  # Anos encerrados (ex.: 2019-2025) ficam em cache pra sempre, já que os
+  # dados não mudam mais. O ano corrente é rebaixado uma vez por dia, porque
+  # os casos continuam sendo notificados.
+  ano_corrente   <- lubridate::year(Sys.Date())
+  cache_e_hoje   <- file.exists(destino) &&
+    as.Date(file.info(destino)$mtime) == Sys.Date()
+  precisa_baixar <- !file.exists(destino) || (ano == ano_corrente && !cache_e_hoje)
+
+  if (precisa_baixar) {
     message("  Baixando via API dados.gov.br: ", link)
-    download.file(link, destfile = destino, mode = "wb")
+    temp <- paste0(destino, ".tmp")
+    erro_download <- tryCatch({
+      download.file(link, destfile = temp, mode = "wb")
+      NULL
+    }, error = function(e) e)
+
+    if (!is.null(erro_download) || !file.exists(temp)) {
+      # Download falhou: descarta o arquivo temporário. Se já existia um
+      # cache anterior (ex.: de ontem), mantém ele em vez de apagar dados
+      # bons; só falha de vez se nunca existiu cache nenhum pra esse ano.
+      if (file.exists(temp)) unlink(temp)
+      if (!file.exists(destino)) {
+        stop("Falha ao baixar ", ano, ": ",
+             if (!is.null(erro_download)) conditionMessage(erro_download) else "arquivo não foi criado")
+      }
+      message("  [aviso] Falha ao atualizar ", ano, " — mantendo cache anterior (",
+              basename(destino), ")")
+    } else {
+      file.rename(temp, destino)
+    }
+  } else {
+    message(
+      "  [cache] Usando CSV já baixado (", basename(destino), ")",
+      if (ano == ano_corrente) " — atualizado hoje" else " — ano encerrado, não muda mais"
+    )
   }
 
   # [Não verificado] assume separador ";" e encoding latin1, padrão histórico

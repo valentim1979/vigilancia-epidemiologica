@@ -2,23 +2,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="pt" xml:lang="pt"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.8.27">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Estatística Descritiva — SRAG – 15ª RS — Vigilância Epidemiológica</title>
 <style>
-/* Default styles provided by pandoc.
-** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
-*/
+code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
-div.columns{display: flex; gap: 1.5em;}
-div.column{flex: auto;}
-@media screen {
-div.columns{gap: min(4vw, 1.5em);}
-div.column{overflow-x: auto;}
-}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
 div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
 ul.task-list{list-style: none;}
 ul.task-list li input[type="checkbox"] {
@@ -39,14 +33,15 @@ ul.task-list li input[type="checkbox"] {
 <link href="./assets/favicon.ico" rel="icon">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-64a204ab8560d761af7679ceaba22944.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-e71002fb930de0bba6cdb4c100f8fae3.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-30e9a4428f9d282bf6329f78bbea72b8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="site_libs/quarto-contrib/glightbox/glightbox.min.js"></script>
 <link href="site_libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
@@ -430,15 +425,25 @@ Aviso
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">Nova Esperanca</td>
-<td style="text-align: right;">98</td>
+<td style="text-align: right;">101</td>
+<td style="text-align: right;">9</td>
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">361.1</td>
-<td style="text-align: right;">14.7</td>
-<td style="text-align: right;">4.1</td>
-<td style="text-align: right;">4.1</td>
+<td style="text-align: right;">372.1</td>
+<td style="text-align: right;">33.2</td>
+<td style="text-align: right;">8.9</td>
+<td style="text-align: right;">4.0</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">Santa Ines</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">286.5</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">Uniflor</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: right;">1</td>
@@ -448,7 +453,7 @@ Aviso
 <td style="text-align: right;">16.7</td>
 <td style="text-align: right;">0.0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Ourizona</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">0</td>
@@ -458,17 +463,17 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">37.5</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Santa Ines</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">229.2</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-</tr>
 <tr class="odd">
+<td style="text-align: left;">Sao Jorge Do Ivai</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">232.1</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">25.0</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">Atalaia</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
@@ -478,7 +483,7 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">0.0</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">Itaguaje</td>
 <td style="text-align: right;">10</td>
 <td style="text-align: right;">1</td>
@@ -488,7 +493,7 @@ Aviso
 <td style="text-align: right;">10.0</td>
 <td style="text-align: right;">10.0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Nossa Senhora Das Gracas</td>
 <td style="text-align: right;">8</td>
 <td style="text-align: right;">0</td>
@@ -498,25 +503,15 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">37.5</td>
 </tr>
-<tr class="even">
-<td style="text-align: left;">Sao Jorge Do Ivai</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">212.8</td>
-<td style="text-align: right;">19.3</td>
-<td style="text-align: right;">9.1</td>
-<td style="text-align: right;">27.3</td>
-</tr>
 <tr class="odd">
 <td style="text-align: left;">Maringa</td>
-<td style="text-align: right;">837</td>
-<td style="text-align: right;">82</td>
-<td style="text-align: right;">237</td>
-<td style="text-align: right;">194.8</td>
-<td style="text-align: right;">19.1</td>
-<td style="text-align: right;">9.8</td>
-<td style="text-align: right;">28.3</td>
+<td style="text-align: right;">907</td>
+<td style="text-align: right;">72</td>
+<td style="text-align: right;">261</td>
+<td style="text-align: right;">211.1</td>
+<td style="text-align: right;">16.8</td>
+<td style="text-align: right;">7.9</td>
+<td style="text-align: right;">28.8</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Santo Inacio</td>
@@ -530,15 +525,25 @@ Aviso
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Colorado</td>
-<td style="text-align: right;">41</td>
+<td style="text-align: right;">42</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">175.9</td>
+<td style="text-align: right;">180.2</td>
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">0.0</td>
-<td style="text-align: right;">4.9</td>
+<td style="text-align: right;">4.8</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">Florai</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">145.7</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">28.6</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">Itambe</td>
 <td style="text-align: right;">9</td>
 <td style="text-align: right;">0</td>
@@ -548,25 +553,15 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">22.2</td>
 </tr>
-<tr class="odd">
-<td style="text-align: left;">Florai</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">124.9</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">16.7</td>
-</tr>
 <tr class="even">
 <td style="text-align: left;">Marialva</td>
-<td style="text-align: right;">55</td>
+<td style="text-align: right;">62</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: right;">122.9</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">138.6</td>
 <td style="text-align: right;">4.5</td>
-<td style="text-align: right;">3.6</td>
-<td style="text-align: right;">45.5</td>
+<td style="text-align: right;">3.2</td>
+<td style="text-align: right;">46.8</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Paranacity</td>
@@ -580,23 +575,43 @@ Aviso
 </tr>
 <tr class="even">
 <td style="text-align: left;">Sarandi</td>
-<td style="text-align: right;">112</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">42</td>
-<td style="text-align: right;">87.4</td>
-<td style="text-align: right;">5.5</td>
+<td style="text-align: right;">122</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">48</td>
+<td style="text-align: right;">95.2</td>
 <td style="text-align: right;">6.2</td>
-<td style="text-align: right;">37.5</td>
+<td style="text-align: right;">6.6</td>
+<td style="text-align: right;">39.3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Munhoz De Melo</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">73.9</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">33.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Lobato</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">63.7</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">33.3</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Astorga</td>
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">5</td>
-<td style="text-align: right;">53.4</td>
-<td style="text-align: right;">3.8</td>
-<td style="text-align: right;">7.1</td>
-<td style="text-align: right;">35.7</td>
+<td style="text-align: right;">57.2</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">33.3</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Floresta</td>
@@ -609,14 +624,14 @@ Aviso
 <td style="text-align: right;">16.7</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Munhoz De Melo</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: left;">Paicandu</td>
+<td style="text-align: right;">24</td>
 <td style="text-align: right;">1</td>
+<td style="text-align: right;">15</td>
 <td style="text-align: right;">49.3</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">50.0</td>
+<td style="text-align: right;">2.1</td>
+<td style="text-align: right;">4.2</td>
+<td style="text-align: right;">62.5</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Mandaguacu</td>
@@ -629,26 +644,16 @@ Aviso
 <td style="text-align: right;">41.2</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">Paicandu</td>
-<td style="text-align: right;">23</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">14</td>
-<td style="text-align: right;">47.2</td>
-<td style="text-align: right;">2.1</td>
-<td style="text-align: right;">4.3</td>
-<td style="text-align: right;">60.9</td>
-</tr>
-<tr class="even">
 <td style="text-align: left;">Presidente Castelo Branco</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">46.5</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">23.2</td>
+<td style="text-align: right;">50.0</td>
 <td style="text-align: right;">0.0</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">Santa Fe</td>
 <td style="text-align: right;">5</td>
 <td style="text-align: right;">0</td>
@@ -657,16 +662,6 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">80.0</td>
-</tr>
-<tr class="even">
-<td style="text-align: left;">Lobato</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">42.5</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Florida</td>
@@ -679,6 +674,16 @@ Aviso
 <td style="text-align: right;">100.0</td>
 </tr>
 <tr class="even">
+<td style="text-align: left;">Mandaguari</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">36.5</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">0.0</td>
+<td style="text-align: right;">78.6</td>
+</tr>
+<tr class="odd">
 <td style="text-align: left;">Iguaracu</td>
 <td style="text-align: right;">2</td>
 <td style="text-align: right;">0</td>
@@ -687,16 +692,6 @@ Aviso
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">0.0</td>
 <td style="text-align: right;">50.0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">Mandaguari</td>
-<td style="text-align: right;">13</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: right;">33.9</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">0.0</td>
-<td style="text-align: right;">76.9</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">Doutor Camargo</td>
