@@ -16,7 +16,7 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
 ## Notificações por estabelecimento (unidade de internação)
 
 ::: {.callout-note}
-Dados agregados por unidade de internação e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`. **Cobre apenas os casos hospitalizados**: a API pública do dados.gov.br não traz o estabelecimento notificador, só a unidade onde o paciente foi internado. **Escopo desta seção: todo o Paraná** (as demais seções da página seguem restritas à 15ª RS) — use os filtros abaixo para restringir a uma macrorregião, regional, município ou estabelecimento específico.
+Dados agregados por unidade de internação e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`. **Cobre apenas os casos hospitalizados**: a API pública do dados.gov.br não traz o estabelecimento notificador, só a unidade onde o paciente foi internado. **Escopo desta seção: todo o Paraná** (as demais seções da página seguem restritas à 15ª RS) — use os filtros abaixo para restringir a uma macrorregião, regional, município ou estabelecimento específico. O Macrorregião/Regional/Município do filtro é o **município do hospital** (onde a internação ocorreu), não o município de residência do paciente — um mesmo hospital pode atender pacientes de outras cidades.
 :::
 
 ```{ojs}

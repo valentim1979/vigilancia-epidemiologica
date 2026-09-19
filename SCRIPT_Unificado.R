@@ -15,6 +15,9 @@
 # ==============================================================================
 if (file.exists("~/.Renviron")) readRenviron("~/.Renviron")
 
+# Timeout maior para downloads grandes via API (alguns anos passam de 1 GB)
+options(timeout = 1800)
+
 # ==============================================================================
 # BLOCO 0 — CONFIGURAÇÃO GLOBAL (EDITE AQUI)
 # ==============================================================================
@@ -32,6 +35,7 @@ MUNICIPIO_ANALISE <- NULL
 DIRETORIO_CACHE_API <- "dbf_sivep"
 
 ARQUIVO_IBGE <- "sivep_15rs/ibge_cnv_pop.csv"
+ARQUIVO_REGIONAIS_PR <- "sivep_15rs/parana_macrorregiao.csv"
 
 CAMINHO_SHP_MUNICIPIOS <- "sivep_15rs/GIS/Pr_Municipios_2024/PR_Municipios_2024.shp"
 
@@ -113,6 +117,20 @@ message("Municípios: ", nrow(municipios_15rs),
 
 
 # ==============================================================================
+# BLOCO 2B — TABELA DE REFERÊNCIA: MACRORREGIÃO / REGIONAL / MUNICÍPIO (PARANÁ)
+# Cobre os 399 municípios do estado (fonte: IBGE 2022, tabela fornecida pelo
+# usuário). Usada para expandir o filtro de estabelecimentos da seção
+# "Notificações por estabelecimento" da 15RS para o Paraná inteiro.
+# ==============================================================================
+ref_regionais_pr <- readr::read_csv(ARQUIVO_REGIONAIS_PR, show_col_types = FALSE) %>%
+  mutate(codigo_ibge_6 = as.integer(codigo_ibge_6))
+
+message("Tabela de referência PR: ", nrow(ref_regionais_pr), " municípios, ",
+        n_distinct(ref_regionais_pr$regional), " regionais, ",
+        n_distinct(ref_regionais_pr$macrorregiao), " macrorregiões.")
+
+
+# ==============================================================================
 # BLOCO 3 — FUNÇÕES AUXILIARES
 # ==============================================================================
 
@@ -150,7 +168,7 @@ obter_token_dados_gov <- function() {
 
 localizar_recurso_ano <- function(ano, formato = "CSV") {
   token <- obter_token_dados_gov()
-  
+
   resp <- httr::GET(
     paste0("https://dados.gov.br/dados/api/publico/conjuntos-dados/", ID_CONJUNTO_SRAG),
     httr::add_headers(`chave-api-dados-abertos` = token)
@@ -158,7 +176,7 @@ localizar_recurso_ano <- function(ano, formato = "CSV") {
   if (httr::status_code(resp) != 200) {
     stop("Falha ao consultar a API (status ", httr::status_code(resp), ").")
   }
-  
+
   recursos <- httr::content(resp, as = "parsed")$recursos
   link <- NULL
   for (r in recursos) {
@@ -171,30 +189,48 @@ localizar_recurso_ano <- function(ano, formato = "CSV") {
 }
 
 baixar_via_api <- function(ano, diretorio_cache) {
+  link    <- localizar_recurso_ano(ano, "CSV")
   destino <- file.path(diretorio_cache, paste0("SRAG_API_", ano, ".csv"))
-  
+
   if (!dir.exists(diretorio_cache)) dir.create(diretorio_cache, recursive = TRUE)
-  
-  # Anos encerrados (anteriores ao corrente) são estáticos — baixa uma vez e
-  # reaproveita o cache para sempre, sem nem consultar a API de novo. O ano
-  # corrente está em atualização diária (casos ainda sendo notificados),
-  # então baixa de novo sempre que o cache não for de hoje.
+
+  # Anos encerrados (ex.: 2019-2025) ficam em cache pra sempre, já que os
+  # dados não mudam mais. O ano corrente é rebaixado uma vez por dia, porque
+  # os casos continuam sendo notificados.
   ano_corrente   <- lubridate::year(Sys.Date())
   cache_e_hoje   <- file.exists(destino) &&
     as.Date(file.info(destino)$mtime) == Sys.Date()
   precisa_baixar <- !file.exists(destino) || (ano == ano_corrente && !cache_e_hoje)
-  
+
   if (precisa_baixar) {
-    link <- localizar_recurso_ano(ano, "CSV")
     message("  Baixando via API dados.gov.br: ", link)
-    download.file(link, destfile = destino, mode = "wb")
+    temp <- paste0(destino, ".tmp")
+    erro_download <- tryCatch({
+      download.file(link, destfile = temp, mode = "wb")
+      NULL
+    }, error = function(e) e)
+
+    if (!is.null(erro_download) || !file.exists(temp)) {
+      # Download falhou: descarta o arquivo temporário. Se já existia um
+      # cache anterior (ex.: de ontem), mantém ele em vez de apagar dados
+      # bons; só falha de vez se nunca existiu cache nenhum pra esse ano.
+      if (file.exists(temp)) unlink(temp)
+      if (!file.exists(destino)) {
+        stop("Falha ao baixar ", ano, ": ",
+             if (!is.null(erro_download)) conditionMessage(erro_download) else "arquivo não foi criado")
+      }
+      message("  [aviso] Falha ao atualizar ", ano, " — mantendo cache anterior (",
+              basename(destino), ")")
+    } else {
+      file.rename(temp, destino)
+    }
   } else {
     message(
       "  [cache] Usando CSV já baixado (", basename(destino), ")",
       if (ano == ano_corrente) " — atualizado hoje" else " — ano encerrado, não muda mais"
     )
   }
-  
+
   # [Não verificado] assume separador ";" e encoding latin1, padrão histórico
   # do SIVEP-Gripe/SRAG. Se der erro de parsing, confira o dicionário de dados:
   # https://s3.sa-east-1.amazonaws.com/ckan.saude.gov.br/SRAG/dicionario-de-dados-2019-a-2025.pdf
@@ -212,33 +248,33 @@ baixar_via_api <- function(ano, diretorio_cache) {
 # há garantia de que os dois têm exatamente os mesmos campos (por exemplo,
 # NM_BAIRRO pode existir só na base interna da regional).
 validar_campos_dbf_api <- function(ano, diretorio_dbf = DIRETORIO_CACHE_API) {
-  
+
   caminho_dbf <- file.path(diretorio_dbf, paste0("SRAGHOSP", ano, ".dbf"))
   if (!file.exists(caminho_dbf)) {
     stop("DBF local de ", ano, " não encontrado em ", diretorio_dbf, " — não dá pra comparar.")
   }
   dbf_amostra <- foreign::read.dbf(caminho_dbf, as.is = TRUE)
   nomes_dbf   <- toupper(names(dbf_amostra))
-  
+
   link <- localizar_recurso_ano(ano, "CSV")
   con  <- url(link, method = "libcurl", encoding = "latin1")
   cabecalho <- readLines(con, n = 1, warn = FALSE)
   close(con)
-  
+
   nomes_api <- toupper(strsplit(cabecalho, ";")[[1]])
   nomes_api <- trimws(gsub('"', '', nomes_api))
-  
+
   em_comum  <- intersect(nomes_dbf, nomes_api)
   so_no_dbf <- setdiff(nomes_dbf, nomes_api)
   so_na_api <- setdiff(nomes_api, nomes_dbf)
-  
+
   cat("=== Comparação de campos — SRAG", ano, "===\n")
   cat("Total no DBF local :", length(nomes_dbf), "\n")
   cat("Total no CSV da API:", length(nomes_api), "\n")
   cat("Em comum (", length(em_comum), "):\n  ", paste(sort(em_comum), collapse = ", "), "\n\n", sep = "")
   cat("Só no DBF local (", length(so_no_dbf), "):\n  ", paste(sort(so_no_dbf), collapse = ", "), "\n\n", sep = "")
   cat("Só no CSV da API (", length(so_na_api), "):\n  ", paste(sort(so_na_api), collapse = ", "), "\n", sep = "")
-  
+
   invisible(list(comum = em_comum, so_dbf = so_no_dbf, so_api = so_na_api))
 }
 
@@ -389,17 +425,17 @@ anos_virus_historico <- setdiff(2019:(max(anos_carregar) - 1), anos_a_carregar)
 if (length(anos_virus_historico) > 0) {
   message("\nCarregando anos históricos para gráfico de vírus: ",
           paste(anos_virus_historico, collapse = ", "))
-  
+
   lista_bases_hist <- Filter(Negate(is.null),
                              lapply(anos_virus_historico, carregar_base,
                                     diretorio = DIRETORIO_CACHE_API))
-  
+
   if (length(lista_bases_hist) > 0) {
     base_hist_extra <- bind_rows(lista_bases_hist)
     names(base_hist_extra) <- toupper(names(base_hist_extra))
     base_hist_extra <- base_hist_extra %>%
       mutate(CO_MUN_RES = as.integer(CO_MUN_RES))
-    
+
     base_15rs_historica <- bind_rows(
       base_15rs_completa,
       base_hist_extra %>% filter(CO_MUN_RES %in% municipios_15rs$codigo_ibge_6)
@@ -468,11 +504,11 @@ if (nrow(casos_semana_ano) > 0) {
   paleta        <- c("#E63946","#F4A261","#2A9D8F","#457B9D","#6A0572","#E9C46A","#264653","#A8DADC")
   cores_curva   <- setNames(paleta[seq_along(todos_anos)], todos_anos)
   espessuras    <- setNames(ifelse(todos_anos %in% anos_destaque, 2.2, 0.9), todos_anos)
-  
+
   n_por_ano  <- casos_semana_ano %>% group_by(Ano) %>% summarise(n = sum(Total), .groups = "drop")
   rotulos    <- setNames(paste0(n_por_ano$Ano, "  (N = ", format(n_por_ano$n, big.mark = "."), ")"),
                          n_por_ano$Ano)
-  
+
   g06 <- ggplot(casos_semana_ano,
                 aes(x = Semana, y = Total, group = Ano, color = Ano, linewidth = Ano)) +
     geom_line(alpha = 0.9) +
@@ -489,7 +525,7 @@ if (nrow(casos_semana_ano) > 0) {
     ) +
     theme_minimal() +
     theme(plot.title = element_text(face = "bold"), legend.position = "right")
-  
+
   salvar_grafico(g06, "06_curva_epidemica_comparativa")
 }
 
@@ -510,7 +546,7 @@ message("Canal endêmico — anos de referência: ", paste(anos_historico, colla
 if (length(anos_historico) < 2) {
   message("  [aviso] Menos de 2 anos de referência — canal endêmico não gerado.")
 } else {
-  
+
   base_historico <- base_15rs_completa %>%
     filter(ANO_BASE %in% anos_historico) %>%
     { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
@@ -519,7 +555,7 @@ if (length(anos_historico) < 2) {
     filter(!is.na(Semana)) %>%
     group_by(ANO_BASE, Semana) %>%
     summarise(total = n(), .groups = "drop")
-  
+
   canal <- base_historico %>%
     group_by(Semana) %>%
     summarise(
@@ -530,7 +566,7 @@ if (length(anos_historico) < 2) {
       n_anos  = n_distinct(ANO_BASE),
       .groups = "drop"
     )
-  
+
   serie_atual <- base_15rs_completa %>%
     filter(ANO_BASE %in% anos_carregar) %>%
     { if (!is.null(MUNICIPIO_ANALISE) && nzchar(trimws(MUNICIPIO_ANALISE)))
@@ -539,7 +575,7 @@ if (length(anos_historico) < 2) {
     filter(!is.na(Semana)) %>%
     group_by(Semana) %>%
     summarise(total = n(), .groups = "drop")
-  
+
   serie_atual <- serie_atual %>%
     left_join(canal, by = "Semana") %>%
     mutate(
@@ -553,19 +589,19 @@ if (length(anos_historico) < 2) {
         "Epidêmico", "Alerta", "Esperado", "Abaixo do esperado"
       ))
     )
-  
+
   cores_zona <- c(
     "Epidêmico"          = "#C62828",
     "Alerta"             = "#FF8F00",
     "Esperado"           = "#2E7D32",
     "Abaixo do esperado" = "#1565C0"
   )
-  
+
   n_atual    <- sum(serie_atual$total)
   n_anos_ref <- length(anos_historico)
   label_ref  <- paste0(min(anos_historico), "–", max(anos_historico))
   semanas_ep <- sum(serie_atual$zona %in% c("Epidêmico", "Alerta"), na.rm = TRUE)
-  
+
   g06b <- ggplot() +
     geom_ribbon(data = canal, aes(x = Semana, ymin = p75, ymax = p90),
                 fill = "#FFECB3", alpha = 0.85) +
@@ -597,7 +633,7 @@ if (length(anos_historico) < 2) {
       plot.subtitle = element_text(size = 8.5, color = "grey40", lineheight = 1.3),
       legend.position = "bottom"
     )
-  
+
   salvar_grafico(g06b, "06b_canal_endemico")
 }
 
@@ -732,20 +768,30 @@ salvar_grafico(g09, "09_incidencia_por_municipio", height = 10)
 # GRÁFICO 10 — NOTIFICAÇÕES POR REGIONAL DE SAÚDE (PARANÁ)
 # ==============================================================================
 
-base_pr <- bind_rows(lista_bases) %>%
-  mutate(ID_REGIONA = toupper(trimws(ID_REGIONA))) %>%
-  filter(!is.na(ID_REGIONA), ANO_BASE %in% anos_carregar) %>%
-  mutate(num_regional = as.integer(str_extract(ID_REGIONA, "^[0-9]+"))) %>%
-  filter(!is.na(num_regional), num_regional >= 1, num_regional <= 22)
+# Filtra por SG_UF_NOT == "PR" (não pelo número no início de ID_REGIONA):
+# a base é nacional e outros estados também numeram suas regionais de 1 a 22
+# (ex.: PE usa "001", "002"...; RS usa "001 CRS"...), então filtrar só pelo
+# número deixava passar regionais de outros estados junto com as do Paraná.
+base_pr <- base_completa %>%
+  mutate(
+    SG_UF_NOT  = toupper(trimws(SG_UF_NOT)),
+    ID_REGIONA = toupper(trimws(ID_REGIONA))
+  ) %>%
+  filter(SG_UF_NOT == "PR", !is.na(ID_REGIONA), nzchar(ID_REGIONA),
+         ANO_BASE %in% anos_carregar)
+# Nota: base_pr agora deriva de base_completa (já com CO_MUN_RES como inteiro,
+# SEM_EPI, CLASSIFICACAO, OBITO_SRAG, UTI_SIM etc.), em vez de bind_rows(lista_bases)
+# cru — mesmas linhas de antes, só que com as colunas derivadas necessárias para
+# o export por estabelecimento (abaixo). O Gráfico 10 não muda.
 
 if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
   casos_regional <- base_pr %>%
     group_by(ID_REGIONA) %>%
     summarise(total = n(), .groups = "drop") %>%
     arrange(desc(total))
-  
+
   n_pr <- sum(casos_regional$total)
-  
+
   g10 <- ggplot(casos_regional,
                 aes(x = total, y = fct_reorder(ID_REGIONA, total))) +
     geom_col(fill = "#0057A3") +
@@ -758,7 +804,7 @@ if ("ID_REGIONA" %in% names(base_pr) && nrow(base_pr) > 0) {
       x = "Total de Notificações", y = "Regional de Saúde", caption = texto_rodape
     ) +
     theme_minimal()
-  
+
   salvar_grafico(g10, "10_notificacoes_regionais_pr", height = 10)
 }
 
@@ -895,7 +941,7 @@ virus_semanal <- base_filtrada %>%
 
 if (nrow(virus_semanal) > 0) {
   n_semanal <- nrow(base_filtrada %>% filter(POS_PCRFLU == 1 | POS_PCROUT == 1))
-  
+
   g14 <- ggplot(virus_semanal,
                 aes(x = as.integer(SEM_NOT), y = total, color = virus, group = virus)) +
     geom_line(linewidth = 0.8) +
@@ -911,7 +957,7 @@ if (nrow(virus_semanal) > 0) {
     ) +
     theme_minimal() +
     theme(legend.position = "bottom")
-  
+
   salvar_grafico(g14, "14_tendencia_viral_semanal")
 }
 
@@ -974,7 +1020,7 @@ if (nrow(virus_faixa_prop) > 0) {
     theme_minimal(base_size = 12) +
     theme(plot.title = element_text(face = "bold"),
           panel.grid = element_blank(), axis.text.y = element_text(size = 11))
-  
+
   salvar_grafico(gD13_heat, "D13_virus_faixa_etaria_heatmap", width = 14, height = 6)
 }
 
@@ -993,7 +1039,7 @@ if (nrow(virus_faixa_long) > 0) {
     ) +
     theme_minimal(base_size = 12) +
     theme(plot.title = element_text(face = "bold"), legend.position = "bottom")
-  
+
   salvar_grafico(gD13_bar, "D13_virus_faixa_etaria_barras", width = 14, height = 6)
 }
 
@@ -1038,7 +1084,7 @@ if (nrow(influenza_tipos) > 0) {
       x = "Total de Casos", y = "Classificação", caption = texto_rodape
     ) +
     theme_minimal()
-  
+
   salvar_grafico(g15, "15_tipos_linhagens_influenza")
 }
 
@@ -1070,7 +1116,7 @@ flu_presente      <- "POS_PCRFLU" %in% names(base_15rs_historica)
 ANO_INICIO_VIRAL <- 2023
 
 if (length(colunas_presentes) > 0 && flu_presente) {
-  
+
   base_virus_hist <- base_15rs_historica %>%
     filter(ANO_BASE >= ANO_INICIO_VIRAL) %>%
     mutate(
@@ -1078,7 +1124,7 @@ if (length(colunas_presentes) > 0 && flu_presente) {
       across(all_of(colunas_presentes), as.character)
     ) %>%
     select(ANO_BASE, all_of(colunas_presentes), PCR_FLU)
-  
+
   casos_virus_ano <- base_virus_hist %>%
     pivot_longer(cols = c(all_of(colunas_presentes), PCR_FLU),
                  names_to = "virus_cod", values_to = "marcado") %>%
@@ -1090,26 +1136,26 @@ if (length(colunas_presentes) > 0 && flu_presente) {
     filter(!is.na(virus)) %>%
     group_by(ANO_BASE, virus) %>%
     summarise(casos = n(), .groups = "drop")
-  
+
   virus_ativos <- casos_virus_ano %>%
     group_by(virus) %>% summarise(total = sum(casos), .groups = "drop") %>%
     filter(total > 0) %>% pull(virus)
-  
+
   casos_virus_ano <- casos_virus_ano %>%
     filter(virus %in% virus_ativos) %>%
     tidyr::complete(ANO_BASE, virus, fill = list(casos = 0))
-  
+
   top3 <- casos_virus_ano %>%
     group_by(virus) %>% summarise(total = sum(casos), .groups = "drop") %>%
     slice_max(total, n = 3) %>% pull(virus)
-  
+
   casos_virus_ano <- casos_virus_ano %>%
     mutate(destaque = virus %in% top3,
            espessura  = if_else(destaque, 1.4, 0.7),
            alpha_line = if_else(destaque, 1.0, 0.55))
-  
+
   ano_atual_viral <- max(casos_virus_ano$ANO_BASE)
-  
+
   g22 <- ggplot(casos_virus_ano,
                 aes(x = ANO_BASE, y = casos, color = virus, group = virus)) +
     geom_vline(xintercept = ano_atual_viral - 0.5,
@@ -1144,10 +1190,10 @@ if (length(colunas_presentes) > 0 && flu_presente) {
           plot.subtitle = element_text(size = 8.5, color = "grey40"),
           legend.position = "bottom", legend.title = element_blank(),
           panel.grid.minor = element_blank())
-  
+
   salvar_grafico(g22, "22_virus_tendencia_anual", width = 13, height = 7)
   message("[OK] Gráfico 22 salvo.")
-  
+
 } else {
   message("  [aviso] Colunas de PCR não encontradas — gráfico 22 não gerado.")
 }
@@ -1242,7 +1288,7 @@ piramide_obitos <- base_filtrada %>%
 
 if (nrow(piramide_obitos) > 0) {
   n_piramide_obitos <- sum(piramide_obitos$n)
-  
+
   g18 <- ggplot(piramide_obitos, aes(x = faixa_etaria, y = value, fill = sexo)) +
     geom_bar(stat = "identity", width = 0.8) +
     geom_text(aes(label = n, hjust = ifelse(sexo == "Masculino", 1.15, -0.15)), size = 3.5) +
@@ -1256,7 +1302,7 @@ if (nrow(piramide_obitos) > 0) {
     ) +
     theme_minimal() +
     theme(legend.position = "bottom")
-  
+
   salvar_grafico(g18, "18_piramide_etaria_obitos", height = 8)
 }
 
@@ -1372,12 +1418,12 @@ tmap_mode("plot")
 if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
   message("\nGerando mapa por município...")
   malha_pr <- sf::st_read(CAMINHO_SHP_MUNICIPIOS, quiet = TRUE)
-  
+
   malha_15rs <- malha_pr %>%
     mutate(CO_MUN_6 = floor(as.integer(CD_MUN) / 10)) %>%
     filter(CO_MUN_6 %in% municipios_15rs$codigo_ibge_6) %>%
     left_join(casos_municipio, by = c("CO_MUN_6" = "CO_MUN_RES"))
-  
+
   mapa_casos <- tm_shape(malha_15rs) +
     tm_polygons(fill = "casos",
                 fill.scale  = tm_scale_continuous(values = "brewer.blues"),
@@ -1387,11 +1433,11 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
     tm_title(paste("SRAG — Casos por Município\n15ª RS Maringá/PR |", titulo_ano)) +
     tm_compass(position = c("right", "top"), size = 1.5) +
     tm_scalebar(position = c("left", "bottom"))
-  
+
   tmap_save(mapa_casos,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_casos_", paste(anos_carregar, collapse = "_"), ".png")),
             width = 2400, height = 2000, device = png)
-  
+
   mapa_incid <- tm_shape(malha_15rs) +
     tm_polygons(fill = "incidencia_100k",
                 fill.scale  = tm_scale_continuous(values = "brewer.yl_or_rd"),
@@ -1401,11 +1447,11 @@ if (file.exists(CAMINHO_SHP_MUNICIPIOS)) {
     tm_title(paste("SRAG — Incidência\n15ª RS Maringá/PR |", titulo_ano, "| Pop. IBGE 2025")) +
     tm_compass(position = c("right", "top"), size = 1.5) +
     tm_scalebar(position = c("left", "bottom"))
-  
+
   tmap_save(mapa_incid,
             file.path(DIR_GRAFICOS, paste0("mapa_srag_incidencia_", paste(anos_carregar, collapse = "_"), ".png")),
             width = 2400, height = 2000, device = png)
-  
+
   message("Mapas por município salvos.")
 } else {
   warning("Shapefile de municípios não encontrado: ", CAMINHO_SHP_MUNICIPIOS)
@@ -1439,23 +1485,54 @@ writexl::write_xlsx(
 dir_dados <- file.path(dirname(DIR_GRAFICOS), "dados")
 if (!dir.exists(dir_dados)) dir.create(dir_dados, recursive = TRUE)
 
-col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE"), names(base_ano_principal))
+# [Não verificado] A API pública do dados.gov.br não traz o estabelecimento
+# notificador (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE não existem em nenhum ano
+# testado, 2019-2026) — provavelmente esses campos só existiam nos DBFs
+# locais antigos. NM_UN_INTE (unidade de internação) é usada como
+# aproximação: só cobre quem foi hospitalizado, não todas as notificações.
+# Base dedicada ao export por estabelecimento: localiza cada hospital pelo
+# município de INTERNAÇÃO (CO_MU_INTE), não pelo de residência do paciente
+# (CO_MUN_RES) — cerca de 1/3 das internações acontecem num município
+# diferente do de residência, então usar CO_MUN_RES colocaria o hospital
+# no município errado. O escopo geográfico (só Paraná) vem naturalmente do
+# join com ref_regionais_pr: hospitalizações fora do PR não têm
+# correspondência em ref_regionais_pr$codigo_ibge_6 e são descartadas
+# adiante (!is.na(MUNICIPIO)) — não depende do texto SG_UF_NOT/SG_UF_INTE.
+base_estab_pr <- base_completa %>%
+  filter(ANO_BASE %in% anos_carregar) %>%
+  mutate(CO_MU_INTE = as.integer(CO_MU_INTE))
+
+col_estab <- intersect(c("NO_UNIDADE", "NM_UNIDADE", "ID_UNIDADE", "NM_UN_INTE"),
+                       names(base_estab_pr))
 col_estab <- if (length(col_estab) > 0) col_estab[1] else NA_character_
 
 if (is.na(col_estab)) {
-  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE) ",
-          "encontrada na base. Exportação para o filtro do site foi pulada.")
+  warning("Nenhuma coluna de estabelecimento (NO_UNIDADE/NM_UNIDADE/ID_UNIDADE/",
+          "NM_UN_INTE) encontrada na base. Exportação para o filtro do site foi pulada.")
 } else {
-  casos_estabelecimento <- base_ano_principal %>%
+  if (col_estab == "NM_UN_INTE") {
+    message("  [aviso] Usando NM_UN_INTE (unidade de internação) como aproximação ",
+            "de estabelecimento — cobre só os casos hospitalizados.")
+  }
+  # A partir daqui, a exportação cobre o Paraná inteiro (base_estab_pr), não
+  # só a 15RS — MUNICIPIO/REGIONAL/MACRORREGIAO vêm da tabela de referência
+  # ref_regionais_pr (BLOCO 2B), casada por CO_MU_INTE (município de
+  # INTERNAÇÃO, isto é, onde o hospital está — não CO_MUN_RES, que é o
+  # município de residência do paciente). Linhas cujo município de
+  # internação não está na tabela (fora do PR, ou código ausente/errado)
+  # são descartadas (!is.na(MUNICIPIO)).
+  casos_estabelecimento <- base_estab_pr %>%
     mutate(
       ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
-      MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)]
+      MUNICIPIO       = ref_regionais_pr$municipio[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)],
+      REGIONAL        = ref_regionais_pr$regional[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)],
+      MACRORREGIAO    = ref_regionais_pr$macrorregiao[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)]
     ) %>%
     filter(
       !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
-      !is.na(SEM_EPI)
+      !is.na(SEM_EPI), !is.na(MUNICIPIO)
     ) %>%
-    group_by(ESTABELECIMENTO, MUNICIPIO, SEM_EPI) %>%
+    group_by(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI) %>%
     summarise(
       casos       = n(),
       obitos      = sum(EVOLUCAO == 2, na.rm = TRUE),
@@ -1463,17 +1540,18 @@ if (is.na(col_estab)) {
       confirmados = sum(CLASSI_FIN %in% c(1, 2, 3, 5), na.rm = TRUE),
       .groups     = "drop"
     ) %>%
-    arrange(ESTABELECIMENTO, SEM_EPI)
-  
+    arrange(REGIONAL, ESTABELECIMENTO, SEM_EPI)
+
   readr::write_csv(
     casos_estabelecimento,
     file.path(dir_dados, "notificacoes_estabelecimento.csv")
   )
-  
-  message("Dados por estabelecimento exportados: ",
+
+  message("Dados por estabelecimento exportados (Paraná): ",
           format(nrow(casos_estabelecimento), big.mark = "."), " linhas, ",
-          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos.")
-  
+          n_distinct(casos_estabelecimento$ESTABELECIMENTO), " estabelecimentos, ",
+          n_distinct(casos_estabelecimento$REGIONAL), " regionais.")
+
   # ----------------------------------------------------------------------------
   # CIRCULAÇÃO VIRAL POR ESTABELECIMENTO
   # Mesmos vírus usados nos gráficos 13/14 (circulação viral total / tendência
@@ -1487,23 +1565,25 @@ if (is.na(col_estab)) {
     PCR_METAP  = "Metapneumovírus",
     PCR_SARS2  = "Covid-19"
   )
-  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_ano_principal))
-  
+  cols_presentes_virus <- intersect(names(colunas_virus_estab), names(base_estab_pr))
+
   if (length(cols_presentes_virus) == 0) {
     warning("Nenhuma coluna de PCR viral encontrada na base. ",
             "Exportação de circulação viral por estabelecimento foi pulada.")
   } else {
-    circulacao_viral_estab <- base_ano_principal %>%
+    circulacao_viral_estab <- base_estab_pr %>%
       mutate(
         ESTABELECIMENTO = trimws(as.character(.data[[col_estab]])),
-        MUNICIPIO       = municipios_15rs$municipio[match(CO_MUN_RES, municipios_15rs$codigo_ibge_6)],
+        MUNICIPIO       = ref_regionais_pr$municipio[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)],
+        REGIONAL        = ref_regionais_pr$regional[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)],
+        MACRORREGIAO    = ref_regionais_pr$macrorregiao[match(CO_MU_INTE, ref_regionais_pr$codigo_ibge_6)],
         across(all_of(cols_presentes_virus), ~ .x == 1, .names = "VFLAG_{.col}")
       ) %>%
       filter(
         !is.na(ESTABELECIMENTO), nzchar(ESTABELECIMENTO), ESTABELECIMENTO != "NA",
-        !is.na(SEM_EPI)
+        !is.na(SEM_EPI), !is.na(MUNICIPIO)
       ) %>%
-      select(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, starts_with("VFLAG_")) %>%
+      select(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI, starts_with("VFLAG_")) %>%
       tidyr::pivot_longer(
         cols      = starts_with("VFLAG_"),
         names_to  = "virus_cod",
@@ -1514,14 +1594,14 @@ if (is.na(col_estab)) {
         virus     = colunas_virus_estab[virus_cod]
       ) %>%
       filter(positivo == TRUE) %>%
-      count(ESTABELECIMENTO, MUNICIPIO, SEM_EPI, virus, name = "positivos") %>%
-      arrange(ESTABELECIMENTO, SEM_EPI, virus)
-    
+      count(ESTABELECIMENTO, MUNICIPIO, REGIONAL, MACRORREGIAO, SEM_EPI, virus, name = "positivos") %>%
+      arrange(REGIONAL, ESTABELECIMENTO, SEM_EPI, virus)
+
     readr::write_csv(
       circulacao_viral_estab,
       file.path(dir_dados, "circulacao_viral_estabelecimento.csv")
     )
-    
+
     message("Circulação viral por estabelecimento exportada: ",
             format(nrow(circulacao_viral_estab), big.mark = "."), " linhas.")
   }
