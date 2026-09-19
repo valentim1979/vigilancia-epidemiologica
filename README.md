@@ -5,7 +5,7 @@ Grave) para a 15ª Regional de Saúde de Maringá/PR, com dados do
 SIVEP-Gripe (módulo hospitalar). Publicado como site estático (Quarto +
 GitHub Pages).
 
-**Site publicado:** https://valentim1979.github.io/vigilancia-epidemiologica
+**Site publicado:** https://valentim1979.github.io/virus-respiratorios
 
 ## O que o projeto faz
 

@@ -55,6 +55,6 @@ git push
 echo ""
 echo "[5/5] Publicado."
 echo "=================================================="
-echo "  Site: https://valentim1979.github.io/vigilancia-epidemiologica"
+echo "  Site: https://valentim1979.github.io/virus-respiratorios"
 echo "=================================================="
 echo ""

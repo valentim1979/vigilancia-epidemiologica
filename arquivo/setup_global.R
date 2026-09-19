@@ -1,7 +1,7 @@
 # ==============================================================================
 # setup_global.R
 # Executado automaticamente pelo Quarto antes de renderizar qualquer página.
-# Localização: raiz do projeto vigilancia-epidemiologica/
+# Localização: raiz do projeto virus-respiratorios/ (pasta local continua com o nome antigo)
 #
 # NÃO edite a ordem dos source(). O descritiva depende dos objetos do principal.
 # ==============================================================================

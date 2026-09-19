@@ -11,7 +11,7 @@ Execute o pipeline de publicação do boletim de vigilância epidemiológica.
    - `Rscript SCRIPT_Unificado.R` — gera os gráficos/tabelas em `graficos/` e `dados/` (baixa dados via API do dados.gov.br quando não há DBF local em `dbf_sivep/`; requer `DADOS_GOV_TOKEN` em `~/.Renviron`);
    - se `--dados-novos` foi passado, apaga `_freeze/` para forçar o Quarto a reprocessar;
    - `quarto render` — gera o site estático em `docs/`;
-   - `git add .`, `git commit` (mensagem automática com a data) e `git push` para `origin/main`, que publica em https://valentim1979.github.io/vigilancia-epidemiologica.
+   - `git add .`, `git commit` (mensagem automática com a data) e `git push` para `origin/main`, que publica em https://valentim1979.github.io/virus-respiratorios.
 3. Se `Rscript` ou `quarto` falharem, pare e reporte o erro exato ao usuário — não tente contornar (não pule etapas, não faça commit parcial).
 4. Ao final, confirme a URL do site publicado e resuma o que foi commitado (`git log -1 --stat`).
 
