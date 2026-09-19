@@ -16,7 +16,7 @@ Notificações de SRAG hospitalar na área de abrangência da 15ª RS. A Vigilâ
 ## Notificações por estabelecimento (unidade de internação)
 
 ::: {.callout-note}
-Dados agregados por unidade de internação e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`. **Cobre apenas os casos hospitalizados**: a API pública do dados.gov.br não traz o estabelecimento notificador, só a unidade onde o paciente foi internado.
+Dados agregados por unidade de internação e semana epidemiológica — sem microdados individuais. Atualizados a cada execução de `SCRIPT_Unificado.R`. **Cobre apenas os casos hospitalizados**: a API pública do dados.gov.br não traz o estabelecimento notificador, só a unidade onde o paciente foi internado. **Escopo desta seção: todo o Paraná** (as demais seções da página seguem restritas à 15ª RS) — use os filtros abaixo para restringir a uma macrorregião, regional, município ou estabelecimento específico.
 :::
 
 ```{ojs}
@@ -26,8 +26,74 @@ dados_estab = FileAttachment("dados/notificacoes_estabelecimento.csv").csv({type
 
 ```{ojs}
 //| echo: false
+lista_macrorregioes = ["Todas as Macrorregiões"].concat(
+  [...new Set(dados_estab.map(d => d.MACRORREGIAO))].filter(x => x != null).sort()
+)
+```
+
+```{ojs}
+//| echo: false
+viewof macrorregiao_sel = Inputs.select(
+  lista_macrorregioes,
+  { label: "🗺️ Macrorregião", value: "Todas as Macrorregiões" }
+)
+```
+
+```{ojs}
+//| echo: false
+dados_apos_macro = macrorregiao_sel === "Todas as Macrorregiões"
+  ? dados_estab
+  : dados_estab.filter(d => d.MACRORREGIAO === macrorregiao_sel)
+```
+
+```{ojs}
+//| echo: false
+lista_regionais = ["Todas as Regionais"].concat(
+  [...new Set(dados_apos_macro.map(d => d.REGIONAL))].filter(x => x != null).sort()
+)
+```
+
+```{ojs}
+//| echo: false
+viewof regional_sel = Inputs.select(
+  lista_regionais,
+  { label: "🏥 Regional de Saúde", value: "Todas as Regionais" }
+)
+```
+
+```{ojs}
+//| echo: false
+dados_apos_regional = regional_sel === "Todas as Regionais"
+  ? dados_apos_macro
+  : dados_apos_macro.filter(d => d.REGIONAL === regional_sel)
+```
+
+```{ojs}
+//| echo: false
+lista_municipios = ["Todos os Municípios"].concat(
+  [...new Set(dados_apos_regional.map(d => d.MUNICIPIO))].filter(x => x != null).sort()
+)
+```
+
+```{ojs}
+//| echo: false
+viewof municipio_sel = Inputs.select(
+  lista_municipios,
+  { label: "📍 Município", value: "Todos os Municípios" }
+)
+```
+
+```{ojs}
+//| echo: false
+dados_apos_municipio = municipio_sel === "Todos os Municípios"
+  ? dados_apos_regional
+  : dados_apos_regional.filter(d => d.MUNICIPIO === municipio_sel)
+```
+
+```{ojs}
+//| echo: false
 lista_estabelecimentos = ["Todos os Estabelecimentos"].concat(
-  [...new Set(dados_estab.map(d => d.ESTABELECIMENTO))].sort()
+  [...new Set(dados_apos_municipio.map(d => d.ESTABELECIMENTO))].sort()
 )
 ```
 
@@ -42,9 +108,13 @@ viewof estabelecimento_sel = Inputs.select(
 ```{ojs}
 //| echo: false
 dados_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
-  ? dados_estab
-  : dados_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
+  ? dados_apos_municipio
+  : dados_apos_municipio.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
 ```
+
+::: {.callout-note collapse="true"}
+Os filtros são em cascata: cada nível restringe as opções do próximo (Macrorregião → Regional → Município → Estabelecimento). Trocar um filtro de um nível reinicia os níveis seguintes para "Todos/Todas".
+:::
 
 ```{ojs}
 //| echo: false
@@ -70,7 +140,59 @@ letalidade_pct = total_casos > 0 ? (total_obitos / total_casos * 100).toFixed(1)
 
 ```{ojs}
 //| echo: false
-md`**Notificações:** ${total_casos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Óbitos:** ${total_obitos.toLocaleString("pt-BR")} &nbsp;|&nbsp; **UTI:** ${total_uti.toLocaleString("pt-BR")} &nbsp;|&nbsp; **Letalidade:** ${letalidade_pct}%`
+n_estabelecimentos_sel = new Set(dados_filtrados.map(d => d.ESTABELECIMENTO)).size
+```
+
+```{ojs}
+//| echo: false
+municipios_no_filtro = [...new Set(dados_filtrados.map(d => d.MUNICIPIO))].sort()
+```
+
+```{ojs}
+//| echo: false
+municipios_label = municipios_no_filtro.length === 0
+  ? "—"
+  : municipios_no_filtro.length <= 3
+    ? municipios_no_filtro.join(", ")
+    : `${municipios_no_filtro.length} municípios`
+```
+
+```{ojs}
+//| echo: false
+// virus_total é definido mais abaixo (seção de circulação viral do estabelecimento
+// selecionado) — no OJS/Quarto a ordem das células não importa, elas formam um
+// grafo de dependências, não um script sequencial.
+virus_predominante = virus_total.length > 0 ? virus_total[0].virus : "—"
+```
+
+```{ojs}
+//| echo: false
+semana_pico = serie_semanal.length > 0
+  ? serie_semanal.reduce((max, d) => d.casos > max.casos ? d : max, serie_semanal[0])
+  : null
+```
+
+```{ojs}
+//| echo: false
+semana_pico_label = semana_pico
+  ? `SE ${semana_pico.SEM_EPI} (${semana_pico.casos.toLocaleString("pt-BR")} casos)`
+  : "—"
+```
+
+```{ojs}
+//| echo: false
+html`<div style="border:1px solid #dde3e8;border-radius:8px;padding:10px 16px;background:#f8f9fa;margin:6px 0 14px 0;">
+  <div style="display:flex;flex-wrap:wrap;column-gap:24px;row-gap:6px;font-size:0.95em;">
+    <div><strong>Notificações:</strong> ${total_casos.toLocaleString("pt-BR")}</div>
+    <div><strong>Óbitos:</strong> ${total_obitos.toLocaleString("pt-BR")}</div>
+    <div><strong>UTI:</strong> ${total_uti.toLocaleString("pt-BR")}</div>
+    <div><strong>Letalidade:</strong> ${letalidade_pct}%</div>
+    <div><strong>Estabelecimentos:</strong> ${n_estabelecimentos_sel}</div>
+    <div><strong>Município(s):</strong> ${municipios_label}</div>
+    <div><strong>Vírus mais frequente:</strong> ${virus_predominante}</div>
+    <div><strong>Semana de pico:</strong> ${semana_pico_label}</div>
+  </div>
+</div>`
 ```
 
 ```{ojs}
@@ -144,9 +266,16 @@ dados_virus_estab = FileAttachment("dados/circulacao_viral_estabelecimento.csv")
 
 ```{ojs}
 //| echo: false
-virus_filtrados = estabelecimento_sel === "Todos os Estabelecimentos"
-  ? dados_virus_estab
-  : dados_virus_estab.filter(d => d.ESTABELECIMENTO === estabelecimento_sel)
+// Aplica a mesma cascata de filtros geográficos usada em dados_filtrados
+// (Macrorregião → Regional → Município → Estabelecimento), não só o
+// estabelecimento final — senão, selecionar apenas uma macrorregião/regional/
+// município (sem escolher um estabelecimento específico) não teria efeito
+// nenhum sobre os gráficos de circulação viral.
+virus_filtrados = dados_virus_estab
+  .filter(d => macrorregiao_sel === "Todas as Macrorregiões" || d.MACRORREGIAO === macrorregiao_sel)
+  .filter(d => regional_sel === "Todas as Regionais" || d.REGIONAL === regional_sel)
+  .filter(d => municipio_sel === "Todos os Municípios" || d.MUNICIPIO === municipio_sel)
+  .filter(d => estabelecimento_sel === "Todos os Estabelecimentos" || d.ESTABELECIMENTO === estabelecimento_sel)
 ```
 
 ```{ojs}
